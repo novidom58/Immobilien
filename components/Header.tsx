@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogIn } from "lucide-react";
 
 const links = [
   { href: "#warum", label: "Warum NoviDom" },
@@ -44,12 +45,21 @@ export function Header() {
             </a>
           ))}
         </nav>
-        <a
-          href="#kontakt"
-          className="rounded-full border border-amber/50 px-5 py-2 font-mono text-xs uppercase tracking-wider text-amber transition-colors hover:bg-amber hover:text-ink"
-        >
-          Bewertung sichern
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href="/login"
+            className="hidden items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-ivory-dim transition-colors hover:text-ivory sm:flex"
+          >
+            <LogIn className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Kundenlogin
+          </a>
+          <a
+            href="#kontakt"
+            className="rounded-full border border-amber/50 px-5 py-2 font-mono text-xs uppercase tracking-wider text-amber transition-colors hover:bg-amber hover:text-ink"
+          >
+            Bewertung sichern
+          </a>
+        </div>
       </div>
     </header>
   );

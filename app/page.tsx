@@ -7,6 +7,7 @@ import { TrustBar } from "@/components/sections/TrustBar";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
 import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
+import { SalesCockpit } from "@/components/sections/SalesCockpit";
 import { CommissionCompare } from "@/components/sections/CommissionCompare";
 import { Situations } from "@/components/sections/Situations";
 import { StatsAndArea } from "@/components/sections/StatsAndArea";
@@ -25,6 +26,7 @@ export default function Home() {
         <WhyNoviDom />
         <Services />
         <Process />
+        <SalesCockpit />
         <CommissionCompare />
         <Situations />
         <StatsAndArea />

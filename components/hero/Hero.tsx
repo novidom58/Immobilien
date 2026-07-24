@@ -1,9 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { HeroPhotoSequence } from "./HeroPhotoSequence";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+
+const Hero3DScene = dynamic(() => import("./Hero3DScene"), { ssr: false });
 
 export function Hero() {
   return (
@@ -11,7 +14,11 @@ export function Hero() {
       id="top"
       className="relative flex min-h-[100svh] items-end overflow-hidden bg-ink"
     >
+      {/* Photo crossfade sits behind as a graceful base/fallback layer */}
       <HeroPhotoSequence />
+      <div className="absolute inset-0">
+        <Hero3DScene />
+      </div>
 
       {/* Legibility + mood gradients so copy stays readable over the photo */}
       <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-ink)_0%,rgba(10,13,18,0.92)_28%,rgba(10,13,18,0.5)_55%,rgba(10,13,18,0.15)_80%)]" />

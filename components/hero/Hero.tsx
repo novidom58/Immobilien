@@ -41,7 +41,7 @@ export function Hero() {
           </span>
         </motion.div>
 
-        <HeroHeadline text="Ihr Zuhause. Neu gedacht." />
+        <HeroHeadline text="Ihr Zuhause verdient den besten Preis." />
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}

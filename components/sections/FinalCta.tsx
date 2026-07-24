@@ -30,7 +30,7 @@ export function FinalCta() {
             Begrenzte Plätze pro Monat
           </span>
           <h2 className="mx-auto mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-tight text-ivory lg:text-6xl">
-            Ihr Zuhause verdient den besten Preis.
+            Starten wir Ihren Verkauf.
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-ivory-dim">
             Ein persönliches, exklusives Bewertungsgespräch — unverbindlich

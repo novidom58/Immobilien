@@ -12,16 +12,17 @@ export default function Hero3DScene() {
     <Canvas
       dpr={[1, 1.5]}
       gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
-      camera={{ fov: 38, position: [0, 13, 24] }}
+      camera={{ fov: 38, position: [0, 16, 27] }}
     >
-      <color attach="background" args={["#0a0d12"]} />
-      <fog attach="fog" args={["#0a0d12", 16, 46]} />
+      <color attach="background" args={["#080a0f"]} />
+      <fog attach="fog" args={["#080a0f", 14, 48]} />
 
-      <ambientLight intensity={0.5} color="#dce6f5" />
-      <directionalLight position={[-8, 12, 6]} intensity={0.85} color="#cdddf2" />
-      <directionalLight position={[6, 4, -8]} intensity={0.2} color="#5fb8e8" />
+      <ambientLight intensity={0.4} color="#dce6f5" />
+      <directionalLight position={[-9, 13, 7]} intensity={0.75} color="#eef2fb" />
+      <directionalLight position={[7, 3, -9]} intensity={0.5} color="#6fa8d8" />
+      <directionalLight position={[0, 4, 10]} intensity={0.35} color="#e8a855" />
 
-      <Stars radius={60} depth={30} count={1200} factor={2} fade speed={0.4} />
+      <Stars radius={70} depth={30} count={1400} factor={2.2} fade speed={0.35} />
 
       <HouseModel />
       <CameraRig />
@@ -29,11 +30,12 @@ export default function Hero3DScene() {
       <EffectComposer>
         <Bloom
           mipmapBlur
-          intensity={0.5}
-          luminanceThreshold={0.7}
+          intensity={0.35}
+          luminanceThreshold={0.88}
           luminanceSmoothing={0.15}
+          radius={0.4}
         />
-        <Vignette eskil={false} offset={0.15} darkness={0.6} />
+        <Vignette eskil={false} offset={0.1} darkness={0.65} />
       </EffectComposer>
     </Canvas>
   );

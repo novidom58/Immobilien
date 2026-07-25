@@ -10,14 +10,46 @@ export function FinalCta() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const subject = encodeURIComponent("Kostenlose Immobilienbewertung anfragen");
-    const body = encodeURIComponent(
-      `Name: ${name}\nE-Mail: ${email}\n\nNachricht:\n${message}`
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "valuation", name, email, message }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg(data.error || "Anfrage konnte nicht gesendet werden.");
+        setStatus("error");
+        return;
+      }
+      setStatus("done");
+    } catch {
+      setErrorMsg("Anfrage konnte nicht gesendet werden.");
+      setStatus("error");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <section id="kontakt" className="relative overflow-hidden bg-ink-2 py-28 lg:py-36">
+        <div className="relative mx-auto max-w-2xl px-6 text-center lg:px-10">
+          <Reveal>
+            <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
+              Vielen Dank, {name.split(" ")[0] || "für Ihre Anfrage"}!
+            </h2>
+            <p className="mt-6 text-balance text-lg text-ivory-dim">
+              Wir melden uns innert kurzer Zeit persönlich bei Ihnen.
+            </p>
+          </Reveal>
+        </div>
+      </section>
     );
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
   }
 
   return (
@@ -67,9 +99,11 @@ export function FinalCta() {
               onChange={(e) => setMessage(e.target.value)}
               className="resize-none rounded-xl border border-line bg-ink px-5 py-4 font-sans text-ivory placeholder:text-ivory-dim/50 focus:border-amber focus:outline-none"
             />
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+            {status === "error" && <p className="text-sm text-red-400">{errorMsg}</p>}
             <div className="mt-2 flex justify-center">
-              <MagneticSubmitButton className="w-full sm:w-auto">
-                Jetzt kostenlose Bewertung sichern
+              <MagneticSubmitButton className="w-full sm:w-auto" disabled={status === "sending"}>
+                {status === "sending" ? "Wird gesendet…" : "Jetzt kostenlose Bewertung sichern"}
               </MagneticSubmitButton>
             </div>
           </form>

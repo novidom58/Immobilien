@@ -9,9 +9,12 @@ import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
 import { SalesCockpit } from "@/components/sections/SalesCockpit";
 import { CommissionCompare } from "@/components/sections/CommissionCompare";
+import { ProceedsCalculator } from "@/components/sections/ProceedsCalculator";
 import { Situations } from "@/components/sections/Situations";
 import { StatsAndArea } from "@/components/sections/StatsAndArea";
+import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
+import { Faq } from "@/components/sections/Faq";
 import { FinalCta } from "@/components/sections/FinalCta";
 
 export default function Home() {
@@ -28,9 +31,12 @@ export default function Home() {
         <Process />
         <SalesCockpit />
         <CommissionCompare />
+        <ProceedsCalculator />
         <Situations />
         <StatsAndArea />
+        <ServiceMap />
         <AboutJana />
+        <Faq />
         <FinalCta />
       </main>
       <Footer />

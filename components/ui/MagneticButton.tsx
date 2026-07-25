@@ -68,20 +68,23 @@ export function MagneticButton({
 export function MagneticSubmitButton({
   children,
   className = "",
+  disabled = false,
 }: {
   children: ReactNode;
   className?: string;
+  disabled?: boolean;
 }) {
   const { springX, springY, handleMouseMove, handleMouseLeave } = useMagneticHandlers();
 
   return (
     <motion.button
       type="submit"
+      disabled={disabled}
       style={{ x: springX, y: springY }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       whileTap={{ scale: 0.96 }}
-      className={`${buttonClasses} ${className}`}
+      className={`${buttonClasses} ${className} disabled:cursor-not-allowed disabled:opacity-60`}
     >
       <ButtonContent>{children}</ButtonContent>
     </motion.button>

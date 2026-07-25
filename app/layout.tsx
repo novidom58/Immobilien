@@ -3,6 +3,8 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import { SmoothScroll } from "@/lib/providers/smooth-scroll";
 import { Loader } from "@/components/Loader";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { StickyContact } from "@/components/StickyContact";
+import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -104,6 +106,8 @@ export default function RootLayout({
         <Loader />
         <ScrollProgress />
         {children}
+        <StickyContact />
+        <CookieConsent />
       </body>
     </html>
   );

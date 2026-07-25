@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="border-t border-line bg-ink py-10">
@@ -7,6 +9,11 @@ export function Footer() {
         </span>
         <span>Region Basel · CH</span>
         <span>&copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.</span>
+      </div>
+      <div className="mx-auto mt-4 max-w-7xl px-6 lg:px-10">
+        <Link href="/admin/login" className="text-xs text-ivory-dim/30 hover:text-ivory-dim/60">
+          Admin
+        </Link>
       </div>
     </footer>
   );

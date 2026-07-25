@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -14,8 +15,8 @@ type KeyFrame = { t: number; radius: number; height: number; theta: number };
 const KEYFRAMES: KeyFrame[] = [
   { t: 0, radius: 27, height: 16, theta: -2.75 },
   { t: 2.3, radius: 9.5, height: 2.6, theta: -1.85 },
-  { t: 4.2, radius: 16, height: 8.5, theta: -1.1 },
-  { t: 6.6, radius: 12, height: 4.6, theta: -0.5 },
+  { t: 4.2, radius: 18, height: 9.5, theta: -1.1 },
+  { t: 6.6, radius: 21, height: 7.2, theta: -0.5 },
 ];
 
 const IDLE_START = KEYFRAMES[KEYFRAMES.length - 1].t;
@@ -41,9 +42,11 @@ function sampleKeyframes(t: number) {
 
 export function CameraRig() {
   const { camera } = useThree();
+  const startTimeRef = useRef<number | null>(null);
 
   useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
+    if (startTimeRef.current === null) startTimeRef.current = clock.elapsedTime;
+    const t = clock.elapsedTime - startTimeRef.current;
     let radius: number;
     let height: number;
     let theta: number;
@@ -66,6 +69,17 @@ export function CameraRig() {
       radius * Math.cos(theta)
     );
     camera.lookAt(TARGET);
+
+    if (process.env.NODE_ENV !== "production") {
+      (window as unknown as { __camDebug: unknown }).__camDebug = {
+        t,
+        radius,
+        height,
+        theta,
+        pos: camera.position.toArray(),
+        fov: (camera as THREE.PerspectiveCamera).fov,
+      };
+    }
   });
 
   return null;

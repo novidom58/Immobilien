@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 const rooms = [
@@ -96,12 +97,14 @@ export function RoomFlythrough() {
           {rooms.map((room, i) => (
             <div key={room.key} className="relative h-full w-screen shrink-0 overflow-hidden">
               {room.image ? (
-                // eslint-disable-next-line @next/next/no-img-element -- external CDN room photo
-                <img
+                <Image
                   src={room.image}
                   alt=""
                   aria-hidden
-                  className="absolute inset-0 h-full w-full object-cover"
+                  fill
+                  sizes="100vw"
+                  quality={70}
+                  className="object-cover"
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-ink-3 via-ink-2 to-ink" />

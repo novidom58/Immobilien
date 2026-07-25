@@ -1,6 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
+
+const MotionImage = motion.create(Image);
 
 // Nano Banana 2 keyframes: blueprint -> rohbau -> fertig (unbeleuchtet) -> fertig (beleuchtet).
 // Gehostet auf der Higgsfield-CDN - vor dem finalen Launch idealerweise auf eigenen
@@ -25,12 +28,16 @@ export function HeroPhotoSequence() {
       {frames.map((src, i) => {
         const isLast = i === frames.length - 1;
         return (
-          <motion.img
+          <MotionImage
             key={src}
             src={src}
             alt=""
             aria-hidden
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="100vw"
+            quality={70}
+            preload={i === 0}
+            className="object-cover"
             initial={{ opacity: i === 0 ? 1 : 0, scale: 1.06 }}
             animate={{
               opacity: [i === 0 ? 1 : 0, 1, isLast ? 1 : 0],

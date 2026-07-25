@@ -54,6 +54,18 @@ export async function POST(request: Request) {
       text: `Typ: ${type}\nName: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\n\nNachricht:\n${message || "—"}`,
     });
     results.emailed = !error;
+
+    // Best-effort auto-reply to the submitter. Failing this never fails the
+    // request - the internal notification above already went through.
+    if (!error) {
+      const firstName = name.split(" ")[0];
+      await resend.emails.send({
+        from: NOTIFY_FROM,
+        to: email,
+        subject: "Ihre Anfrage bei NoviDom Immo ist eingegangen",
+        text: `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`,
+      });
+    }
   }
 
   if (!results.stored && !results.emailed) {

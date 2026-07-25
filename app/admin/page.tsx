@@ -34,7 +34,7 @@ export default async function AdminPage() {
 
   const [leadsRes, listingsRes] = await Promise.all([
     supabase.from("leads").select("id, type, name, email, phone, message, created_at").order("created_at", { ascending: false }).limit(20),
-    supabase.from("listings").select("id, address, city, status, owner_id, price_chf").order("created_at", { ascending: false }),
+    supabase.from("listings").select("id, address, city, status, owner_id, price_chf, lat, lng").order("created_at", { ascending: false }),
   ]);
 
   const leads = leadsRes.data ?? [];
@@ -106,6 +106,7 @@ export default async function AdminPage() {
                     <th className="px-4 py-3">Adresse</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Preis</th>
+                    <th className="px-4 py-3">Auf Karte</th>
                     <th className="px-4 py-3">Kunde verknüpft</th>
                   </tr>
                 </thead>
@@ -118,6 +119,9 @@ export default async function AdminPage() {
                       <td className="px-4 py-3 text-amber-soft">{listing.status}</td>
                       <td className="px-4 py-3 text-ivory-dim">
                         {listing.price_chf ? `CHF ${listing.price_chf.toLocaleString("de-CH")}` : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-ivory-dim/60">
+                        {listing.lat && listing.lng ? "Ja" : "Nein — manuell setzen"}
                       </td>
                       <td className="px-4 py-3 text-ivory-dim/60">{listing.owner_id ? "Ja" : "Nein"}</td>
                     </tr>

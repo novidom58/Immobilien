@@ -59,15 +59,14 @@ export function FinalCta() {
       <div className="relative mx-auto max-w-5xl px-6 text-center lg:px-10">
         <Reveal>
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-amber-soft">
-            Begrenzte Plätze pro Monat
+            Unverbindlich &amp; kostenlos
           </span>
           <h2 className="mx-auto mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-tight text-ivory lg:text-6xl">
             Starten wir Ihren Verkauf.
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-ivory-dim">
-            Ein persönliches, exklusives Bewertungsgespräch — unverbindlich
-            und kostenlos. Da wir nur wenige Termine pro Monat anbieten,
-            lohnt sich eine frühzeitige Anfrage.
+            Ein persönliches Bewertungsgespräch mit Jana Schnuderl —
+            unverbindlich und kostenlos.
           </p>
         </Reveal>
 

@@ -15,6 +15,7 @@ import { StatsAndArea } from "@/components/sections/StatsAndArea";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
 import { Faq } from "@/components/sections/Faq";
+import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
 
 export default function Home() {
@@ -37,6 +38,7 @@ export default function Home() {
         <ServiceMap />
         <AboutJana />
         <Faq />
+        <BookingSection />
         <FinalCta />
       </main>
       <Footer />

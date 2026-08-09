@@ -54,9 +54,11 @@ export function Hero() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=180%",
+          end: "+=200%",
           pin: true,
-          scrub: 0.6,
+          // Higher smoothing = the build glides behind the scroll instead of
+          // snapping with it - this is what makes it feel "im Fluss".
+          scrub: 1.2,
           onUpdate: (self) => {
             if (labelRef.current) {
               const pct = Math.round(self.progress * 100);
@@ -71,34 +73,38 @@ export function Hero() {
       tl.fromTo(
         framesWrapRef.current,
         { scale: 1.12 },
-        { scale: 1, duration: 3.2, ease: "none" },
+        { scale: 1, duration: 3.4, ease: "none" },
         0
       );
 
       // Crossfade blueprint -> rohbau -> fertig -> beleuchtet.
+      // Fades overlap (each starts before the previous finishes) and ease
+      // in/out, so stages melt into each other instead of switching.
       frames.forEach((_, i) => {
         if (i === 0) return;
-        tl.to(
+        const at = (i - 1) * 1.0;
+        tl.fromTo(
           frameRefs.current[i],
-          { opacity: 1, duration: 1, ease: "none" },
-          (i - 1) * 1.05
+          { opacity: 0, yPercent: 1.6 },
+          { opacity: 1, yPercent: 0, duration: 1.4, ease: "power1.inOut" },
+          at
         );
       });
 
       // Blueprint grid dissolves as the build becomes real.
-      tl.to(gridRef.current, { opacity: 0, duration: 1.6, ease: "none" }, 0.4);
+      tl.to(gridRef.current, { opacity: 0, duration: 1.8, ease: "power1.out" }, 0.4);
 
       // Scan line sweeps down in sync with the whole build.
       tl.fromTo(
         scanRef.current,
         { top: "0%" },
-        { top: "100%", duration: 3.0, ease: "none" },
+        { top: "100%", duration: 3.2, ease: "none" },
         0
       );
-      tl.to(scanRef.current, { opacity: 0, duration: 0.2, ease: "none" }, 2.9);
+      tl.to(scanRef.current, { opacity: 0, duration: 0.2, ease: "none" }, 3.1);
 
       // HUD frame retires once the house is finished.
-      tl.to(hudRef.current, { opacity: 0, duration: 0.4, ease: "none" }, 2.8);
+      tl.to(hudRef.current, { opacity: 0, duration: 0.4, ease: "power1.out" }, 3.0);
     }, sectionRef);
 
     return () => ctx.revert();

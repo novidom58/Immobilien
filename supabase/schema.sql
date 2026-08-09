@@ -75,13 +75,13 @@ drop policy if exists "listings_select_own_or_admin" on listings;
 create policy "listings_select_own_or_admin" on listings
   for select using (
     owner_id = auth.uid()
-    or exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+    or public.is_admin()
   );
 
 drop policy if exists "listings_admin_write" on listings;
 create policy "listings_admin_write" on listings
   for all using (
-    exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+    public.is_admin()
   );
 
 -- Öffentliche, nicht-personenbezogene Übersicht für die Karte auf der
@@ -89,6 +89,99 @@ create policy "listings_admin_write" on listings
 drop policy if exists "listings_public_map_view" on listings;
 create policy "listings_public_map_view" on listings
   for select using (status in ('active', 'reserved', 'sold'));
+
+-- V2: erweiterte Objektfelder (sicher mehrfach ausführbar)
+alter table listings add column if not exists title text;
+alter table listings add column if not exists property_type text not null default 'Haus';
+alter table listings add column if not exists rooms numeric;
+alter table listings add column if not exists living_area integer;
+alter table listings add column if not exists description text;
+
+-- ---------------------------------------------------------------------
+-- listing_photos: Objektfotos (Dateien liegen im Storage-Bucket
+-- "listing-photos", hier nur die öffentlichen URLs + Reihenfolge)
+-- ---------------------------------------------------------------------
+create table if not exists listing_photos (
+  id uuid primary key default gen_random_uuid(),
+  listing_id uuid not null references listings (id) on delete cascade,
+  url text not null,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table listing_photos enable row level security;
+
+drop policy if exists "listing_photos_public_read" on listing_photos;
+create policy "listing_photos_public_read" on listing_photos
+  for select using (true);
+
+drop policy if exists "listing_photos_admin_write" on listing_photos;
+create policy "listing_photos_admin_write" on listing_photos
+  for all using (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- user_documents: vom Kunden selbst hochgeladene Unterlagen (Dateien im
+-- privaten Bucket "kunden-dokumente" unter <user_id>/<dateiname>)
+-- ---------------------------------------------------------------------
+create table if not exists user_documents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references profiles (id) on delete cascade,
+  name text not null,
+  storage_path text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table user_documents enable row level security;
+
+drop policy if exists "user_documents_own_or_admin" on user_documents;
+create policy "user_documents_own_or_admin" on user_documents
+  for all using (user_id = auth.uid() or public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- Storage-Buckets + Zugriffsregeln
+-- ---------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('listing-photos', 'listing-photos', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('kunden-dokumente', 'kunden-dokumente', false)
+on conflict (id) do nothing;
+
+-- Objektfotos: alle dürfen lesen, nur Admin lädt hoch/löscht
+drop policy if exists "storage_listing_photos_read" on storage.objects;
+create policy "storage_listing_photos_read" on storage.objects
+  for select using (bucket_id = 'listing-photos');
+
+drop policy if exists "storage_listing_photos_insert" on storage.objects;
+create policy "storage_listing_photos_insert" on storage.objects
+  for insert with check (bucket_id = 'listing-photos' and public.is_admin());
+
+drop policy if exists "storage_listing_photos_delete" on storage.objects;
+create policy "storage_listing_photos_delete" on storage.objects
+  for delete using (bucket_id = 'listing-photos' and public.is_admin());
+
+-- Kundendokumente: Kunde nur im eigenen Ordner (<user_id>/...), Admin überall
+drop policy if exists "storage_kunden_docs_select" on storage.objects;
+create policy "storage_kunden_docs_select" on storage.objects
+  for select using (
+    bucket_id = 'kunden-dokumente'
+    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
+  );
+
+drop policy if exists "storage_kunden_docs_insert" on storage.objects;
+create policy "storage_kunden_docs_insert" on storage.objects
+  for insert with check (
+    bucket_id = 'kunden-dokumente'
+    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
+  );
+
+drop policy if exists "storage_kunden_docs_delete" on storage.objects;
+create policy "storage_kunden_docs_delete" on storage.objects
+  for delete using (
+    bucket_id = 'kunden-dokumente'
+    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
+  );
 
 -- ---------------------------------------------------------------------
 -- listing_documents / listing_activity: Inhalte des Verkaufs-Cockpits
@@ -118,7 +211,7 @@ create policy "listing_documents_owner_or_admin" on listing_documents
 drop policy if exists "listing_documents_admin_write" on listing_documents;
 create policy "listing_documents_admin_write" on listing_documents
   for all using (
-    exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+    public.is_admin()
   );
 
 create table if not exists listing_activity (
@@ -145,7 +238,7 @@ create policy "listing_activity_owner_or_admin" on listing_activity
 drop policy if exists "listing_activity_admin_write" on listing_activity;
 create policy "listing_activity_admin_write" on listing_activity
   for all using (
-    exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+    public.is_admin()
   );
 
 -- ---------------------------------------------------------------------
@@ -172,7 +265,7 @@ create policy "leads_public_insert" on leads
 drop policy if exists "leads_admin_select" on leads;
 create policy "leads_admin_select" on leads
   for select using (
-    exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+    public.is_admin()
   );
 
 -- ---------------------------------------------------------------------

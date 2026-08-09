@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
+import { MyDocuments } from "@/components/MyDocuments";
 
 export const metadata: Metadata = {
   title: "Verkaufs-Cockpit",
@@ -47,9 +49,10 @@ export default async function DashboardPage() {
 
   let activity: { text: string; created_at: string }[] = [];
   let documents: { name: string; url: string }[] = [];
+  let photos: { url: string }[] = [];
 
   if (listing) {
-    const [activityRes, documentsRes] = await Promise.all([
+    const [activityRes, documentsRes, photosRes] = await Promise.all([
       supabase
         .from("listing_activity")
         .select("text, created_at")
@@ -57,9 +60,15 @@ export default async function DashboardPage() {
         .order("created_at", { ascending: false })
         .limit(6),
       supabase.from("listing_documents").select("name, url").eq("listing_id", listing.id),
+      supabase
+        .from("listing_photos")
+        .select("url")
+        .eq("listing_id", listing.id)
+        .order("sort_order", { ascending: true }),
     ]);
     activity = activityRes.data ?? [];
     documents = documentsRes.data ?? [];
+    photos = photosRes.data ?? [];
   }
 
   return (
@@ -171,12 +180,38 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="mt-8 rounded-2xl border border-line bg-ink-2 p-5 lg:p-7">
-            <div className="flex items-center gap-2 font-mono text-xs text-ivory-dim/60">
-              {listing.address}, {listing.city}
-              <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
-                {listing.status}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 font-mono text-xs text-ivory-dim/60">
+                {listing.address}, {listing.city}
+                <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
+                  {listing.status}
+                </span>
+              </div>
+              {listing.status !== "draft" && (
+                <Link
+                  href={`/immobilien/${listing.id}`}
+                  target="_blank"
+                  className="font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
+                >
+                  Öffentliches Inserat ansehen →
+                </Link>
+              )}
             </div>
+
+            {photos.length > 0 && (
+              <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {photos.slice(0, 5).map((photo, i) => (
+                  <div key={photo.url} className="relative aspect-square overflow-hidden rounded-lg bg-ink">
+                    <Image src={photo.url} alt="" fill sizes="150px" className="object-cover" />
+                    {i === 4 && photos.length > 5 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-ink/70 font-mono text-xs text-ivory">
+                        +{photos.length - 5}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
@@ -240,6 +275,10 @@ export default async function DashboardPage() {
                   </ul>
                 )}
               </div>
+            </div>
+
+            <div className="mt-4">
+              <MyDocuments />
             </div>
           </div>
         )}

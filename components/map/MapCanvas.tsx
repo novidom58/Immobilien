@@ -5,7 +5,14 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 export type ServiceArea = { name: string; lat: number; lng: number };
-export type MapListing = { id: string; address: string; city: string; lat: number; lng: number };
+export type MapListing = {
+  id: string;
+  address: string;
+  city: string;
+  lat: number;
+  lng: number;
+  title?: string | null;
+};
 
 const AREAS: ServiceArea[] = [
   { name: "Basel-Stadt", lat: 47.5596, lng: 7.5886 },
@@ -54,7 +61,16 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
       {listings.map((listing) => (
         <Marker key={listing.id} position={[listing.lat, listing.lng]} icon={listingIcon}>
           <Popup>
-            {listing.address}, {listing.city}
+            <div className="min-w-[160px]">
+              <div className="font-medium">{listing.title || listing.address}</div>
+              <div className="text-xs opacity-70">{listing.city}</div>
+              <a
+                href={`/immobilien/${listing.id}`}
+                className="mt-1 inline-block text-xs font-medium underline underline-offset-2"
+              >
+                Details ansehen →
+              </a>
+            </div>
           </Popup>
         </Marker>
       ))}

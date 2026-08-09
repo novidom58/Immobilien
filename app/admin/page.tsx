@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { NewListingForm } from "@/components/admin/NewListingForm";
+import { ListingCard } from "@/components/admin/ListingCard";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -35,11 +36,25 @@ export default async function AdminPage() {
 
   const [leadsRes, listingsRes] = await Promise.all([
     supabase.from("leads").select("id, type, name, email, phone, message, created_at").order("created_at", { ascending: false }).limit(20),
-    supabase.from("listings").select("id, address, city, status, owner_id, price_chf, lat, lng").order("created_at", { ascending: false }),
+    supabase
+      .from("listings")
+      .select("id, title, address, city, status, owner_id, price_chf, property_type, lat, listing_photos(count)")
+      .order("created_at", { ascending: false }),
   ]);
 
   const leads = leadsRes.data ?? [];
-  const listings = listingsRes.data ?? [];
+  const listings = (listingsRes.data ?? []).map((l) => ({
+    id: l.id as string,
+    title: (l.title as string | null) ?? null,
+    address: l.address as string,
+    city: l.city as string,
+    status: l.status as string,
+    property_type: (l.property_type as string) ?? "Haus",
+    price_chf: (l.price_chf as number | null) ?? null,
+    lat: (l.lat as number | null) ?? null,
+    photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
+    hasOwner: Boolean(l.owner_id),
+  }));
 
   return (
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
@@ -101,38 +116,13 @@ export default async function AdminPage() {
             <NewListingForm />
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+          <div className="mt-4 flex flex-col gap-4">
             {listings.length === 0 ? (
-              <p className="p-6 text-sm text-ivory-dim">Noch keine Inserate.</p>
+              <p className="rounded-2xl border border-line p-6 text-sm text-ivory-dim">
+                Noch keine Inserate.
+              </p>
             ) : (
-              <table className="w-full text-left text-sm">
-                <thead className="bg-ink-2 text-xs uppercase tracking-wide text-ivory-dim/60">
-                  <tr>
-                    <th className="px-4 py-3">Adresse</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Preis</th>
-                    <th className="px-4 py-3">Auf Karte</th>
-                    <th className="px-4 py-3">Kunde verknüpft</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {listings.map((listing) => (
-                    <tr key={listing.id} className="border-t border-line">
-                      <td className="px-4 py-3 text-ivory">
-                        {listing.address}, {listing.city}
-                      </td>
-                      <td className="px-4 py-3 text-amber-soft">{listing.status}</td>
-                      <td className="px-4 py-3 text-ivory-dim">
-                        {listing.price_chf ? `CHF ${listing.price_chf.toLocaleString("de-CH")}` : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-ivory-dim/60">
-                        {listing.lat && listing.lng ? "Ja" : "Nein — manuell setzen"}
-                      </td>
-                      <td className="px-4 py-3 text-ivory-dim/60">{listing.owner_id ? "Ja" : "Nein"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)
             )}
           </div>
           <p className="mt-3 text-xs text-ivory-dim/60">

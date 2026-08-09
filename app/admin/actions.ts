@@ -4,25 +4,50 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
 
-export async function createListing(formData: FormData) {
+const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
+const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
+
+async function requireAdmin() {
   const supabase = await createClient();
-  if (!supabase) return { error: "Nicht eingerichtet." };
+  if (!supabase) return { supabase: null, error: "Supabase ist nicht eingerichtet." };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
+  if (!user) return { supabase: null, error: "Nicht angemeldet." };
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) return { supabase: null, error: `Profil nicht lesbar: ${profileError.message}` };
+  if (profile?.role !== "admin") return { supabase: null, error: "Keine Admin-Rechte." };
+
+  return { supabase, error: null };
+}
+
+export async function createListing(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
 
   const address = String(formData.get("address") || "").trim();
   const city = String(formData.get("city") || "").trim();
   const postalCode = String(formData.get("postal_code") || "").trim();
-  const priceRaw = String(formData.get("price_chf") || "").trim();
+  const priceRaw = String(formData.get("price_chf") || "").replace(/[^\d]/g, "");
+  const title = String(formData.get("title") || "").trim();
+  const typeRaw = String(formData.get("property_type") || "Haus");
+  const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
+  const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
+  const description = String(formData.get("description") || "").trim();
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
-  // Best-effort: place the pin on the map automatically. If it fails (no
-  // network, address not found), the listing still saves - lat/lng can be
-  // set manually later in the Supabase Table Editor.
+  const propertyType = (VALID_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "Haus";
+
+  // Best-effort: Pin für die Karte automatisch setzen; schlägt das fehl,
+  // wird das Inserat trotzdem gespeichert.
   const coords = await geocodeAddress(address, city);
 
   const { error } = await supabase.from("listings").insert({
@@ -30,13 +55,49 @@ export async function createListing(formData: FormData) {
     city,
     postal_code: postalCode || null,
     price_chf: priceRaw ? Number(priceRaw) : null,
+    title: title || null,
+    property_type: propertyType,
+    rooms: roomsRaw ? Number(roomsRaw) : null,
+    living_area: areaRaw ? Number(areaRaw) : null,
+    description: description || null,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   });
 
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  return { error: null };
+}
+
+export async function updateListingStatus(listingId: string, status: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  if (!(VALID_STATUS as readonly string[]).includes(status)) {
+    return { error: "Ungültiger Status." };
+  }
+
+  const { error } = await supabase.from("listings").update({ status }).eq("id", listingId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin");
   revalidatePath("/");
+  revalidatePath("/immobilien");
+  return { error: null };
+}
+
+export async function deleteListing(listingId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("listings").delete().eq("id", listingId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
   return { error: null };
 }

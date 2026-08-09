@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, BedDouble } from "lucide-react";
+import Image from "next/image";
+import { MapPin, BedDouble, Ruler } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
@@ -15,12 +16,17 @@ export const dynamic = "force-dynamic";
 
 type PublicListing = {
   id: string;
+  title: string | null;
   address: string;
   city: string;
   postal_code: string | null;
   price_chf: number | null;
   status: string;
+  property_type: string | null;
+  rooms: number | null;
+  living_area: number | null;
   created_at: string;
+  cover: string | null;
 };
 
 const STATUS_LABEL: Record<string, { label: string; classes: string }> = {
@@ -40,10 +46,32 @@ export default async function ImmobilienPage() {
   if (supabase) {
     const { data } = await supabase
       .from("listings")
-      .select("id, address, city, postal_code, price_chf, status, created_at")
+      .select(
+        "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, created_at, listing_photos(url, sort_order)"
+      )
       .in("status", ["active", "reserved", "sold"])
       .order("created_at", { ascending: false });
-    listings = (data as PublicListing[] | null) ?? [];
+
+    listings = (data ?? []).map((l) => {
+      const photos = (l.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
+      const cover = photos.length
+        ? [...photos].sort((a, b) => a.sort_order - b.sort_order)[0].url
+        : null;
+      return {
+        id: l.id as string,
+        title: (l.title as string | null) ?? null,
+        address: l.address as string,
+        city: l.city as string,
+        postal_code: (l.postal_code as string | null) ?? null,
+        price_chf: (l.price_chf as number | null) ?? null,
+        status: l.status as string,
+        property_type: (l.property_type as string | null) ?? null,
+        rooms: (l.rooms as number | null) ?? null,
+        living_area: (l.living_area as number | null) ?? null,
+        created_at: l.created_at as string,
+        cover,
+      };
+    });
   }
 
   const available = listings.filter((l) => l.status !== "sold");
@@ -82,15 +110,26 @@ export default async function ImmobilienPage() {
             {available.map((listing) => {
               const status = STATUS_LABEL[listing.status] ?? STATUS_LABEL.active;
               return (
-                <div
+                <Link
                   key={listing.id}
+                  href={`/immobilien/${listing.id}`}
                   className="group overflow-hidden rounded-2xl border border-line bg-ink-2 transition-all duration-300 hover:-translate-y-1 hover:border-amber/40"
                 >
-                  {/* Platzhalter-Visual bis echte Objektfotos hochgeladen werden */}
-                  <div className="relative flex h-44 items-center justify-center bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
-                    <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
+                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
+                    {listing.cover ? (
+                      <Image
+                        src={listing.cover}
+                        alt=""
+                        aria-hidden
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
+                    )}
                     <span
-                      className={`absolute left-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wide ${status.classes}`}
+                      className={`absolute left-4 top-4 rounded-full border bg-ink/80 px-3 py-1 font-mono text-[10px] uppercase tracking-wide backdrop-blur-sm ${status.classes}`}
                     >
                       {status.label}
                     </span>
@@ -102,19 +141,27 @@ export default async function ImmobilienPage() {
                       {listing.city}
                     </div>
                     <div className="mt-2 font-display text-lg font-semibold text-ivory">
-                      {listing.address}
+                      {listing.title || listing.address}
                     </div>
+                    {(listing.rooms || listing.living_area) && (
+                      <div className="mt-2 flex items-center gap-4 text-xs text-ivory-dim/70">
+                        {listing.rooms && <span>{listing.rooms} Zimmer</span>}
+                        {listing.living_area && (
+                          <span className="flex items-center gap-1">
+                            <Ruler className="h-3 w-3" strokeWidth={1.5} />
+                            {listing.living_area} m²
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className="mt-4 font-mono text-amber-soft">
                       {listing.price_chf ? formatChf(listing.price_chf) : "Preis auf Anfrage"}
                     </div>
-                    <Link
-                      href="/#kontakt"
-                      className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-ivory-dim underline underline-offset-4 group-hover:text-ivory"
-                    >
-                      Besichtigung anfragen
-                    </Link>
+                    <span className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-ivory-dim underline underline-offset-4 group-hover:text-ivory">
+                      Details ansehen
+                    </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -127,12 +174,13 @@ export default async function ImmobilienPage() {
             </h2>
             <div className="mt-6 flex flex-wrap gap-3">
               {sold.map((listing) => (
-                <span
+                <Link
                   key={listing.id}
-                  className="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm text-ivory-dim"
+                  href={`/immobilien/${listing.id}`}
+                  className="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm text-ivory-dim hover:border-amber/40 hover:text-ivory"
                 >
                   {listing.address}, {listing.city}
-                </span>
+                </Link>
               ))}
             </div>
           </div>

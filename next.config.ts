@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "d8j0ntlcm91z4.cloudfront.net",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
     ],
     qualities: [70, 75],
   },

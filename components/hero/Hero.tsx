@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { HeroPhotoSequence } from "./HeroPhotoSequence";
+import { HeroScanOverlay } from "./HeroScanOverlay";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 export function Hero() {
@@ -12,6 +13,7 @@ export function Hero() {
       className="relative flex min-h-[100svh] items-end overflow-hidden bg-ink"
     >
       <HeroPhotoSequence />
+      <HeroScanOverlay />
 
       {/* Legibility + mood gradients so copy stays readable over the photo */}
       <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-ink)_0%,rgba(10,13,18,0.92)_28%,rgba(10,13,18,0.5)_55%,rgba(10,13,18,0.15)_80%)]" />

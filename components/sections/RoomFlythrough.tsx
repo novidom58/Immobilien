@@ -6,6 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
+// Nur Räume mit fertigem Foto - sobald Wohnzimmer/Küche-Bilder existieren,
+// hier ergänzen statt leere Platzhalter-Slides zu zeigen.
 const rooms = [
   {
     key: "eingang",
@@ -15,24 +17,6 @@ const rooms = [
     text: "Ein einladender Empfang mit natürlichen Materialien setzt den Ton für das gesamte Zuhause.",
     image:
       "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.png",
-    align: "left" as const,
-  },
-  {
-    key: "wohnzimmer",
-    label: "Wohnzimmer",
-    tag: "Zum Wohlfühlen",
-    title: "Wo sich Zuhause anfühlt",
-    text: "Grosszügige Räume mit viel Licht — der Mittelpunkt für Familie und Gäste.",
-    image: null,
-    align: "right" as const,
-  },
-  {
-    key: "kueche",
-    label: "Küche",
-    tag: "Der Alltag",
-    title: "Der Mittelpunkt des Alltags",
-    text: "Durchdachtes Design trifft auf hochwertige Materialien.",
-    image: null,
     align: "left" as const,
   },
   {
@@ -96,19 +80,15 @@ export function RoomFlythrough() {
         <div ref={trackRef} className="flex h-full will-change-transform">
           {rooms.map((room, i) => (
             <div key={room.key} className="relative h-full w-screen shrink-0 overflow-hidden">
-              {room.image ? (
-                <Image
-                  src={room.image}
-                  alt=""
-                  aria-hidden
-                  fill
-                  sizes="100vw"
-                  quality={70}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-ink-3 via-ink-2 to-ink" />
-              )}
+              <Image
+                src={room.image}
+                alt=""
+                aria-hidden
+                fill
+                sizes="100vw"
+                unoptimized
+                className="object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" />
               <div className="grain absolute inset-0" />
 
@@ -118,11 +98,7 @@ export function RoomFlythrough() {
 
               <div
                 className={`absolute inset-0 z-10 flex items-center px-6 lg:px-20 ${
-                  room.align === "right"
-                    ? "justify-end text-right"
-                    : room.align === "center"
-                      ? "justify-center text-center"
-                      : "justify-start"
+                  room.align === "center" ? "justify-center text-center" : "justify-start"
                 }`}
               >
                 <div

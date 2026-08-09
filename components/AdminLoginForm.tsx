@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ForgotPassword } from "@/components/ForgotPassword";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -92,6 +93,10 @@ export function AdminLoginForm() {
       >
         {loading ? "Einen Moment…" : "Anmelden"}
       </button>
+
+      <div className="mt-1">
+        <ForgotPassword initialEmail={email} />
+      </div>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ForgotPassword } from "@/components/ForgotPassword";
 
 type Mode = "login" | "signup";
 
@@ -160,6 +161,12 @@ export function LoginForm() {
         >
           {loading ? "Einen Moment…" : mode === "login" ? "Anmelden" : "Konto erstellen"}
         </button>
+
+        {mode === "login" && (
+          <div className="mt-1">
+            <ForgotPassword initialEmail={email} />
+          </div>
+        )}
       </form>
     </div>
   );

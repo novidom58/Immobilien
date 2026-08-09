@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
+import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 
 export const metadata: Metadata = {
   title: "Verkaufs-Cockpit",
@@ -74,7 +75,11 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <h1 className="mt-10 font-display text-3xl font-semibold text-ivory lg:text-4xl">
+        <div className="mt-6">
+          <PasswordSettingsToggle />
+        </div>
+
+        <h1 className="mt-8 font-display text-3xl font-semibold text-ivory lg:text-4xl">
           Ihr Verkaufs-Cockpit
         </h1>
 

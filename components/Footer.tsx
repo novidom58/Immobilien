@@ -10,10 +10,21 @@ export function Footer() {
         <span>Region Basel · CH</span>
         <span>&copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.</span>
       </div>
-      <div className="mx-auto mt-4 max-w-7xl px-6 lg:px-10">
-        <Link href="/admin/login" className="text-xs text-ivory-dim/30 hover:text-ivory-dim/60">
-          Admin
-        </Link>
+      <div className="mx-auto mt-6 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs sm:flex-row lg:px-10">
+        <div className="flex gap-5 text-ivory-dim/50">
+          <Link href="/datenschutz" className="hover:text-ivory-dim">
+            Datenschutz
+          </Link>
+          <Link href="/impressum" className="hover:text-ivory-dim">
+            Impressum
+          </Link>
+          <Link href="/admin/login" className="text-ivory-dim/30 hover:text-ivory-dim/60">
+            Admin
+          </Link>
+        </div>
+        <a href="#top" className="text-ivory-dim/50 hover:text-ivory-dim">
+          Nach oben ↑
+        </a>
       </div>
     </footer>
   );

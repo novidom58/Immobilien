@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
+import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { NewListingForm } from "@/components/admin/NewListingForm";
 
 export const metadata: Metadata = {
@@ -53,7 +54,11 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <section className="mt-10">
+        <div className="mt-6">
+          <PasswordSettingsToggle />
+        </div>
+
+        <section className="mt-8">
           <h2 className="font-display text-2xl font-semibold text-ivory">Leads</h2>
           <div className="mt-4 overflow-hidden rounded-2xl border border-line">
             {leads.length === 0 ? (

@@ -55,10 +55,27 @@ export function ProceedsCalculator() {
             <p className="mt-4 max-w-md text-sm text-ivory-dim/60">
               Notarkosten, Handänderungssteuer und eine allfällige
               Grundstückgewinnsteuer sind hier nicht eingerechnet — diese
-              besprechen wir im persönlichen Gespräch. Wer eine neue Hypothek
-              plant, kann diese künftig direkt hier mit hypotheken-analyse.ch
-              vergleichen.
+              besprechen wir im persönlichen Gespräch.
             </p>
+
+            <div className="mt-8 max-w-md rounded-2xl border border-line bg-ink p-6">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-blueprint">
+                In Zusammenarbeit mit hypotheken-analyse.ch
+              </span>
+              <p className="mt-3 text-sm text-ivory-dim">
+                Verkauf und Finanzierung aus einer Hand: Wer nach dem Verkauf
+                neu kauft oder die Hypothek ablösen muss, erhält über unsere
+                Partnerplattform direkt einen unabhängigen Hypothekenvergleich.
+              </p>
+              <a
+                href="https://www.hypotheken-analyse.ch"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+              >
+                Hypothek prüfen →
+              </a>
+            </div>
           </Reveal>
 
           <Reveal delay={0.1}>

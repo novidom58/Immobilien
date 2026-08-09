@@ -84,18 +84,48 @@ export default async function DashboardPage() {
         </h1>
 
         {!listing ? (
-          <div className="mt-8 rounded-2xl border border-line bg-ink-2 p-8 text-center">
-            <p className="text-ivory">Ihr Verkaufsmandat ist noch nicht aktiv.</p>
-            <p className="mx-auto mt-2 max-w-md text-sm text-ivory-dim">
-              Sobald Ihre Immobilie bei NoviDom gelistet ist, sehen Sie hier in Echtzeit alle
-              Aufrufe, Anfragen und Dokumente. Fragen? Schreiben Sie uns direkt.
-            </p>
-            <Link
-              href="/#kontakt"
-              className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
-            >
-              Zur kostenlosen Bewertung
-            </Link>
+          <div className="mt-8">
+            <div className="rounded-2xl border border-line bg-ink-2 p-8 text-center">
+              <p className="text-ivory">Ihr Verkaufsmandat ist noch nicht aktiv.</p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-ivory-dim">
+                Sobald Ihre Immobilie bei NoviDom gelistet ist, sehen Sie hier in Echtzeit alle
+                Aufrufe, Anfragen und Dokumente. Fragen? Schreiben Sie uns direkt.
+              </p>
+              <Link
+                href="/#kontakt"
+                className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
+              >
+                Zur kostenlosen Bewertung
+              </Link>
+            </div>
+
+            {/* Vorschau, damit das Portal vor Mandatsstart nicht leer wirkt */}
+            <div className="relative mt-6 rounded-2xl border border-line bg-ink-2 p-5 lg:p-7">
+              <span className="absolute right-5 top-5 font-mono text-[10px] uppercase tracking-[0.2em] text-ivory-dim/40">
+                Beispielansicht
+              </span>
+              <div className="font-mono text-xs text-ivory-dim/60">
+                So wird Ihr Cockpit aussehen:
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 opacity-60 sm:grid-cols-4">
+                {[
+                  { icon: Eye, value: "128", label: "Inseratsaufrufe" },
+                  { icon: Scan, value: "42", label: "3D-Rundgang-Aufrufe" },
+                  { icon: FileDown, value: "18", label: "Exposé-Downloads" },
+                  { icon: CalendarCheck, value: "6", label: "Besichtigungsanfragen" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-xl bg-ink p-4">
+                    <stat.icon className="h-4 w-4 text-amber" strokeWidth={1.5} />
+                    <div className="mt-3 font-display text-2xl font-semibold text-ivory">
+                      {stat.value}
+                    </div>
+                    <div className="mt-1 text-[11px] leading-tight text-ivory-dim">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="mt-8 rounded-2xl border border-line bg-ink-2 p-5 lg:p-7">

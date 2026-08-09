@@ -105,9 +105,9 @@ export default async function DashboardPage() {
                 Beispielansicht
               </span>
               <div className="font-mono text-xs text-ivory-dim/60">
-                So wird Ihr Cockpit aussehen:
+                So wird Ihr Cockpit aussehen — Beispiel: Musterstrasse 12, Basel
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-3 opacity-60 sm:grid-cols-4">
+              <div className="mt-5 grid grid-cols-2 gap-3 opacity-70 sm:grid-cols-4">
                 {[
                   { icon: Eye, value: "128", label: "Inseratsaufrufe" },
                   { icon: Scan, value: "42", label: "3D-Rundgang-Aufrufe" },
@@ -125,6 +125,48 @@ export default async function DashboardPage() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-4 grid gap-4 opacity-70 sm:grid-cols-2">
+                <div className="rounded-xl bg-ink p-4">
+                  <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+                    <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Aktivitäten
+                  </div>
+                  <ul className="space-y-3">
+                    {[
+                      ["Neue Besichtigungsanfrage erhalten", "vor 2 Std."],
+                      ["Exposé von Interessent:in heruntergeladen", "vor 6 Std."],
+                      ["3D-Rundgang angesehen (2. Mal)", "vor 1 Tag"],
+                    ].map(([text, time]) => (
+                      <li key={text} className="text-xs text-ivory-dim">
+                        <span className="text-ivory">{text}</span>
+                        <div className="mt-0.5 text-ivory-dim/50">{time}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-ink p-4">
+                  <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+                    <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Dokumente
+                  </div>
+                  <ul className="space-y-2.5">
+                    {["Exposé.pdf", "Grundbuchauszug.pdf", "Energieausweis.pdf"].map((doc) => (
+                      <li key={doc} className="flex items-center gap-2 text-xs text-ivory-dim">
+                        <span className="h-1 w-1 rounded-full bg-amber/70" />
+                        {doc}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <Link
+                href="/expose-beispiel"
+                className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
+              >
+                Beispiel-Exposé ansehen →
+              </Link>
             </div>
           </div>
         ) : (

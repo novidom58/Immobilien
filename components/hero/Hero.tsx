@@ -39,9 +39,11 @@ export function Hero() {
 
     // Reduced motion: skip the pinned scrub, show the finished house.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      frameRefs.current.forEach((frame, i) => {
-        if (frame) frame.style.opacity = i === frames.length - 1 ? "1" : "0";
-      });
+      const last = frameRefs.current[frames.length - 1];
+      if (last) {
+        last.style.opacity = "1";
+        last.style.clipPath = "none";
+      }
       if (gridRef.current) gridRef.current.style.opacity = "0";
       if (hudRef.current) hudRef.current.style.opacity = "0";
       if (scanRef.current) scanRef.current.style.opacity = "0";
@@ -56,8 +58,8 @@ export function Hero() {
           start: "top top",
           end: "+=200%",
           pin: true,
-          // Higher smoothing = the build glides behind the scroll instead of
-          // snapping with it - this is what makes it feel "im Fluss".
+          // Smoothing lets the build glide behind the scroll instead of
+          // snapping with it.
           scrub: 1.2,
           onUpdate: (self) => {
             if (labelRef.current) {
@@ -69,42 +71,58 @@ export function Hero() {
         },
       });
 
+      const CLOSED = "inset(100% 0% 0% 0%)";
+      const OPEN = "inset(0% 0% 0% 0%)";
+
       // Slow settle-zoom across the whole scrub for depth.
       tl.fromTo(
         framesWrapRef.current,
         { scale: 1.12 },
-        { scale: 1, duration: 3.4, ease: "none" },
+        { scale: 1, duration: 3.3, ease: "none" },
         0
       );
 
-      // Crossfade blueprint -> rohbau -> fertig -> beleuchtet.
-      // Fades overlap (each starts before the previous finishes) and ease
-      // in/out, so stages melt into each other instead of switching.
-      frames.forEach((_, i) => {
-        if (i === 0) return;
-        const at = (i - 1) * 1.0;
-        tl.fromTo(
-          frameRefs.current[i],
-          { opacity: 0, yPercent: 1.6 },
-          { opacity: 1, yPercent: 0, duration: 1.4, ease: "power1.inOut" },
-          at
-        );
-      });
+      // The house BUILDS: rohbau and fertig grow upward from the ground
+      // (clip-path reveal) instead of crossfading - only the final lighting
+      // state fades in over the finished structure.
+      tl.fromTo(
+        frameRefs.current[1],
+        { clipPath: CLOSED },
+        { clipPath: OPEN, duration: 1.05, ease: "power1.inOut" },
+        0
+      );
+      tl.fromTo(
+        frameRefs.current[2],
+        { clipPath: CLOSED },
+        { clipPath: OPEN, duration: 1.15, ease: "power1.inOut", immediateRender: false },
+        1.05
+      );
+      tl.to(
+        frameRefs.current[3],
+        { opacity: 1, duration: 1.0, ease: "power1.inOut" },
+        2.3
+      );
 
-      // Blueprint grid dissolves as the build becomes real.
-      tl.to(gridRef.current, { opacity: 0, duration: 1.8, ease: "power1.out" }, 0.4);
-
-      // Scan line sweeps down in sync with the whole build.
+      // Scan line rides the build edge: two upward passes, one per stage.
       tl.fromTo(
         scanRef.current,
-        { top: "0%" },
-        { top: "100%", duration: 3.2, ease: "none" },
+        { top: "100%" },
+        { top: "0%", duration: 1.05, ease: "power1.inOut" },
         0
       );
-      tl.to(scanRef.current, { opacity: 0, duration: 0.2, ease: "none" }, 3.1);
+      tl.fromTo(
+        scanRef.current,
+        { top: "100%" },
+        { top: "0%", duration: 1.15, ease: "power1.inOut", immediateRender: false },
+        1.05
+      );
+      tl.to(scanRef.current, { opacity: 0, duration: 0.25, ease: "none" }, 2.25);
+
+      // Blueprint grid dissolves as the build becomes real.
+      tl.to(gridRef.current, { opacity: 0, duration: 1.8, ease: "power1.out" }, 0.5);
 
       // HUD frame retires once the house is finished.
-      tl.to(hudRef.current, { opacity: 0, duration: 0.4, ease: "power1.out" }, 3.0);
+      tl.to(hudRef.current, { opacity: 0, duration: 0.4, ease: "power1.out" }, 2.9);
     }, sectionRef);
 
     return () => ctx.revert();
@@ -128,7 +146,13 @@ export function Hero() {
               frameRefs.current[i] = el;
             }}
             className="absolute inset-0"
-            style={{ opacity: i === 0 ? 1 : 0 }}
+            style={
+              i === 0
+                ? undefined
+                : i === frames.length - 1
+                  ? { opacity: 0 }
+                  : { clipPath: "inset(100% 0% 0% 0%)" }
+            }
           >
             <Image
               src={src}

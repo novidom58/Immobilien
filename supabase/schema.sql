@@ -14,12 +14,21 @@ create table if not exists profiles (
 
 alter table profiles enable row level security;
 
+-- security definer: läuft mit Owner-Rechten und umgeht RLS - dadurch keine
+-- Endlos-Rekursion, wenn eine profiles-Policy die Admin-Rolle prüfen muss.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from profiles where id = auth.uid() and role = 'admin');
+$$;
+
 drop policy if exists "profiles_select_own_or_admin" on profiles;
 create policy "profiles_select_own_or_admin" on profiles
-  for select using (
-    id = auth.uid()
-    or exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
-  );
+  for select using (id = auth.uid() or public.is_admin());
 
 drop policy if exists "profiles_update_own" on profiles;
 create policy "profiles_update_own" on profiles

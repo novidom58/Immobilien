@@ -7,6 +7,7 @@ import { Reveal } from "@/lib/reveal";
 
 const CONTACT_EMAIL = "beratung@novidom-immo.ch";
 const PROPERTY_TYPES = ["Haus", "Wohnung", "Andere"] as const;
+const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK;
 
 const fieldClasses =
   "w-full rounded-xl border border-line bg-ink px-5 py-4 font-sans text-ivory placeholder:text-ivory-dim/50 focus:border-amber focus:outline-none";
@@ -66,6 +67,14 @@ export function FinalCta() {
             <p className="mt-6 text-balance text-lg text-ivory-dim">
               Wir melden uns innert kurzer Zeit persönlich bei Ihnen.
             </p>
+            {CAL_LINK && (
+              <a
+                href="#termin"
+                className="mt-8 inline-block rounded-full bg-amber px-7 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink"
+              >
+                Oder direkt Termin wählen ↑
+              </a>
+            )}
           </Reveal>
         </div>
       </section>

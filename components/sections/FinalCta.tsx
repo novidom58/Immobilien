@@ -19,6 +19,8 @@ export function FinalCta() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [wantsFinancing, setWantsFinancing] = useState(false);
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -41,6 +43,8 @@ export function FinalCta() {
           email,
           phone,
           message: `Objekttyp: ${propertyType}\nAdresse: ${address}`,
+          wantsFinancing,
+          newsletterOptIn,
         }),
       });
       const data = await res.json();
@@ -180,6 +184,26 @@ export function FinalCta() {
                     className={fieldClasses}
                   />
                   <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+
+                  <label className="flex items-start gap-2.5 text-sm text-ivory-dim">
+                    <input
+                      type="checkbox"
+                      checked={wantsFinancing}
+                      onChange={(e) => setWantsFinancing(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-line bg-ink accent-amber"
+                    />
+                    Ich interessiere mich zusätzlich für eine unabhängige Finanzierungsberatung.
+                  </label>
+                  <label className="flex items-start gap-2.5 text-sm text-ivory-dim">
+                    <input
+                      type="checkbox"
+                      checked={newsletterOptIn}
+                      onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-line bg-ink accent-amber"
+                    />
+                    Ich möchte Updates zu neuen Objekten per E-Mail erhalten.
+                  </label>
+
                   {status === "error" && <p className="text-sm text-red-400">{errorMsg}</p>}
                   <div className="mt-1 flex items-center justify-center gap-5">
                     <button

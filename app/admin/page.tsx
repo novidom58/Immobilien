@@ -6,6 +6,7 @@ import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { NewListingForm } from "@/components/admin/NewListingForm";
 import { ListingCard } from "@/components/admin/ListingCard";
+import { LeadRow } from "@/components/admin/LeadRow";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -34,15 +35,24 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/admin/login");
 
-  const [leadsRes, listingsRes] = await Promise.all([
-    supabase.from("leads").select("id, type, name, email, phone, message, created_at").order("created_at", { ascending: false }).limit(20),
+  const [leadsRes, listingsRes, newsletterRes] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("id, type, name, email, phone, message, status, wants_financing, created_at")
+      .order("created_at", { ascending: false })
+      .limit(30),
     supabase
       .from("listings")
       .select("id, title, address, city, status, owner_id, price_chf, property_type, lat, listing_photos(count)")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("newsletter_subscribers")
+      .select("email, source, created_at")
+      .order("created_at", { ascending: false }),
   ]);
 
   const leads = leadsRes.data ?? [];
+  const subscribers = newsletterRes.data ?? [];
   const listings = (listingsRes.data ?? []).map((l) => ({
     id: l.id as string,
     title: (l.title as string | null) ?? null,
@@ -87,25 +97,38 @@ export default async function AdminPage() {
                     <th className="px-4 py-3">Kontakt</th>
                     <th className="px-4 py-3">Nachricht</th>
                     <th className="px-4 py-3">Datum</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Finanzierung</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leads.map((lead) => (
-                    <tr key={lead.id} className="border-t border-line">
-                      <td className="px-4 py-3 text-amber-soft">{lead.type}</td>
-                      <td className="px-4 py-3 text-ivory">{lead.name}</td>
-                      <td className="px-4 py-3 text-ivory-dim">
-                        {lead.email}
-                        {lead.phone ? ` · ${lead.phone}` : ""}
-                      </td>
-                      <td className="max-w-xs truncate px-4 py-3 text-ivory-dim">{lead.message}</td>
-                      <td className="px-4 py-3 text-ivory-dim/60">
-                        {new Date(lead.created_at).toLocaleDateString("de-CH")}
-                      </td>
-                    </tr>
+                    <LeadRow key={lead.id} lead={lead} />
                   ))}
                 </tbody>
               </table>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-14">
+          <h2 className="font-display text-2xl font-semibold text-ivory">
+            Newsletter-Abonnenten ({subscribers.length})
+          </h2>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+            {subscribers.length === 0 ? (
+              <p className="p-6 text-sm text-ivory-dim">Noch keine Anmeldungen.</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {subscribers.map((s) => (
+                  <li key={s.email} className="flex items-center justify-between px-4 py-3 text-sm">
+                    <span className="text-ivory">{s.email}</span>
+                    <span className="font-mono text-xs text-ivory-dim/60">
+                      {s.source ?? "—"} · {new Date(s.created_at).toLocaleDateString("de-CH")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </section>

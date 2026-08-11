@@ -25,6 +25,8 @@ export async function POST(request: Request) {
   const email = typeof body.email === "string" ? body.email.trim().slice(0, 200) : "";
   const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 50) : "";
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 4000) : "";
+  const wantsFinancing = body.wantsFinancing === true;
+  const newsletterOptIn = body.newsletterOptIn === true;
 
   if (!name || !EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Name und eine gültige E-Mail-Adresse sind erforderlich." }, { status: 400 });
@@ -40,8 +42,15 @@ export async function POST(request: Request) {
       email,
       phone: phone || null,
       message: message || null,
+      wants_financing: wantsFinancing,
+      newsletter_opt_in: newsletterOptIn,
     });
     results.stored = !error;
+
+    if (newsletterOptIn) {
+      // Best-effort - Duplikate (bereits abonniert, unique-Constraint) sind kein Fehlerfall.
+      await supabase.from("newsletter_subscribers").insert({ email, source: type });
+    }
   }
 
   const resend = createResendClient();

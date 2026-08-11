@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export function Footer() {
   return (
@@ -8,7 +9,10 @@ export function Footer() {
           Novi<span className="text-amber">Dom</span> Immo
         </span>
         <span>Region Basel · CH</span>
-        <span>&copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.</span>
+        <NewsletterSignup />
+      </div>
+      <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">
+        &copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.
       </div>
       <div className="mx-auto mt-6 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs sm:flex-row lg:px-10">
         <div className="flex gap-5 text-ivory-dim/50">

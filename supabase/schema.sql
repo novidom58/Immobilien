@@ -268,6 +268,42 @@ create policy "leads_admin_select" on leads
     public.is_admin()
   );
 
+drop policy if exists "leads_admin_update" on leads;
+create policy "leads_admin_update" on leads
+  for update using (
+    public.is_admin()
+  );
+
+-- CRM-Erweiterung: Status-Pipeline, Finanzierungs-Flag (interne Weiterleitung
+-- an hypotheken-analyse.ch), Newsletter-Opt-in, freies Admin-Notizfeld.
+alter table leads add column if not exists status text not null default 'neu'
+  check (status in ('neu', 'kontaktiert', 'termin', 'abgeschlossen', 'irrelevant'));
+alter table leads add column if not exists wants_financing boolean not null default false;
+alter table leads add column if not exists newsletter_opt_in boolean not null default false;
+alter table leads add column if not exists admin_note text;
+
+-- ---------------------------------------------------------------------
+-- newsletter_subscribers: eigenständige Newsletter-Anmeldungen (Footer etc.)
+-- ---------------------------------------------------------------------
+create table if not exists newsletter_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  source text,
+  created_at timestamptz not null default now()
+);
+
+alter table newsletter_subscribers enable row level security;
+
+drop policy if exists "newsletter_subscribers_public_insert" on newsletter_subscribers;
+create policy "newsletter_subscribers_public_insert" on newsletter_subscribers
+  for insert with check (true);
+
+drop policy if exists "newsletter_subscribers_admin_select" on newsletter_subscribers;
+create policy "newsletter_subscribers_admin_select" on newsletter_subscribers
+  for select using (
+    public.is_admin()
+  );
+
 -- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier

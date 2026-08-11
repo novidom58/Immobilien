@@ -89,6 +89,37 @@ export async function updateListingStatus(listingId: string, status: string) {
   return { error: null };
 }
 
+const VALID_LEAD_STATUS = ["neu", "kontaktiert", "termin", "abgeschlossen", "irrelevant"] as const;
+
+export async function updateLeadStatus(leadId: string, status: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  if (!(VALID_LEAD_STATUS as readonly string[]).includes(status)) {
+    return { error: "Ungültiger Status." };
+  }
+
+  const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+export async function updateLeadNote(leadId: string, note: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ admin_note: note.trim() || null })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
 export async function deleteListing(listingId: string) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };

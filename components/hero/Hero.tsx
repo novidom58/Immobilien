@@ -1,17 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { ValuationWidget } from "./ValuationWidget";
+import { createClient } from "@/lib/supabase/client";
 
-// Fertiges, warm beleuchtetes Objekt (Nano Banana) als ruhiger Hero-Hintergrund.
-// Bewusst EIN Foto statt der früheren Mehrbild-Bausequenz: die hat sich beim
-// Scrollen nie wie ein durchgängiges Video angefühlt, sondern wie drei
-// unabhängige Bilder - und liest sich zudem wie Bau-/Architekturwerbung statt
-// Immobilienverkauf. Sobald neue Video-Assets generiert werden können, ersetzt
-// ein echter Clip dieses Standbild 1:1.
-const HERO_IMAGE =
+// Generisches KI-Bild als Fallback, solange noch kein echtes Objekt online ist.
+// Sobald ein aktives Inserat mit Foto existiert, ersetzt useEffect unten dieses
+// Bild automatisch durch ein echtes Objektfoto - das ist der eigentliche Fix
+// gegen den "Architekturbüro statt Maklerei"-Eindruck: reale Objekte statt
+// KI-Renderings, sobald welche erfasst sind.
+const FALLBACK_IMAGE =
   "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png";
 
 const HUD_CORNERS = [
@@ -22,6 +23,31 @@ const HUD_CORNERS = [
 ];
 
 export function Hero() {
+  const [heroImage, setHeroImage] = useState(FALLBACK_IMAGE);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+
+    async function loadLatestListingPhoto() {
+      const { data } = await supabase!
+        .from("listings")
+        .select("listing_photos(url, sort_order)")
+        .in("status", ["active", "reserved", "sold"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const photos = (data?.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
+      if (photos.length > 0) {
+        const cover = [...photos].sort((a, b) => a.sort_order - b.sort_order)[0];
+        setHeroImage(cover.url);
+      }
+    }
+
+    loadLatestListingPhoto();
+  }, []);
+
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden bg-ink">
       {/* Ruhiger Ken-Burns-Zoom auf dem Hintergrundfoto - läuft unabhängig vom Scroll,
@@ -33,7 +59,7 @@ export function Hero() {
         transition={{ duration: 22, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
       >
         <Image
-          src={HERO_IMAGE}
+          src={heroImage}
           alt=""
           aria-hidden
           fill

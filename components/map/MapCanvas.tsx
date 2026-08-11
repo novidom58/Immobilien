@@ -12,6 +12,8 @@ export type MapListing = {
   lat: number;
   lng: number;
   title?: string | null;
+  property_type?: string | null;
+  price_chf?: number | null;
 };
 
 const AREAS: ServiceArea[] = [

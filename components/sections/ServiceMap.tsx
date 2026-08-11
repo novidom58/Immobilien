@@ -11,7 +11,7 @@ export async function ServiceMap() {
   if (supabase) {
     const { data } = await supabase
       .from("listings")
-      .select("id, title, address, city, lat, lng")
+      .select("id, title, address, city, lat, lng, property_type, price_chf")
       .in("status", ["active", "reserved", "sold"])
       .not("lat", "is", null)
       .not("lng", "is", null);

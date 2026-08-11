@@ -1,7 +1,6 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/hero/Hero";
-import { RoomFlythrough } from "@/components/sections/RoomFlythrough";
 import { UspMarquee } from "@/components/sections/UspMarquee";
 import { TrustBar } from "@/components/sections/TrustBar";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
@@ -25,7 +24,6 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <RoomFlythrough />
         <UspMarquee />
         <TrustBar />
         <FeaturedListings />

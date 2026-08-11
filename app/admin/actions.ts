@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
+import { createResendClient } from "@/lib/resend";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
@@ -80,13 +81,54 @@ export async function updateListingStatus(listingId: string, status: string) {
     return { error: "Ungültiger Status." };
   }
 
+  const { data: before } = await supabase
+    .from("listings")
+    .select("title, address, city, price_chf, status")
+    .eq("id", listingId)
+    .single();
+
   const { error } = await supabase.from("listings").update({ status }).eq("id", listingId);
   if (error) return { error: error.message };
+
+  // Bei Erstaktivierung: Newsletter-Abonnenten über das neue Objekt informieren.
+  if (before && before.status !== "active" && status === "active") {
+    await notifyNewsletterSubscribers(supabase, listingId, before);
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/immobilien");
   return { error: null };
+}
+
+async function notifyNewsletterSubscribers(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  listingId: string,
+  listing: { title: string | null; address: string; city: string; price_chf: number | null }
+) {
+  const resend = createResendClient();
+  if (!resend) return;
+
+  const { data: subscribers } = await supabase.from("newsletter_subscribers").select("email").limit(1000);
+  if (!subscribers || subscribers.length === 0) return;
+
+  const name = listing.title || `${listing.address}, ${listing.city}`;
+  const price = listing.price_chf
+    ? `CHF ${listing.price_chf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`
+    : "Preis auf Anfrage";
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch"}/immobilien/${listingId}`;
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+
+  await Promise.allSettled(
+    subscribers.map((s) =>
+      resend.emails.send({
+        from,
+        to: s.email,
+        subject: `Neu bei NoviDom: ${name}`,
+        text: `Hallo\n\nEin neues Objekt ist bei NoviDom Immo online:\n\n${name}\n${price}\n\nAnsehen: ${url}\n\nFreundliche Grüsse\nNoviDom Immo`,
+      })
+    )
+  );
 }
 
 const VALID_LEAD_STATUS = ["neu", "kontaktiert", "termin", "abgeschlossen", "irrelevant"] as const;

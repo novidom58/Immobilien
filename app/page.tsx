@@ -4,13 +4,13 @@ import { Hero } from "@/components/hero/Hero";
 import { RoomFlythrough } from "@/components/sections/RoomFlythrough";
 import { UspMarquee } from "@/components/sections/UspMarquee";
 import { TrustBar } from "@/components/sections/TrustBar";
+import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
 import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
 import { SalesCockpit } from "@/components/sections/SalesCockpit";
 import { CommissionCompare } from "@/components/sections/CommissionCompare";
 import { ProceedsCalculator } from "@/components/sections/ProceedsCalculator";
-import { Partnership } from "@/components/sections/Partnership";
 import { Situations } from "@/components/sections/Situations";
 import { StatsAndArea } from "@/components/sections/StatsAndArea";
 import { ServiceMap } from "@/components/sections/ServiceMap";
@@ -28,13 +28,13 @@ export default function Home() {
         <RoomFlythrough />
         <UspMarquee />
         <TrustBar />
+        <FeaturedListings />
         <WhyNoviDom />
         <Services />
         <Process />
         <SalesCockpit />
         <CommissionCompare />
         <ProceedsCalculator />
-        <Partnership />
         <Situations />
         <StatsAndArea />
         <ServiceMap />

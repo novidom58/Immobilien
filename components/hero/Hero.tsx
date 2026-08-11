@@ -47,7 +47,7 @@ export function Hero() {
       if (gridRef.current) gridRef.current.style.opacity = "0";
       if (hudRef.current) hudRef.current.style.opacity = "0";
       if (scanRef.current) scanRef.current.style.opacity = "0";
-      if (labelRef.current) labelRef.current.textContent = "Bezugsbereit";
+      if (labelRef.current) labelRef.current.textContent = "Verkaufsbereit";
       return;
     }
 
@@ -65,7 +65,7 @@ export function Hero() {
             if (labelRef.current) {
               const pct = Math.round(self.progress * 100);
               labelRef.current.textContent =
-                pct < 100 ? `Konstruktion ${pct}%` : "Bezugsbereit";
+                pct < 100 ? `Analyse ${pct}%` : "Verkaufsbereit";
             }
           },
         },
@@ -189,7 +189,7 @@ export function Hero() {
         style={{ top: "0%" }}
       />
 
-      {/* HUD corners + construction readout */}
+      {/* HUD corners + valuation readout */}
       <div ref={hudRef} aria-hidden className="pointer-events-none absolute inset-0">
         {HUD_CORNERS.map((pos) => (
           <div
@@ -201,7 +201,7 @@ export function Hero() {
           ref={labelRef}
           className="absolute right-6 top-20 mt-14 font-mono text-[10px] uppercase tracking-[0.3em] text-blueprint lg:right-10 lg:top-24"
         >
-          Konstruktion 0%
+          Analyse 0%
         </span>
       </div>
 
@@ -262,7 +262,7 @@ export function Hero() {
       >
         <div className="flex flex-col items-center gap-2 text-ivory-dim">
           <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
-            Scrollen &amp; bauen
+            Scrollen &amp; entdecken
           </span>
           <span className="h-9 w-px animate-pulse-slow bg-ivory-dim" />
         </div>

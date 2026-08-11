@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "beratung@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_TYPES = new Set(["contact", "valuation", "access_request"]);
 
 export async function POST(request: Request) {
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 4000) : "";
   const wantsFinancing = body.wantsFinancing === true;
   const newsletterOptIn = body.newsletterOptIn === true;
+  const listingId = typeof body.listingId === "string" && UUID_RE.test(body.listingId) ? body.listingId : null;
 
   if (!name || !EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Name und eine gültige E-Mail-Adresse sind erforderlich." }, { status: 400 });
@@ -44,6 +46,7 @@ export async function POST(request: Request) {
       message: message || null,
       wants_financing: wantsFinancing,
       newsletter_opt_in: newsletterOptIn,
+      listing_id: listingId,
     });
     results.stored = !error;
 

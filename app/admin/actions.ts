@@ -73,6 +73,52 @@ export async function createListing(formData: FormData) {
   return { error: null };
 }
 
+export async function updateListing(listingId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const address = String(formData.get("address") || "").trim();
+  const city = String(formData.get("city") || "").trim();
+  const postalCode = String(formData.get("postal_code") || "").trim();
+  const priceRaw = String(formData.get("price_chf") || "").replace(/[^\d]/g, "");
+  const title = String(formData.get("title") || "").trim();
+  const typeRaw = String(formData.get("property_type") || "Haus");
+  const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
+  const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
+  const description = String(formData.get("description") || "").trim();
+
+  if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
+
+  const propertyType = (VALID_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "Haus";
+
+  // Bei Adress-/Ortsänderung erneut geocodieren, damit der Karten-Pin stimmt.
+  const coords = await geocodeAddress(address, city);
+
+  const { error } = await supabase
+    .from("listings")
+    .update({
+      address,
+      city,
+      postal_code: postalCode || null,
+      price_chf: priceRaw ? Number(priceRaw) : null,
+      title: title || null,
+      property_type: propertyType,
+      rooms: roomsRaw ? Number(roomsRaw) : null,
+      living_area: areaRaw ? Number(areaRaw) : null,
+      description: description || null,
+      ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
+    })
+    .eq("id", listingId);
+
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  revalidatePath(`/immobilien/${listingId}`);
+  return { error: null };
+}
+
 export async function updateListingStatus(listingId: string, status: string) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };

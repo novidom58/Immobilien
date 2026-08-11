@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { MapPin, BedDouble, Ruler, Home } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -170,11 +170,10 @@ export default async function ListingDetailPage({
             <div className="mt-2 font-display text-3xl font-semibold text-amber-soft">
               {listing.price_chf ? formatChf(listing.price_chf) : "Auf Anfrage"}
             </div>
-            <div className="mt-6">
-              <MagneticButton href="/#kontakt" className="w-full justify-center">
-                Besichtigung anfragen
-              </MagneticButton>
-            </div>
+            <p className="mt-6 font-mono text-xs uppercase tracking-wide text-ivory-dim/60">
+              Besichtigung anfragen
+            </p>
+            <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
             <p className="mt-4 text-xs text-ivory-dim/60">
               Persönliche Auskunft durch Jana Schnuderl, NoviDom Immo.
             </p>

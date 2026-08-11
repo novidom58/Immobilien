@@ -43,7 +43,9 @@ export default async function AdminPage() {
       .limit(30),
     supabase
       .from("listings")
-      .select("id, title, address, city, status, owner_id, price_chf, property_type, lat, listing_photos(count)")
+      .select(
+        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, lat, listing_photos(count)"
+      )
       .order("created_at", { ascending: false }),
     supabase
       .from("newsletter_subscribers")
@@ -58,9 +60,13 @@ export default async function AdminPage() {
     title: (l.title as string | null) ?? null,
     address: l.address as string,
     city: l.city as string,
+    postal_code: (l.postal_code as string | null) ?? null,
     status: l.status as string,
     property_type: (l.property_type as string) ?? "Haus",
     price_chf: (l.price_chf as number | null) ?? null,
+    rooms: (l.rooms as number | null) ?? null,
+    living_area: (l.living_area as number | null) ?? null,
+    description: (l.description as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
     hasOwner: Boolean(l.owner_id),

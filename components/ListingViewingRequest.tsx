@@ -2,7 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 
-const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK;
+// Eigener Kalender-Link für Besichtigungen (andere Dauer/Ablauf als ein
+// Bewertungsgespräch) - fällt auf den allgemeinen Cal.com-Link zurück, falls
+// noch kein separater Besichtigungs-Termintyp eingerichtet ist.
+const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK_VIEWING || process.env.NEXT_PUBLIC_CAL_LINK;
 
 const fieldClasses =
   "w-full rounded-lg border border-line bg-ink px-3.5 py-2.5 font-sans text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-amber focus:outline-none";

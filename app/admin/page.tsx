@@ -155,9 +155,8 @@ export default async function AdminPage() {
             )}
           </div>
           <p className="mt-3 text-xs text-ivory-dim/60">
-            Um ein Inserat mit einem Kundenkonto zu verknüpfen, im Supabase Table Editor bei der
-            Tabelle „listings“ das Feld „owner_id“ auf die User-ID des Kunden setzen (unter
-            Authentication → Users zu finden).
+            Kunden per E-Mail-Adresse direkt bei der jeweiligen Objektkarte zuweisen — der
+            Kunde muss sich vorher einmal unter /login registriert haben.
           </p>
         </section>
       </div>

@@ -30,13 +30,13 @@ export default function Home() {
         <WhyNoviDom />
         <Services />
         <Process />
-        <SalesCockpit />
         <CommissionCompare />
         <ProceedsCalculator />
         <Situations />
         <StatsAndArea />
         <ServiceMap />
         <AboutJana />
+        <SalesCockpit />
         <Faq />
         <BookingSection />
         <FinalCta />

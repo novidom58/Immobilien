@@ -3,9 +3,15 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ImagePlus, Trash2, MapPin, Pencil } from "lucide-react";
+import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { updateListingStatus, updateListing, deleteListing } from "@/app/admin/actions";
+import {
+  updateListingStatus,
+  updateListing,
+  assignListingOwner,
+  unassignListingOwner,
+  deleteListing,
+} from "@/app/admin/actions";
 
 type AdminListing = {
   id: string;
@@ -49,6 +55,32 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [assignEmail, setAssignEmail] = useState("");
+  const [assigning, setAssigning] = useState(false);
+
+  async function handleAssign() {
+    if (!assignEmail.trim()) return;
+    setBusy("assign");
+    setError(null);
+    const res = await assignListingOwner(listing.id, assignEmail.trim());
+    setBusy(null);
+    if (res.error) setError(res.error);
+    else {
+      setAssignEmail("");
+      setAssigning(false);
+      router.refresh();
+    }
+  }
+
+  async function handleUnassign() {
+    if (!window.confirm("Kundenverknüpfung wirklich entfernen?")) return;
+    setBusy("unassign");
+    setError(null);
+    const res = await unassignListingOwner(listing.id);
+    setBusy(null);
+    if (res.error) setError(res.error);
+    else router.refresh();
+  }
 
   async function handleUpdate(formData: FormData) {
     setBusy("edit");
@@ -133,10 +165,62 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
               Karte: {listing.lat ? "Ja" : "Nein"}
             </span>
             <span>{listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}</span>
-            <span>Kunde verknüpft: {listing.hasOwner ? "Ja" : "Nein"}</span>
             <Link href={`/immobilien/${listing.id}`} className="text-amber underline underline-offset-2">
               Detailseite ansehen
             </Link>
+          </div>
+
+          <div className="mt-3">
+            {listing.hasOwner ? (
+              <button
+                type="button"
+                disabled={busy === "unassign"}
+                onClick={handleUnassign}
+                className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-red-400 disabled:opacity-50"
+              >
+                <UserX className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Kunde verknüpft — entfernen
+              </button>
+            ) : assigning ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="email"
+                  autoFocus
+                  placeholder="kunde@email.ch"
+                  value={assignEmail}
+                  onChange={(e) => setAssignEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAssign()}
+                  className="rounded-lg border border-line bg-ink px-2.5 py-1.5 text-xs text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={busy === "assign" || !assignEmail.trim()}
+                  onClick={handleAssign}
+                  className="font-mono text-[11px] uppercase tracking-wide text-amber hover:text-amber-soft disabled:opacity-50"
+                >
+                  {busy === "assign" ? "…" : "Bestätigen"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAssigning(false);
+                    setAssignEmail("");
+                  }}
+                  className="font-mono text-[11px] uppercase tracking-wide text-ivory-dim/40 hover:text-ivory-dim"
+                >
+                  Abbrechen
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setAssigning(true)}
+                className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-amber"
+              >
+                <UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Kunde per E-Mail zuweisen
+              </button>
+            )}
           </div>
         </div>
 

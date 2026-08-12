@@ -305,6 +305,37 @@ create policy "newsletter_subscribers_admin_select" on newsletter_subscribers
   );
 
 -- ---------------------------------------------------------------------
+-- Admin: Inserat per E-Mail direkt einem Kundenkonto zuweisen, ohne den
+-- Supabase Table Editor zu öffnen. SECURITY DEFINER, weil auth.users sonst
+-- nicht über die normale Client-API abfragbar ist - die Funktion prüft
+-- selbst is_admin(), bevor sie etwas tut.
+-- ---------------------------------------------------------------------
+create or replace function public.admin_assign_listing_owner(p_listing_id uuid, p_customer_email text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid;
+begin
+  if not public.is_admin() then
+    raise exception 'Nicht berechtigt.';
+  end if;
+
+  select id into v_user_id from auth.users where lower(email) = lower(p_customer_email) limit 1;
+
+  if v_user_id is null then
+    raise exception 'Kein Kundenkonto mit dieser E-Mail-Adresse gefunden. Der Kunde muss sich zuerst unter /login registrieren.';
+  end if;
+
+  update listings set owner_id = v_user_id where id = p_listing_id;
+end;
+$$;
+
+grant execute on function public.admin_assign_listing_owner(uuid, text) to authenticated;
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

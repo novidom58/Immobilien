@@ -208,6 +208,34 @@ export async function updateLeadNote(leadId: string, note: string) {
   return { error: null };
 }
 
+export async function assignListingOwner(listingId: string, email: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) return { error: "E-Mail-Adresse erforderlich." };
+
+  const { error } = await supabase.rpc("admin_assign_listing_owner", {
+    p_listing_id: listingId,
+    p_customer_email: trimmedEmail,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+export async function unassignListingOwner(listingId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("listings").update({ owner_id: null }).eq("id", listingId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
 export async function deleteListing(listingId: string) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };

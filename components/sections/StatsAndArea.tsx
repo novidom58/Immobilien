@@ -10,18 +10,7 @@ const stats = [
   { to: 10, suffix: "+", label: "Immobilienportale" },
 ];
 
-const area = [
-  "Basel-Stadt",
-  "Riehen",
-  "Bettingen",
-  "Binningen",
-  "Allschwil",
-  "Reinach",
-  "Muttenz",
-  "Arlesheim",
-  "Pratteln",
-  "Liestal",
-];
+const area = ["Basel-Stadt", "Baselland", "Fricktal", "Schwarzbubenland", "Solothurn"];
 
 export function StatsAndArea() {
   return (
@@ -48,7 +37,7 @@ export function StatsAndArea() {
 
       <div className="mt-20">
         <p className="mb-6 text-center font-mono text-xs uppercase tracking-[0.3em] text-ivory-dim/60">
-          Aktiv in der gesamten Region Basel
+          Aktiv in der gesamten Nordwestschweiz
         </p>
         <Marquee
           items={area.map((place) => (

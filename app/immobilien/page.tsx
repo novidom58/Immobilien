@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Immobilien",
   description:
-    "Aktuelle Immobilien-Angebote von NoviDom Immo in der Region Basel.",
+    "Aktuelle Immobilien-Angebote von NoviDom Immo in der Nordwestschweiz.",
 };
 
 export const dynamic = "force-dynamic";

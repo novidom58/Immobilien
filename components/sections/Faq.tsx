@@ -24,7 +24,7 @@ const faqs = [
   },
   {
     q: "In welchen Gebieten ist NoviDom aktiv?",
-    a: "In der gesamten Region Basel — unter anderem Basel-Stadt, Riehen, Bettingen, Binningen, Allschwil, Reinach, Muttenz, Arlesheim, Pratteln und Liestal.",
+    a: "In der gesamten Nordwestschweiz — Basel-Stadt, Baselland und die angrenzenden Regionen in Solothurn und im Fricktal.",
   },
   {
     q: "Wer begleitet meinen Verkauf persönlich?",

@@ -36,8 +36,9 @@ export const metadata: Metadata = {
     template: "%s | NoviDom Immo",
   },
   description:
-    "NoviDom Immo verkauft Ihre Immobilie in der Region Basel transparent, schnell und persönlich — zur fixen Kommission von 0.95%. Jetzt kostenlose Bewertung sichern.",
+    "NoviDom Immo verkauft Ihre Immobilie in der Nordwestschweiz transparent, schnell und persönlich — zur fixen Kommission von 0.95%. Jetzt kostenlose Bewertung sichern.",
   keywords: [
+    "Immobilienmakler Nordwestschweiz",
     "Immobilienmakler Basel",
     "Immobilie verkaufen Basel",
     "Immobilienbewertung Basel",
@@ -52,13 +53,13 @@ export const metadata: Metadata = {
     siteName: "NoviDom Immo",
     title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
     description:
-      "Immobilien verkaufen in der Region Basel — transparent, persönlich, zur fixen Kommission von 0.95%.",
+      "Immobilien verkaufen in der Nordwestschweiz — transparent, persönlich, zur fixen Kommission von 0.95%.",
   },
   twitter: {
     card: "summary_large_image",
     title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
     description:
-      "Immobilien verkaufen in der Region Basel — transparent, persönlich, zur fixen Kommission von 0.95%.",
+      "Immobilien verkaufen in der Nordwestschweiz — transparent, persönlich, zur fixen Kommission von 0.95%.",
   },
   robots: { index: true, follow: true },
   alternates: { canonical: siteUrl },
@@ -74,11 +75,11 @@ const jsonLd = {
   "@type": "RealEstateAgent",
   name: "NoviDom Immo",
   description:
-    "Moderner Real-Estate-Partner für den Immobilienverkauf in der Region Basel mit fixer 0.95%-Kommission.",
+    "Moderner Real-Estate-Partner für den Immobilienverkauf in der Nordwestschweiz mit fixer 0.95%-Kommission.",
   url: siteUrl,
   areaServed: {
     "@type": "Place",
-    name: "Region Basel, Schweiz",
+    name: "Nordwestschweiz",
   },
   priceRange: "0.95% Kommission",
   founder: {

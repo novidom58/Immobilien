@@ -28,12 +28,12 @@ export async function ServiceMap() {
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
               Zuhause in der
               <br />
-              <span className="text-amber-soft">gesamten Region Basel.</span>
+              <span className="text-amber-soft">gesamten Nordwestschweiz.</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
-              Von der Stadt bis ins Baselbiet — wir kennen die lokalen
-              Märkte, Preise und Käuferkreise in jeder dieser Gemeinden
-              persönlich.
+              Von Basel-Stadt über das Baselbiet bis ins Fricktal und
+              Schwarzbubenland — wir kennen die lokalen Märkte, Preise und
+              Käuferkreise persönlich.
             </p>
             {listings.length > 0 && (
               <p className="mt-4 max-w-md text-sm text-ivory-dim/70">

@@ -36,7 +36,7 @@ export default async function Image() {
           Ihr Zuhause verdient den besten Preis.
         </div>
         <div style={{ display: "flex", marginTop: 32, fontSize: 30, color: "#f2c177" }}>
-          Immobilien verkaufen in der Region Basel · Fixe 0.95% Kommission
+          Immobilien verkaufen in der Nordwestschweiz · Fixe 0.95% Kommission
         </div>
       </div>
     ),

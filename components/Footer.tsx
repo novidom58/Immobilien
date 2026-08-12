@@ -8,7 +8,7 @@ export function Footer() {
         <span className="font-display text-base font-semibold text-ivory">
           Novi<span className="text-amber">Dom</span> Immo
         </span>
-        <span>Region Basel · CH</span>
+        <span>Nordwestschweiz · CH</span>
         <NewsletterSignup />
       </div>
       <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">

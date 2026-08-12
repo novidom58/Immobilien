@@ -5,6 +5,8 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { ValuationWidget } from "./ValuationWidget";
+import { HeroKeyUnlock } from "./HeroKeyUnlock";
+import { LOADER_DURATION_MS } from "@/components/Loader";
 import { createClient } from "@/lib/supabase/client";
 
 // Generisches KI-Bild als Fallback, solange noch kein echtes Objekt online ist.
@@ -24,6 +26,20 @@ const HUD_CORNERS = [
 
 export function Hero() {
   const [heroImage, setHeroImage] = useState(FALLBACK_IMAGE);
+  const [showIntro, setShowIntro] = useState(true);
+  const [introStart, setIntroStart] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only media check, must run post-mount to stay hydration-safe
+      setShowIntro(false);
+      return;
+    }
+    // Wartet, bis der sitewide Loader fertig ist, damit die grosse
+    // Schlüssel-Animation sichtbar von vorne beginnt statt verdeckt zu laufen.
+    const timer = setTimeout(() => setIntroStart(true), LOADER_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -50,6 +66,8 @@ export function Hero() {
 
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden bg-ink">
+      {showIntro && <HeroKeyUnlock start={introStart} onDone={() => setShowIntro(false)} />}
+
       {/* Ruhiger Ken-Burns-Zoom auf dem Hintergrundfoto - läuft unabhängig vom Scroll,
           wirkt dadurch immer flüssig statt wie eingefrorene Zwischenbilder. */}
       <motion.div
@@ -93,21 +111,6 @@ export function Hero() {
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-6 py-32 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16 lg:px-10 lg:py-40">
         <div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber/40 bg-ink/40 px-4 py-1.5 backdrop-blur-sm"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber" />
-            </span>
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-amber-soft">
-              Persönliche Beratung · Region Basel
-            </span>
-          </motion.div>
-
           <HeroHeadline text="Ihr Zuhause verdient den besten Preis." />
 
           <motion.p

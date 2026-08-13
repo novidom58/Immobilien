@@ -13,7 +13,7 @@ const services = [
 
 export function Services() {
   return (
-    <section className="relative bg-ink-2 py-28 lg:py-36">
+    <section id="leistungen" className="relative bg-ink-2 py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionLabel>Voller Service</SectionLabel>
         <h2 className="mt-6 max-w-2xl text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">

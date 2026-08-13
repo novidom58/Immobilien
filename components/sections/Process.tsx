@@ -1,4 +1,7 @@
+"use client";
+
 import { Search, Megaphone, Handshake, FileCheck } from "lucide-react";
+import { motion } from "motion/react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -39,14 +42,21 @@ export function Process() {
         </h2>
 
         <div className="relative mt-14">
-          {/* Verbindungslinie auf Desktop */}
-          <div className="absolute left-0 right-0 top-7 hidden h-px bg-line lg:block" aria-hidden />
+          {/* Verbindungslinie auf Desktop - zeichnet sich beim Scrollen ein */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-0 right-0 top-7 hidden h-px origin-left bg-line lg:block"
+            aria-hidden
+          />
 
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {steps.map((step, i) => (
               <Reveal key={step.n} delay={i * 0.08}>
-                <div className="relative">
-                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber/40 bg-ink">
+                <div className="group relative transition-transform duration-300 hover:-translate-y-1">
+                  <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber/40 bg-ink transition-colors duration-300 group-hover:border-amber group-hover:bg-amber/10">
                     <step.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
                   </div>
                   <div className="mt-5 flex items-baseline gap-3">

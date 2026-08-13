@@ -15,7 +15,7 @@ const HeroKeyUnlock3D = dynamic(() => import("./HeroKeyUnlock3D"), { ssr: false 
 export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () => void }) {
   useEffect(() => {
     if (!start) return;
-    const timer = setTimeout(onDone, 2200);
+    const timer = setTimeout(onDone, 2650);
     return () => clearTimeout(timer);
   }, [start, onDone]);
 
@@ -24,7 +24,7 @@ export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () =>
       className="absolute inset-0 z-20 flex items-center justify-center bg-ink"
       initial={{ opacity: 1 }}
       animate={start ? { opacity: 0 } : { opacity: 1 }}
-      transition={{ duration: 0.5, delay: 1.75, ease: "easeInOut" }}
+      transition={{ duration: 0.55, delay: 2.1, ease: "easeInOut" }}
     >
       {start && (
         <div className="h-[70vmin] w-[70vmin] max-h-[560px] max-w-[560px]">

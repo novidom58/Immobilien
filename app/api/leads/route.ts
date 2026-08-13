@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "beratung@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+
+// Sobald diese Datei existiert (PDF-Export des Ratgebers, siehe env.example-
+// Hinweis), wird sie automatisch an die Bestätigungsmail einer
+// Ratgeber-Anfrage angehängt - kein Code-Update nötig, nur die Datei ins
+// public/downloads-Verzeichnis legen.
+const GUIDE_PDF_PATH = join(process.cwd(), "public", "downloads", "ratgeber-novidom-immo.pdf");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_TYPES = new Set(["contact", "valuation", "access_request"]);
@@ -71,11 +79,21 @@ export async function POST(request: Request) {
     // request - the internal notification above already went through.
     if (!error) {
       const firstName = name.split(" ")[0];
+      const isGuideRequest = type === "access_request";
+      const hasGuidePdf = isGuideRequest && existsSync(GUIDE_PDF_PATH);
+
       await resend.emails.send({
         from: NOTIFY_FROM,
         to: email,
-        subject: "Ihre Anfrage bei NoviDom Immo ist eingegangen",
-        text: `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`,
+        subject: isGuideRequest
+          ? "Ihr Ratgeber von NoviDom Immo"
+          : "Ihre Anfrage bei NoviDom Immo ist eingegangen",
+        text: hasGuidePdf
+          ? `Hallo ${firstName}\n\nVielen Dank für Ihr Interesse. Im Anhang finden Sie Ihren kostenlosen Ratgeber „1×1 des Immobilienverkaufs in der Schweiz“.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`
+          : `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`,
+        attachments: hasGuidePdf
+          ? [{ filename: "1x1-Immobilienverkauf-NoviDom.pdf", content: readFileSync(GUIDE_PDF_PATH) }]
+          : undefined,
       });
     }
   }

@@ -18,7 +18,7 @@ export function AboutJana() {
   return (
     <section id="ueber-uns" className="relative bg-ink py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <SectionLabel>Kopf hinter NoviDom</SectionLabel>
+        <SectionLabel>Köpfe hinter NoviDom</SectionLabel>
 
         <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-24">
           <Reveal>
@@ -32,22 +32,22 @@ export function AboutJana() {
 
           <Reveal delay={0.1}>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Jana Schnuderl
+              Jana Schnuderl &amp; Team
             </h2>
             <p className="mt-2 font-mono text-sm uppercase tracking-widest text-blueprint">
-              Inhaberin · NoviDom Immo · Basel
+              Inhaberin · NoviDom Immo · Nordwestschweiz
             </p>
             <p className="mt-8 max-w-2xl text-balance text-lg text-ivory-dim">
-              18+ Jahre Erfahrung in Immobilien, Hypotheken und Bankwesen.
-              Jana Schnuderl kennt den Basler Markt, die lokalen Preise und
+              Wir vereinen 18+ Jahre Erfahrung in Immobilien, Hypotheken und
+              Bankwesen. Wir kennen den Basler Markt, die lokalen Preise und
               die Anforderungen der Banken — aus der Praxis, nicht aus dem
               Lehrbuch.
             </p>
             <p className="mt-5 max-w-2xl text-balance text-lg text-ivory-dim">
-              Was NoviDom unterscheidet: Immobilienverkauf und Finanzierung
-              werden zusammen gedacht. Käufer werden direkt auf ihre
+              Was uns unterscheidet: Wir denken Immobilienverkauf und
+              Finanzierung zusammen. Käufer werden direkt auf ihre
               Finanzierungsfähigkeit geprüft — kein Zeitverlust, mehr
-              Sicherheit für Sie. Persönlich, unkompliziert, immer
+              Sicherheit für Sie. Persönlich, unkompliziert und immer
               erreichbar, bis zum Notartermin.
             </p>
 

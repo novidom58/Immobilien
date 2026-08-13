@@ -108,45 +108,58 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/20 to-ink/50" />
       <div className="grain absolute inset-0" />
 
-      <div className="relative z-10 mx-auto w-full max-w-3xl px-6 py-32 lg:px-10 lg:py-40">
-        <HeroHeadline text="Ihr Zuhause verdient den besten Preis." />
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-6 py-32 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16 lg:px-10 lg:py-40">
+        <div>
+          <HeroHeadline text="Ihr Zuhause verdient den besten Preis." />
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
-        >
-          Gleiche Qualität wie grosse Makler — professionelle IAZI-Bewertung,
-          Matterport-3D-Rundgang und persönliche Begleitung bis zum Notar.
-          Zu <span className="font-mono text-amber-soft">0.95%</span> statt 3%.
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
+            className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
+          >
+            Gleiche Qualität wie grosse Makler — professionelle IAZI-Bewertung,
+            Matterport-3D-Rundgang und persönliche Begleitung bis zum Notar.
+            Zu <span className="font-mono text-amber-soft">0.95%</span> statt 3%.
+          </motion.p>
 
-        <motion.a
-          href="#kontakt"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.85 }}
-          className="mt-8 inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 shadow-[0_8px_32px_-4px_rgba(232,168,85,0.45)] transition-transform hover:-translate-y-0.5"
-        >
-          <span className="font-display text-4xl font-semibold leading-none tracking-tight text-ink">
-            0.95%
-          </span>
-          <span className="h-11 w-px bg-ink/20" aria-hidden />
-          <span className="flex flex-col">
-            <span className="font-display text-sm font-semibold text-ink">
-              Fixprovision — statt 3%
-            </span>
-            <span className="text-xs text-ink/60">Voller Service, faire Kosten</span>
-          </span>
-        </motion.a>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="mt-8"
+          >
+            <a
+              href="#leistungen"
+              className="font-mono text-sm uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+            >
+              Unsere Leistungen →
+            </a>
+          </motion.div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          className="mt-6 flex flex-wrap items-center gap-5"
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="flex flex-col gap-5"
         >
+          <a
+            href="#kontakt"
+            className="inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 shadow-[0_8px_32px_-4px_rgba(232,168,85,0.45)] transition-transform hover:-translate-y-0.5"
+          >
+            <span className="font-display text-4xl font-semibold leading-none tracking-tight text-ink">
+              0.95%
+            </span>
+            <span className="h-11 w-px bg-ink/20" aria-hidden />
+            <span className="flex flex-col">
+              <span className="font-display text-sm font-semibold text-ink">
+                Fixprovision — statt 3%
+              </span>
+              <span className="text-xs text-ink/60">Voller Service, faire Kosten</span>
+            </span>
+          </a>
+
           <motion.a
             href="#bewertung"
             animate={{
@@ -156,16 +169,10 @@ export function Hero() {
               ],
             }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 rounded-full bg-amber px-7 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-amber px-7 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink"
           >
             Kostenlose Bewertung anfragen
           </motion.a>
-          <a
-            href="#leistungen"
-            className="font-mono text-sm uppercase tracking-wide text-ivory-dim underline underline-offset-4 hover:text-ivory"
-          >
-            Unsere Leistungen
-          </a>
         </motion.div>
       </div>
     </section>

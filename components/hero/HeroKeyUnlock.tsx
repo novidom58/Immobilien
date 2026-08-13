@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
+import { playUnlockSound } from "@/lib/unlockSound";
 
 // Echtes WebGL-3D (React Three Fiber) statt flachem SVG - eigenes Code-Bundle
 // (nur hier geladen, kein Effekt auf andere Seiten) und komplett entladen,
@@ -15,8 +16,15 @@ const HeroKeyUnlock3D = dynamic(() => import("./HeroKeyUnlock3D"), { ssr: false 
 export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () => void }) {
   useEffect(() => {
     if (!start) return;
-    const timer = setTimeout(onDone, 2650);
-    return () => clearTimeout(timer);
+    const doneTimer = setTimeout(onDone, 2650);
+    // Zeitlich auf Schlüsseldreh (~0.9s) + Aufschluss-Blitz (~1.3s) der
+    // 3D-Sequenz abgestimmt. Browser blockieren Ton ohne vorherige
+    // Nutzer-Geste beim allerersten Seitenaufruf - siehe lib/unlockSound.ts.
+    const soundTimer = setTimeout(playUnlockSound, 900);
+    return () => {
+      clearTimeout(doneTimer);
+      clearTimeout(soundTimer);
+    };
   }, [start, onDone]);
 
   return (

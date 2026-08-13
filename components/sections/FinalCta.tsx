@@ -19,6 +19,7 @@ export function FinalCta() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [timeframe, setTimeframe] = useState("");
   const [wantsFinancing, setWantsFinancing] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -42,7 +43,7 @@ export function FinalCta() {
           name,
           email,
           phone,
-          message: `Objekttyp: ${propertyType}\nAdresse: ${address}`,
+          message: `Objekttyp: ${propertyType}\nAdresse: ${address}\nZeithorizont: ${timeframe || "keine Angabe"}`,
           wantsFinancing,
           newsletterOptIn,
         }),
@@ -183,6 +184,17 @@ export function FinalCta() {
                     onChange={(e) => setPhone(e.target.value)}
                     className={fieldClasses}
                   />
+                  <select
+                    value={timeframe}
+                    onChange={(e) => setTimeframe(e.target.value)}
+                    className={`${fieldClasses} text-ivory-dim`}
+                  >
+                    <option value="">Wann möchten Sie verkaufen? (optional)</option>
+                    <option value="So bald wie möglich">So bald wie möglich</option>
+                    <option value="In 3–6 Monaten">In 3–6 Monaten</option>
+                    <option value="In 6–12 Monaten">In 6–12 Monaten</option>
+                    <option value="Nur unverbindlich informieren">Nur unverbindlich informieren</option>
+                  </select>
                   <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
                   <label className="flex items-start gap-2.5 text-sm text-ivory-dim">

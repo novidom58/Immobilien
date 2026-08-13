@@ -105,7 +105,7 @@ export function PropertyValuationLead() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="lg:mt-11">
             {status === "done" ? (
               <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-line bg-ink p-10 text-center">
                 <h3 className="font-display text-2xl font-semibold text-ivory">

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX } from "lucide-react";
+import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX, FileText, FileUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   updateListingStatus,
@@ -28,6 +28,7 @@ type AdminListing = {
   lat: number | null;
   photoCount: number;
   hasOwner: boolean;
+  documents: { id: string; name: string; url: string }[];
 };
 
 const TYPE_OPTIONS = [
@@ -52,6 +53,7 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
+  const docFileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -119,7 +121,7 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
     setError(null);
 
     for (const file of Array.from(files)) {
-      const path = `${listing.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const path = `${listing.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error: uploadError } = await supabase.storage
         .from("listing-photos")
         .upload(path, file, { cacheControl: "3600" });
@@ -144,6 +146,52 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
     setBusy(null);
     if (fileRef.current) fileRef.current.value = "";
     router.refresh();
+  }
+
+  async function handleDocUpload(files: FileList | null) {
+    if (!files || files.length === 0 || !supabase) return;
+    setBusy("doc-upload");
+    setError(null);
+
+    for (const file of Array.from(files)) {
+      const path = `${listing.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from("listing-dokumente")
+        .upload(path, file);
+      if (uploadError) {
+        setError(`Upload fehlgeschlagen: ${uploadError.message}`);
+        setBusy(null);
+        return;
+      }
+      const { error: insertError } = await supabase.from("listing_documents").insert({
+        listing_id: listing.id,
+        name: file.name,
+        url: path,
+      });
+      if (insertError) {
+        setError(`Datei gespeichert, aber Verknüpfung fehlgeschlagen: ${insertError.message}`);
+        setBusy(null);
+        return;
+      }
+    }
+
+    setBusy(null);
+    if (docFileRef.current) docFileRef.current.value = "";
+    router.refresh();
+  }
+
+  async function handleDocDelete(doc: { id: string; url: string }) {
+    if (!supabase) return;
+    if (!window.confirm("Dokument wirklich löschen?")) return;
+    setBusy(`doc-delete-${doc.id}`);
+    setError(null);
+    if (!doc.url.startsWith("http")) {
+      await supabase.storage.from("listing-dokumente").remove([doc.url]);
+    }
+    const { error: deleteError } = await supabase.from("listing_documents").delete().eq("id", doc.id);
+    setBusy(null);
+    if (deleteError) setError(`Löschen fehlgeschlagen: ${deleteError.message}`);
+    else router.refresh();
   }
 
   return (
@@ -258,6 +306,23 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
 
           <button
             type="button"
+            disabled={busy === "doc-upload"}
+            onClick={() => docFileRef.current?.click()}
+            className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ivory-dim hover:border-amber/50 hover:text-ivory disabled:opacity-50"
+          >
+            <FileUp className="h-4 w-4" strokeWidth={1.5} />
+            {busy === "doc-upload" ? "Lädt…" : "Dokumente"}
+          </button>
+          <input
+            ref={docFileRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => handleDocUpload(e.target.files)}
+          />
+
+          <button
+            type="button"
             onClick={() => setEditing((v) => !v)}
             className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ivory-dim hover:border-amber/50 hover:text-ivory"
           >
@@ -276,6 +341,31 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
           </button>
         </div>
       </div>
+
+      {listing.documents.length > 0 && (
+        <div className="mt-4 border-t border-line pt-4">
+          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+            <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Verkaufsdossier &amp; Dokumente
+          </div>
+          <ul className="space-y-1.5">
+            {listing.documents.map((doc) => (
+              <li key={doc.id} className="flex items-center justify-between gap-2 text-sm text-ivory-dim">
+                <span className="truncate">{doc.name}</span>
+                <button
+                  type="button"
+                  disabled={busy === `doc-delete-${doc.id}`}
+                  onClick={() => handleDocDelete(doc)}
+                  className="shrink-0 text-ivory-dim/60 hover:text-red-400 disabled:opacity-50"
+                  aria-label="Dokument löschen"
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {editing && (
         <form action={handleUpdate} className="mt-4 grid gap-2.5 border-t border-line pt-4 sm:grid-cols-2">

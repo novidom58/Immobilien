@@ -67,8 +67,22 @@ export default async function DashboardPage() {
         .order("sort_order", { ascending: true }),
     ]);
     activity = activityRes.data ?? [];
-    documents = documentsRes.data ?? [];
     photos = photosRes.data ?? [];
+
+    // Dokumente aus dem privaten "listing-dokumente"-Bucket liegen als
+    // Storage-Pfad in `url` (nicht als direkt aufrufbarer Link) und
+    // brauchen eine signierte, zeitlich begrenzte URL zum Anzeigen.
+    const rawDocuments = documentsRes.data ?? [];
+    documents = await Promise.all(
+      rawDocuments.map(async (doc) => {
+        if (doc.url.startsWith("http")) return doc;
+        const { data: signed } = await supabase.storage
+          .from("listing-dokumente")
+          .createSignedUrl(doc.url, 300);
+        return { name: doc.name, url: signed?.signedUrl ?? "" };
+      })
+    );
+    documents = documents.filter((doc) => doc.url);
   }
 
   return (

@@ -148,6 +148,10 @@ insert into storage.buckets (id, name, public)
 values ('kunden-dokumente', 'kunden-dokumente', false)
 on conflict (id) do nothing;
 
+insert into storage.buckets (id, name, public)
+values ('listing-dokumente', 'listing-dokumente', false)
+on conflict (id) do nothing;
+
 -- Objektfotos: alle dürfen lesen, nur Admin lädt hoch/löscht
 drop policy if exists "storage_listing_photos_read" on storage.objects;
 create policy "storage_listing_photos_read" on storage.objects
@@ -182,6 +186,31 @@ create policy "storage_kunden_docs_delete" on storage.objects
     bucket_id = 'kunden-dokumente'
     and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
   );
+
+-- Verkaufsdossiers etc.: Dateien liegen im privaten Bucket
+-- "listing-dokumente" unter <listing_id>/<dateiname>. Admin lädt hoch/
+-- löscht, der verknüpfte Kunde darf seine eigenen Objektdokumente nur lesen.
+drop policy if exists "storage_listing_dokumente_select" on storage.objects;
+create policy "storage_listing_dokumente_select" on storage.objects
+  for select using (
+    bucket_id = 'listing-dokumente'
+    and (
+      public.is_admin()
+      or exists (
+        select 1 from listings l
+        where l.id::text = (storage.foldername(name))[1]
+          and l.owner_id = auth.uid()
+      )
+    )
+  );
+
+drop policy if exists "storage_listing_dokumente_insert" on storage.objects;
+create policy "storage_listing_dokumente_insert" on storage.objects
+  for insert with check (bucket_id = 'listing-dokumente' and public.is_admin());
+
+drop policy if exists "storage_listing_dokumente_delete" on storage.objects;
+create policy "storage_listing_dokumente_delete" on storage.objects
+  for delete using (bucket_id = 'listing-dokumente' and public.is_admin());
 
 -- ---------------------------------------------------------------------
 -- listing_documents / listing_activity: Inhalte des Verkaufs-Cockpits

@@ -169,17 +169,46 @@ export default async function ImmobilienPage() {
 
         {sold.length > 0 && (
           <div className="mt-20">
-            <h2 className="font-display text-2xl font-semibold text-ivory">
+            <span className="font-mono text-xs uppercase tracking-[0.3em] text-blueprint">
+              Referenzen
+            </span>
+            <h2 className="mt-3 font-display text-2xl font-semibold text-ivory">
               Erfolgreich verkauft
             </h2>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {sold.map((listing) => (
                 <Link
                   key={listing.id}
                   href={`/immobilien/${listing.id}`}
-                  className="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm text-ivory-dim hover:border-amber/40 hover:text-ivory"
+                  className="group overflow-hidden rounded-2xl border border-line bg-ink-2 opacity-80 transition-all duration-300 hover:-translate-y-1 hover:border-amber/40 hover:opacity-100"
                 >
-                  {listing.address}, {listing.city}
+                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
+                    {listing.cover ? (
+                      <Image
+                        src={listing.cover}
+                        alt=""
+                        aria-hidden
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover grayscale-[0.3] transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
+                    )}
+                    <span className="absolute left-4 top-4 rounded-full border border-line bg-ink/80 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/70 backdrop-blur-sm">
+                      Verkauft
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 text-sm text-ivory-dim">
+                      <MapPin className="h-3.5 w-3.5 text-amber" strokeWidth={1.5} />
+                      {listing.postal_code ? `${listing.postal_code} ` : ""}
+                      {listing.city}
+                    </div>
+                    <div className="mt-2 font-display text-lg font-semibold text-ivory">
+                      {listing.title || listing.address}
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>

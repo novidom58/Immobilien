@@ -144,9 +144,16 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="flex flex-col gap-5"
         >
-          <a
+          <motion.a
             href="#kontakt"
-            className="inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 shadow-[0_8px_32px_-4px_rgba(232,168,85,0.45)] transition-transform hover:-translate-y-0.5"
+            animate={{
+              boxShadow: [
+                "0 0 0px 0px rgba(232,168,85,0.5)",
+                "0 0 0px 10px rgba(232,168,85,0)",
+              ],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            className="inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 transition-transform hover:-translate-y-0.5"
           >
             <span className="font-display text-4xl font-semibold leading-none tracking-tight text-ink">
               0.95%
@@ -158,7 +165,7 @@ export function Hero() {
               </span>
               <span className="text-xs text-ink/60">Voller Service, faire Kosten</span>
             </span>
-          </a>
+          </motion.a>
 
           <motion.a
             href="#bewertung"
@@ -168,7 +175,7 @@ export function Hero() {
                 "0 0 0px 10px rgba(232,168,85,0)",
               ],
             }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-amber px-7 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink"
           >
             Kostenlose Bewertung anfragen

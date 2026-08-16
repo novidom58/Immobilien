@@ -25,7 +25,7 @@ export function HeroHeadline({ text }: { text: string }) {
       variants={container}
       initial="hidden"
       animate="visible"
-      className="text-balance font-display text-[clamp(2.5rem,7vw,6rem)] font-semibold leading-[1.02] tracking-tight text-ivory"
+      className="text-balance font-display text-[clamp(2.75rem,7.5vw,6.75rem)] font-bold leading-[0.98] tracking-tighter text-ivory"
     >
       {words.map((w, i) => (
         <span key={i} className="mr-[0.25em] inline-block overflow-hidden pb-1 align-bottom">

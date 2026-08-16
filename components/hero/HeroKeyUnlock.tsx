@@ -1,43 +1,92 @@
 "use client";
 
-import { useEffect } from "react";
-import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { playUnlockSound } from "@/lib/unlockSound";
+import { playKeyClick, playDoorChime } from "@/lib/unlockSound";
 
-// Echtes WebGL-3D (React Three Fiber) statt flachem SVG - eigenes Code-Bundle
-// (nur hier geladen, kein Effekt auf andere Seiten) und komplett entladen,
-// sobald die Sequenz vorbei ist. `start=false` zeigt nur die blickdichte
-// Abdeckung (kein Canvas-Mount, kein GPU-Aufwand), bis der sitewide Loader
-// (components/Loader.tsx) fertig ist und der Elternteil `start` umschaltet -
-// so gibt es nie ein Aufblitzen des echten Hero-Inhalts dazwischen.
-const HeroKeyUnlock3D = dynamic(() => import("./HeroKeyUnlock3D"), { ssr: false });
+// Echtes gefilmtes Intro (Schlüssel gleitet ins Schloss, Tür öffnet sich in
+// eine grosse Eingangshalle) statt der früheren WebGL-Szene. Zeitpunkte sind
+// auf public/videos/key-unlock.mp4 abgestimmt (9.5s, Türöffnung bei ~6.3s).
+const CLICK_DELAY_MS = 300;
+const CHIME_DELAY_MS = 6300;
+const SKIP_VISIBLE_DELAY_MS = 1500;
+const FADE_MS = 550;
+// Reiner Sicherheitsnetz-Timer, deutlich länger als die 9.5s Videolänge -
+// greift nur, falls das Video nie ein "ended"-Event feuert (z.B. hängt beim
+// Buffern fest), nicht als normale Abschaltung während es noch läuft.
+const FALLBACK_DONE_MS = 13000;
 
 export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [finishing, setFinishing] = useState(false);
+  const [showSkip, setShowSkip] = useState(false);
+
   useEffect(() => {
-    if (!start) return;
-    const doneTimer = setTimeout(onDone, 2650);
-    // Zeitlich auf Schlüsseldreh (~0.9s) + Aufschluss-Blitz (~1.3s) der
-    // 3D-Sequenz abgestimmt. Browser blockieren Ton ohne vorherige
-    // Nutzer-Geste beim allerersten Seitenaufruf - siehe lib/unlockSound.ts.
-    const soundTimer = setTimeout(playUnlockSound, 900);
+    if (!start || finishing) return;
+
+    function finish() {
+      setFinishing(true);
+      setTimeout(onDone, FADE_MS);
+    }
+
+    const video = videoRef.current;
+    video?.play().catch(() => finish());
+
+    const clickTimer = setTimeout(playKeyClick, CLICK_DELAY_MS);
+    const chimeTimer = setTimeout(playDoorChime, CHIME_DELAY_MS);
+    const skipTimer = setTimeout(() => setShowSkip(true), SKIP_VISIBLE_DELAY_MS);
+    const fallbackTimer = setTimeout(finish, FALLBACK_DONE_MS);
+
+    video?.addEventListener("ended", finish);
+
     return () => {
-      clearTimeout(doneTimer);
-      clearTimeout(soundTimer);
+      clearTimeout(clickTimer);
+      clearTimeout(chimeTimer);
+      clearTimeout(skipTimer);
+      clearTimeout(fallbackTimer);
+      video?.removeEventListener("ended", finish);
     };
-  }, [start, onDone]);
+  }, [start, finishing, onDone]);
+
+  function handleSkip() {
+    setFinishing(true);
+    setTimeout(onDone, FADE_MS);
+  }
 
   return (
     <motion.div
-      className="absolute inset-0 z-20 flex items-center justify-center bg-ink"
+      className="absolute inset-0 z-20 overflow-hidden bg-ink"
       initial={{ opacity: 1 }}
-      animate={start ? { opacity: 0 } : { opacity: 1 }}
-      transition={{ duration: 0.55, delay: 2.1, ease: "easeInOut" }}
+      animate={finishing ? { opacity: 0 } : { opacity: 1 }}
+      transition={{ duration: FADE_MS / 1000, ease: "easeInOut" }}
     >
       {start && (
-        <div className="h-[70vmin] w-[70vmin] max-h-[560px] max-w-[560px]">
-          <HeroKeyUnlock3D />
-        </div>
+        <video
+          ref={videoRef}
+          className="h-full w-full object-cover"
+          poster="/videos/key-unlock-poster.jpg"
+          muted
+          playsInline
+          autoPlay
+          preload="auto"
+        >
+          <source src="/videos/key-unlock.webm" type="video/webm" />
+          <source src="/videos/key-unlock.mp4" type="video/mp4" />
+        </video>
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-ink/20" />
+
+      {showSkip && !finishing && (
+        <motion.button
+          type="button"
+          onClick={handleSkip}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="absolute bottom-8 right-8 z-30 font-mono text-xs uppercase tracking-wide text-ivory-dim/70 underline underline-offset-4 hover:text-ivory"
+        >
+          Überspringen →
+        </motion.button>
       )}
     </motion.div>
   );

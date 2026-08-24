@@ -6,15 +6,17 @@ import { playKeyClick, playDoorChime } from "@/lib/unlockSound";
 
 // Echtes gefilmtes Intro (Schlüssel gleitet ins Schloss, Tür öffnet sich in
 // eine grosse Eingangshalle) statt der früheren WebGL-Szene. Zeitpunkte sind
-// auf public/videos/key-unlock.mp4 abgestimmt (9.5s, Türöffnung bei ~6.3s).
+// auf public/videos/key-unlock.mp4 abgestimmt (5.25s, Türöffnung ab ~2.1s
+// dank Schnitt/Crossfade - die lange Drehbewegung in der Mitte ist raus,
+// damit man schnell auf der echten Seite landet).
 const CLICK_DELAY_MS = 300;
-const CHIME_DELAY_MS = 6300;
+const CHIME_DELAY_MS = 2100;
 const SKIP_VISIBLE_DELAY_MS = 1500;
 const FADE_MS = 550;
-// Reiner Sicherheitsnetz-Timer, deutlich länger als die 9.5s Videolänge -
+// Reiner Sicherheitsnetz-Timer, deutlich länger als die 5.25s Videolänge -
 // greift nur, falls das Video nie ein "ended"-Event feuert (z.B. hängt beim
 // Buffern fest), nicht als normale Abschaltung während es noch läuft.
-const FALLBACK_DONE_MS = 13000;
+const FALLBACK_DONE_MS = 8000;
 
 export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);

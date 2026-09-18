@@ -1,6 +1,7 @@
 import { Landmark, Scan, LayoutGrid, Gem, Handshake, ShieldOff } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
+import { MatterportDemo } from "./MatterportDemo";
 
 const services = [
   { icon: Landmark, name: "IAZI-Bewertung", text: "Bankanerkannt" },
@@ -33,6 +34,8 @@ export function Services() {
             </Reveal>
           ))}
         </div>
+
+        <MatterportDemo />
       </div>
     </section>
   );

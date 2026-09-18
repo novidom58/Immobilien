@@ -8,6 +8,14 @@ const MIN = 300_000;
 const MAX = 3_000_000;
 const STEP = 50_000;
 
+const TAX_LINKS = [
+  { canton: "Basel-Stadt", href: "https://www.homegate.ch/c/de/ratgeber/verkaufen/steuern/grundstueckgewinnsteuer-baselstadt" },
+  { canton: "Basel-Landschaft", href: "https://properti.com/ch/de/insights/eigentum/grundstueckgewinnsteuer-in-basel-landschaft-was-eigentuemer-wissen-muessen/" },
+  { canton: "Solothurn", href: "https://realadvisor.ch/de/blog/grundstueckgewinnsteuer-im-kanton-solothurn" },
+  { canton: "Zürich", href: "https://www.zh.ch/de/steuern-finanzen/steuern/steuern-natuerliche-personen/grundstueck-gewinnsteuer.html" },
+  { canton: "Aargau", href: "https://www.ag.ch/de/themen/steuern-finanzen/steuern-startseite/alles-zu-steuern" },
+];
+
 function formatChf(value: number) {
   return `CHF ${Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
 }
@@ -99,6 +107,28 @@ export function ProvisionsRechner() {
             >
               Jetzt Mandat anfragen →
             </a>
+
+            <div className="mt-10 border-t border-line pt-6 text-left">
+              <p className="text-sm text-ivory-dim">
+                Die Provision zählt als Aufwand bei der{" "}
+                <span className="text-ivory">Grundstückgewinnsteuer</span> und
+                mindert so den steuerbaren Gewinn — die genauen Regeln sind
+                kantonal unterschiedlich:
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {TAX_LINKS.map((link) => (
+                  <a
+                    key={link.canton}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-line px-3.5 py-1.5 font-mono text-xs uppercase tracking-wide text-ivory-dim hover:border-amber/50 hover:text-amber-soft"
+                  >
+                    {link.canton} →
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </Reveal>
       </div>

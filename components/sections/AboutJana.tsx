@@ -5,12 +5,12 @@ const certs = [
   "Eidg. dipl. Kauffrau",
   "IAZI-zertifiziert",
   "Matterport",
-  "18+ J. Bankerfahrung",
+  "20+ J. Bankerfahrung",
 ];
 
 const stats = [
   { value: "500+", label: "Bewertungen" },
-  { value: "18+", label: "Jahre Praxis" },
+  { value: "20+", label: "Jahre Praxis" },
   { value: "0.95%", label: "Provision" },
 ];
 
@@ -24,7 +24,7 @@ export function AboutJana() {
           <Reveal>
             <div className="relative flex aspect-[4/5] w-full max-w-xs items-center justify-center overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
               <span className="font-display text-6xl font-semibold text-ivory/15">
-                JS
+                ND
               </span>
               <div className="grain absolute inset-0" />
             </div>
@@ -32,15 +32,15 @@ export function AboutJana() {
 
           <Reveal delay={0.1}>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Jana Schnuderl &amp; Team
+              Unser Team
             </h2>
             <p className="mt-2 font-mono text-sm uppercase tracking-widest text-blueprint">
-              Inhaberin · NoviDom Immo · Nordwestschweiz
+              NoviDom Immo · Basel &amp; Zug
             </p>
             <p className="mt-8 max-w-2xl text-balance text-lg text-ivory-dim">
-              Wir vereinen 18+ Jahre Erfahrung in Immobilien, Hypotheken und
-              Bankwesen. Wir kennen den Basler Markt, die lokalen Preise und
-              die Anforderungen der Banken — aus der Praxis, nicht aus dem
+              Wir vereinen 20+ Jahre Erfahrung in Immobilien, Hypotheken und
+              Bankwesen. Wir kennen den Markt, die lokalen Preise und die
+              Anforderungen der Banken — aus der Praxis, nicht aus dem
               Lehrbuch.
             </p>
             <p className="mt-5 max-w-2xl text-balance text-lg text-ivory-dim">

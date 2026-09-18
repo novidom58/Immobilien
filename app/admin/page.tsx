@@ -35,7 +35,7 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/admin/login");
 
-  const [leadsRes, listingsRes, newsletterRes] = await Promise.all([
+  const [leadsRes, listingsRes, newsletterRes, customersRes] = await Promise.all([
     supabase
       .from("leads")
       .select("id, type, name, email, phone, message, status, wants_financing, created_at")
@@ -51,10 +51,18 @@ export default async function AdminPage() {
       .from("newsletter_subscribers")
       .select("email, source, created_at")
       .order("created_at", { ascending: false }),
+    supabase.rpc("admin_list_customers"),
   ]);
 
   const leads = leadsRes.data ?? [];
   const subscribers = newsletterRes.data ?? [];
+  const customers = (customersRes.data ?? []) as {
+    id: string;
+    email: string;
+    full_name: string | null;
+    role: string;
+    created_at: string;
+  }[];
   const listings = (listingsRes.data ?? []).map((l) => ({
     id: l.id as string,
     title: (l.title as string | null) ?? null,
@@ -142,6 +150,37 @@ export default async function AdminPage() {
         </section>
 
         <section className="mt-14">
+          <h2 className="font-display text-2xl font-semibold text-ivory">
+            Registrierte Kunden ({customers.length})
+          </h2>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+            {customers.length === 0 ? (
+              <p className="p-6 text-sm text-ivory-dim">
+                Noch niemand registriert. Kund:innen müssen sich zuerst unter /login anmelden,
+                bevor ihr sie einem Inserat zuweisen könnt.
+              </p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {customers.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                    <span className="text-ivory">
+                      {c.full_name || "—"}{" "}
+                      <span className="text-ivory-dim">
+                        {c.full_name ? `· ${c.email}` : c.email}
+                      </span>
+                    </span>
+                    <span className="font-mono text-xs text-ivory-dim/60">
+                      {c.role === "admin" ? "Admin" : "Kunde"} ·{" "}
+                      {new Date(c.created_at).toLocaleDateString("de-CH")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-14">
           <h2 className="font-display text-2xl font-semibold text-ivory">Inserate</h2>
           <div className="mt-4 rounded-2xl border border-line bg-ink-2 p-5">
             <NewListingForm />
@@ -153,7 +192,13 @@ export default async function AdminPage() {
                 Noch keine Inserate.
               </p>
             ) : (
-              listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)
+              listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  customerEmails={customers.filter((c) => c.role !== "admin").map((c) => c.email)}
+                />
+              ))
             )}
           </div>
           <p className="mt-3 text-xs text-ivory-dim/60">

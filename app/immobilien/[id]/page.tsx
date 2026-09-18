@@ -200,7 +200,7 @@ export default async function ListingDetailPage({
             </p>
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
             <p className="mt-4 text-xs text-ivory-dim/60">
-              Persönliche Auskunft durch Jana Schnuderl, NoviDom Immo.
+              Persönliche Auskunft durch unser Team, NoviDom Immo.
             </p>
           </div>
         </div>

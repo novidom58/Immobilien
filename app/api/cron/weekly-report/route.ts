@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         `Alle Details finden Sie jederzeit in Ihrem Verkaufs-Cockpit.`,
         ``,
         `Freundliche Grüsse`,
-        `Jana Schnuderl · NoviDom Immo`,
+        `Ihr Team von NoviDom Immo`,
       ].join("\n"),
     });
 

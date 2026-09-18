@@ -1,4 +1,4 @@
-import { Home, HeartCrack, Scroll, RefreshCw, Sunset, Zap } from "lucide-react";
+import { Home, HeartCrack, Scroll, RefreshCw, Sunset, Zap, Building2, Hammer } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -32,6 +32,16 @@ const situations = [
     icon: Zap,
     name: "Privatverkauf läuft nicht",
     text: "Zu wenig Anfragen? Wir übernehmen, optimieren und bringen den Verkauf zum Abschluss.",
+  },
+  {
+    icon: Building2,
+    name: "Renditeobjekt verkaufen",
+    text: "Vermietete Liegenschaft? Wir kalkulieren den Ertragswert korrekt und finden den passenden Käuferkreis.",
+  },
+  {
+    icon: Hammer,
+    name: "Sanierungsbedarf",
+    text: "Renovationsstau statt Bauchgefühl: Wir zeigen den realistischen Zustandswert und was sich lohnt, vorher noch zu machen.",
   },
 ];
 

@@ -8,6 +8,7 @@ import { ProblemSolution } from "@/components/sections/ProblemSolution";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
 import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
+import { Preparation } from "@/components/sections/Preparation";
 import { PropertyValuationLead } from "@/components/sections/PropertyValuationLead";
 import { SalesCockpit } from "@/components/sections/SalesCockpit";
 import { ProvisionsRechner } from "@/components/sections/ProvisionsRechner";
@@ -33,6 +34,7 @@ export default function Home() {
         <WhyNoviDom />
         <Services />
         <Process />
+        <Preparation />
         <PropertyValuationLead />
         <ProvisionsRechner />
         <Situations />

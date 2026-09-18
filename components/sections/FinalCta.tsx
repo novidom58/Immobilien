@@ -99,7 +99,7 @@ export function FinalCta() {
             Starten wir Ihren Verkauf.
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-ivory-dim">
-            Ein persönliches Bewertungsgespräch mit Jana Schnuderl —
+            Ein persönliches Bewertungsgespräch mit unserem Team —
             unverbindlich und kostenlos.
           </p>
         </Reveal>

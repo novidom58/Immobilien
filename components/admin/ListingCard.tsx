@@ -50,7 +50,13 @@ const STATUS_OPTIONS = [
   { value: "sold", label: "Verkauft" },
 ];
 
-export function ListingCard({ listing }: { listing: AdminListing }) {
+export function ListingCard({
+  listing,
+  customerEmails = [],
+}: {
+  listing: AdminListing;
+  customerEmails?: string[];
+}) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -235,12 +241,18 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
                 <input
                   type="email"
                   autoFocus
+                  list={`customers-${listing.id}`}
                   placeholder="kunde@email.ch"
                   value={assignEmail}
                   onChange={(e) => setAssignEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAssign()}
                   className="rounded-lg border border-line bg-ink px-2.5 py-1.5 text-xs text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
                 />
+                <datalist id={`customers-${listing.id}`}>
+                  {customerEmails.map((email) => (
+                    <option key={email} value={email} />
+                  ))}
+                </datalist>
                 <button
                   type="button"
                   disabled={busy === "assign" || !assignEmail.trim()}

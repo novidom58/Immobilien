@@ -27,7 +27,7 @@ export function ProvisionsRechner() {
   }, [price]);
 
   return (
-    <section id="provisionsrechner" className="relative bg-ink py-28 lg:py-36">
+    <section id="kommission" className="relative bg-ink py-28 lg:py-36">
       <div className="mx-auto max-w-4xl px-6 text-center lg:px-10">
         <Reveal>
           <div className="flex justify-center">

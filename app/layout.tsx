@@ -77,15 +77,11 @@ const jsonLd = {
   description:
     "Moderner Real-Estate-Partner für den Immobilienverkauf in der Nordwestschweiz mit fixer 0.95%-Kommission.",
   url: siteUrl,
-  areaServed: {
-    "@type": "Place",
-    name: "Nordwestschweiz",
-  },
+  areaServed: [
+    { "@type": "Place", name: "Nordwestschweiz" },
+    { "@type": "Place", name: "Kanton Zug" },
+  ],
   priceRange: "0.95% Kommission",
-  founder: {
-    "@type": "Person",
-    name: "Jana Schnuderl",
-  },
 };
 
 export default function RootLayout({

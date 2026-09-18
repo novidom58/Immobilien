@@ -89,8 +89,8 @@ export async function POST(request: Request) {
           ? "Ihr Ratgeber von NoviDom Immo"
           : "Ihre Anfrage bei NoviDom Immo ist eingegangen",
         text: hasGuidePdf
-          ? `Hallo ${firstName}\n\nVielen Dank für Ihr Interesse. Im Anhang finden Sie Ihren kostenlosen Ratgeber „1×1 des Immobilienverkaufs in der Schweiz“.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`
-          : `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nJana Schnuderl\nNoviDom Immo`,
+          ? `Hallo ${firstName}\n\nVielen Dank für Ihr Interesse. Im Anhang finden Sie Ihren kostenlosen Ratgeber „1×1 des Immobilienverkaufs in der Schweiz“.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`
+          : `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`,
         attachments: hasGuidePdf
           ? [{ filename: "1x1-Immobilienverkauf-NoviDom.pdf", content: readFileSync(GUIDE_PDF_PATH) }]
           : undefined,

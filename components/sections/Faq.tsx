@@ -24,11 +24,11 @@ const faqs = [
   },
   {
     q: "In welchen Gebieten ist NoviDom aktiv?",
-    a: "In der gesamten Nordwestschweiz — Basel-Stadt, Baselland und die angrenzenden Regionen in Solothurn und im Fricktal.",
+    a: "Mit Büros in Basel und Zug sind wir in der gesamten Nordwestschweiz — Basel-Stadt, Baselland, Solothurn, Fricktal — sowie in der Region Zug aktiv.",
   },
   {
     q: "Wer begleitet meinen Verkauf persönlich?",
-    a: "Jana Schnuderl, Inhaberin von NoviDom Immo, mit über 18 Jahren Erfahrung in Immobilien, Hypotheken und Bankwesen — persönlich und bis zum Notartermin erreichbar.",
+    a: "Unser Team von NoviDom Immo, mit über 20 Jahren Erfahrung in Immobilien, Hypotheken und Bankwesen — persönlich und bis zum Notartermin erreichbar.",
   },
 ];
 

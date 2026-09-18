@@ -366,6 +366,32 @@ $$;
 grant execute on function public.admin_assign_listing_owner(uuid, text) to authenticated;
 
 -- ---------------------------------------------------------------------
+-- Admin: Liste aller registrierten Kundenkonten (mit E-Mail) abrufen, damit
+-- im Admin-UI aus einer Liste statt blind per E-Mail zugewiesen werden kann.
+-- SECURITY DEFINER aus demselben Grund wie oben (auth.users-Zugriff).
+-- ---------------------------------------------------------------------
+create or replace function public.admin_list_customers()
+returns table (id uuid, email text, full_name text, role text, created_at timestamptz)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Nicht berechtigt.';
+  end if;
+
+  return query
+    select p.id, u.email::text, p.full_name, p.role, p.created_at
+    from public.profiles p
+    join auth.users u on u.id = p.id
+    order by p.created_at desc;
+end;
+$$;
+
+grant execute on function public.admin_list_customers() to authenticated;
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

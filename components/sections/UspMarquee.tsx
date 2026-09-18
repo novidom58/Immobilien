@@ -7,8 +7,8 @@ const items = [
   "10+ Immobilienportale",
   "Käuferprüfung inklusive",
   "Kein Verkauf = keine Kosten",
-  "18+ Jahre Bankerfahrung",
-  "Basel & Nordwestschweiz",
+  "20+ Jahre Bankerfahrung",
+  "Basel & Zug",
 ];
 
 export function UspMarquee() {

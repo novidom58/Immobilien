@@ -25,6 +25,7 @@ type AdminListing = {
   rooms: number | null;
   living_area: number | null;
   description: string | null;
+  tour_url: string | null;
   lat: number | null;
   photoCount: number;
   hasOwner: boolean;
@@ -414,6 +415,13 @@ export function ListingCard({ listing }: { listing: AdminListing }) {
             defaultValue={listing.description ?? ""}
             placeholder="Beschreibung"
             className={`${editFieldClasses} resize-none sm:col-span-2`}
+          />
+          <input
+            name="tour_url"
+            type="url"
+            defaultValue={listing.tour_url ?? ""}
+            placeholder="Matterport-Link (z.B. https://my.matterport.com/show/?m=...)"
+            className={`${editFieldClasses} sm:col-span-2`}
           />
           <button
             type="submit"

@@ -44,6 +44,12 @@ export function NewListingForm() {
         placeholder="Beschreibung für die öffentliche Detailseite"
         className={`${inputClasses} resize-none sm:col-span-2`}
       />
+      <input
+        name="tour_url"
+        type="url"
+        placeholder="Matterport-Link (z.B. https://my.matterport.com/show/?m=...)"
+        className={`${inputClasses} sm:col-span-2`}
+      />
       {state.error && <p className="text-sm text-red-400 sm:col-span-2">{state.error}</p>}
       <button
         type="submit"

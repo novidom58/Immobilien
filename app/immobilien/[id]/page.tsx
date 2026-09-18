@@ -27,7 +27,7 @@ async function getListing(id: string) {
   const { data } = await supabase
     .from("listings")
     .select(
-      "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, description, listing_photos(url, sort_order)"
+      "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, description, tour_url, listing_photos(url, sort_order)"
     )
     .eq("id", id)
     .in("status", ["active", "reserved", "sold"])
@@ -113,6 +113,31 @@ export default async function ListingDetailPage({
             </div>
           )}
         </div>
+
+        {/* 3D-Rundgang */}
+        {listing.tour_url && (
+          <div className="mt-10">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-xl font-semibold text-ivory">3D-Rundgang</h2>
+              <span className="rounded-full border border-amber/40 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber-soft">
+                Matterport
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-ivory-dim">
+              Bewegen Sie sich frei durch die Räume — wie bei einer echten Besichtigung.
+            </p>
+            <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-ink-2">
+              <iframe
+                src={listing.tour_url}
+                title="3D-Rundgang"
+                className="h-full w-full"
+                allow="xr-spatial-tracking; gyroscope; accelerometer"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Kopf */}
         <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">

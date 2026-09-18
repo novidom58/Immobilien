@@ -42,6 +42,7 @@ export async function createListing(formData: FormData) {
   const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
+  const tourUrl = String(formData.get("tour_url") || "").trim();
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -61,6 +62,7 @@ export async function createListing(formData: FormData) {
     rooms: roomsRaw ? Number(roomsRaw) : null,
     living_area: areaRaw ? Number(areaRaw) : null,
     description: description || null,
+    tour_url: tourUrl || null,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   });
@@ -86,6 +88,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
+  const tourUrl = String(formData.get("tour_url") || "").trim();
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -106,6 +109,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       rooms: roomsRaw ? Number(roomsRaw) : null,
       living_area: areaRaw ? Number(areaRaw) : null,
       description: description || null,
+      tour_url: tourUrl || null,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
     .eq("id", listingId);

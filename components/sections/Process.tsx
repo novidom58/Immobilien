@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Megaphone, Handshake, FileCheck } from "lucide-react";
+import { Users, Megaphone, Handshake, FileCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
@@ -8,27 +8,27 @@ import { Reveal } from "@/lib/reveal";
 const steps = [
   {
     n: "01",
-    icon: Search,
-    title: "Bewertung",
-    text: "Persönliches Gespräch vor Ort, fundierte Marktanalyse und ein realistischer, marktgerechter Verkaufspreis.",
+    icon: Users,
+    title: "Kennenlernen",
+    text: "Wir kommen bei Ihnen vorbei, besprechen die realistische Marktwerteinschätzung — dann Profi-Fotografie, Bildbearbeitung und eine eigene Webseite für Ihr Objekt, startklar in 5–7 Tagen.",
   },
   {
     n: "02",
     icon: Megaphone,
     title: "Vermarktung",
-    text: "Profi-Fotografie, modernes Exposé, 3D-Rundgang und gezielte Strategie über die richtigen Kanäle.",
+    text: "Sobald alle Bilder online sind: Schaltung auf allen relevanten Immobilienportalen plus direkter Versand an unsere über 300 Kontakte aus 10 Jahren Finanzierungs- und Versicherungsgeschäft.",
   },
   {
     n: "03",
     icon: Handshake,
-    title: "Verkauf",
-    text: "Qualifizierte Interessenten, professionelle Verhandlung und ein Kaufvertrag, der Ihre Interessen schützt.",
+    title: "Besichtigung & Verkauf",
+    text: "Interessenten buchen Besichtigungen direkt online, wir prüfen und qualifizieren jeden Käufer und bereiten die Hypothek für den Kauf gleich mit vor.",
   },
   {
     n: "04",
     icon: FileCheck,
-    title: "Notartermin",
-    text: "Persönliche Begleitung bis zur Beurkundung — klare Kommunikation bis zum erfolgreichen Abschluss.",
+    title: "Notartermin & Betreuung",
+    text: "Persönliche Begleitung bis zur Beurkundung — und danach Ansprechpartner für Fragen zu Geld und Anlage. Rundum sorglos, ohne Risiko für Käufer und Verkäufer.",
   },
 ];
 
@@ -40,6 +40,11 @@ export function Process() {
         <h2 className="mt-6 max-w-2xl text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
           Vier Schritte. Ein persönlicher Ansprechpartner.
         </h2>
+        <p className="mt-4 max-w-2xl text-balance text-lg text-ivory-dim">
+          Von der ersten Besichtigung bis zur Schlüsselübergabe — und darüber
+          hinaus. Unser Rundum-sorglos-Paket, ohne Risiko für Käufer und
+          Verkäufer.
+        </p>
 
         <div className="relative mt-14">
           {/* Verbindungslinie auf Desktop - zeichnet sich beim Scrollen ein */}

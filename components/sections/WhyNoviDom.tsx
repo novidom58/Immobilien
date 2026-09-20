@@ -27,7 +27,8 @@ export function WhyNoviDom() {
                 </span>
                 <p className="text-balance text-ivory-dim">
                   steht für Neu &amp; Innovation — ein frischer Blick auf den
-                  Immobilienmarkt in der Nordwestschweiz.
+                  Immobilienmarkt von der Nordwestschweiz bis zum
+                  Vierwaldstättersee.
                 </p>
               </div>
               <div className="h-px w-full bg-line" />

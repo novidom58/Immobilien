@@ -13,7 +13,8 @@ export default function ImpressumPage() {
       <main className="mx-auto max-w-3xl px-6 py-32 lg:px-10">
         <h1 className="font-display text-4xl font-semibold text-ivory">Impressum</h1>
         <p className="mt-4 text-sm text-ivory-dim/60">
-          Entwurf — bitte exakte Firmierung, Adresse und ggf. Handelsregister-/UID-Nummer ergänzen.
+          Entwurf — Firmierung, Adresse und Handelsregister-/UID-Nummer folgen nach
+          Gründung der Gesellschaft.
         </p>
 
         <div className="mt-10 flex flex-col gap-8 text-ivory-dim">
@@ -22,12 +23,11 @@ export default function ImpressumPage() {
             <p className="mt-2">
               NoviDom Immo
               <br />
-              Jana Schnuderl
-              <br />
-              Region Basel, Schweiz
+              Basel &amp; Zug, Schweiz
             </p>
             <p className="mt-2 text-sm text-ivory-dim/70">
-              [Vollständige Geschäftsadresse und Kontaktangaben hier ergänzen]
+              [Vollständige Geschäftsadresse, Rechtsform und Handelsregister-/UID-Nummer
+              werden nach Gründung der Gesellschaft ergänzt]
             </p>
           </section>
 

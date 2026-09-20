@@ -118,9 +118,10 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
           >
-            Gleiche Qualität wie grosse Makler — professionelle IAZI-Bewertung,
-            Matterport-3D-Rundgang und persönliche Begleitung bis zum Notar.
-            Zu <span className="font-mono text-amber-soft">0.95%</span> statt 3%.
+            Gleiche Qualität wie grosse Makler — professionelle IAZI- und
+            WUP-Bewertung, Matterport-3D-Rundgang und persönliche Begleitung
+            bis zum Notar.
+            Ab <span className="font-mono text-amber-soft">0.95%</span> statt 3%.
           </motion.p>
 
           <motion.div
@@ -156,12 +157,12 @@ export function Hero() {
             className="inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 transition-transform hover:-translate-y-0.5"
           >
             <span className="font-display text-4xl font-semibold leading-none tracking-tight text-ink">
-              0.95%
+              ab 0.95%
             </span>
             <span className="h-11 w-px bg-ink/20" aria-hidden />
             <span className="flex flex-col">
               <span className="font-display text-sm font-semibold text-ink">
-                Fixprovision — statt 3%
+                Provision — statt 3%
               </span>
               <span className="text-xs text-ink/60">Voller Service, faire Kosten</span>
             </span>

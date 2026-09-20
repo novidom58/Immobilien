@@ -36,10 +36,13 @@ export const metadata: Metadata = {
     template: "%s | NoviDom Immo",
   },
   description:
-    "NoviDom Immo verkauft Ihre Immobilie in der Nordwestschweiz transparent, schnell und persönlich — zur fixen Kommission von 0.95%. Jetzt kostenlose Bewertung sichern.",
+    "NoviDom Immo verkauft Ihre Immobilie von der Nordwestschweiz bis zum Vierwaldstättersee transparent, schnell und persönlich — zur Kommission ab 0.95%. Jetzt kostenlose Bewertung sichern.",
   keywords: [
     "Immobilienmakler Nordwestschweiz",
     "Immobilienmakler Basel",
+    "Immobilienmakler Zürich",
+    "Immobilienmakler Zug",
+    "Immobilienmakler Luzern",
     "Immobilie verkaufen Basel",
     "Immobilienbewertung Basel",
     "faire Maklerkommission",
@@ -53,13 +56,13 @@ export const metadata: Metadata = {
     siteName: "NoviDom Immo",
     title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
     description:
-      "Immobilien verkaufen in der Nordwestschweiz — transparent, persönlich, zur fixen Kommission von 0.95%.",
+      "Immobilien verkaufen von der Nordwestschweiz bis zum Vierwaldstättersee — transparent, persönlich, zur Kommission ab 0.95%.",
   },
   twitter: {
     card: "summary_large_image",
     title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
     description:
-      "Immobilien verkaufen in der Nordwestschweiz — transparent, persönlich, zur fixen Kommission von 0.95%.",
+      "Immobilien verkaufen von der Nordwestschweiz bis zum Vierwaldstättersee — transparent, persönlich, zur Kommission ab 0.95%.",
   },
   robots: { index: true, follow: true },
   alternates: { canonical: siteUrl },
@@ -75,13 +78,17 @@ const jsonLd = {
   "@type": "RealEstateAgent",
   name: "NoviDom Immo",
   description:
-    "Moderner Real-Estate-Partner für den Immobilienverkauf in der Nordwestschweiz mit fixer 0.95%-Kommission.",
+    "Moderner Real-Estate-Partner für den Immobilienverkauf von der Nordwestschweiz bis zum Vierwaldstättersee mit einer Kommission ab 0.95%.",
   url: siteUrl,
   areaServed: [
     { "@type": "Place", name: "Nordwestschweiz" },
+    { "@type": "Place", name: "Kanton Aargau" },
+    { "@type": "Place", name: "Kanton Solothurn" },
+    { "@type": "Place", name: "Kanton Zürich" },
     { "@type": "Place", name: "Kanton Zug" },
+    { "@type": "Place", name: "Kanton Luzern" },
   ],
-  priceRange: "0.95% Kommission",
+  priceRange: "ab 0.95% Kommission",
 };
 
 export default function RootLayout({

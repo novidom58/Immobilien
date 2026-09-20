@@ -14,6 +14,8 @@ const TAX_LINKS = [
   { canton: "Solothurn", href: "https://realadvisor.ch/de/blog/grundstueckgewinnsteuer-im-kanton-solothurn" },
   { canton: "Zürich", href: "https://www.zh.ch/de/steuern-finanzen/steuern/steuern-natuerliche-personen/grundstueck-gewinnsteuer.html" },
   { canton: "Aargau", href: "https://www.ag.ch/de/themen/steuern-finanzen/steuern-startseite/alles-zu-steuern" },
+  { canton: "Zug", href: "https://realadvisor.ch/de/blog/grundstueckgewinnsteuer-im-kanton-zug" },
+  { canton: "Luzern", href: "https://steuern.lu.ch/steuererklaerung/steuererklaerung_grundstueckgewinnsteuer" },
 ];
 
 function formatChf(value: number) {
@@ -83,7 +85,7 @@ export function ProvisionsRechner() {
               </div>
               <div className="rounded-2xl border border-amber/40 bg-ink-2 p-6">
                 <div className="font-mono text-xs uppercase tracking-wide text-amber">
-                  NoviDom (0.95%)
+                  NoviDom (ab 0.95%)
                 </div>
                 <div className="mt-2 font-display text-3xl font-semibold text-amber-soft">
                   {formatChf(novidom)}

@@ -6,11 +6,20 @@ import { Reveal } from "@/lib/reveal";
 const stats = [
   { to: 0.95, decimals: 2, suffix: "%", label: "Provision statt 3%" },
   { to: 500, suffix: "+", label: "Immobilienbewertungen" },
-  { to: 18, suffix: "+", label: "Jahre Bankerfahrung" },
+  { to: 20, suffix: "+", label: "Jahre Bankerfahrung" },
   { to: 10, suffix: "+", label: "Immobilienportale" },
 ];
 
-const area = ["Basel-Stadt", "Baselland", "Fricktal", "Schwarzbubenland", "Solothurn"];
+const area = [
+  "Basel-Stadt",
+  "Baselland",
+  "Fricktal",
+  "Solothurn",
+  "Aargau",
+  "Zürich",
+  "Zug",
+  "Luzern",
+];
 
 export function StatsAndArea() {
   return (
@@ -37,7 +46,7 @@ export function StatsAndArea() {
 
       <div className="mt-20">
         <p className="mb-6 text-center font-mono text-xs uppercase tracking-[0.3em] text-ivory-dim/60">
-          Aktiv in der gesamten Nordwestschweiz
+          Aktiv von der Nordwestschweiz bis zum Vierwaldstättersee
         </p>
         <Marquee
           items={area.map((place) => (

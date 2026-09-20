@@ -8,7 +8,8 @@ const PROPERTY_TYPES = ["Einfamilienhaus", "Doppelhaushälfte", "Eigentumswohnun
 const CONDITIONS = ["Sehr gut (renoviert)", "Gut (gepflegt)", "Mittel", "Renovationsbedürftig"];
 
 const checkList = [
-  "Marktwert nach IAZI/CIFI-Modell — bankanerkannt",
+  "Marktwert nach IAZI- und WUP-Modell — bankanerkannt",
+  "Abgleich mit den Schätzmodellen von über 30 Banken",
   "Vergleich mit aktuellen Transaktionspreisen in der Region",
   "Belehnung und Bankakzeptanz des Kaufpreises",
   "Renovationsbedarf und Auswirkung auf den Belehnungswert",
@@ -72,14 +73,14 @@ export function PropertyValuationLead() {
               <span className="text-amber-soft italic">wirklich wert?</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
-              Wir bewerten Ihre Immobilie mit dem bankanerkannten
-              IAZI-Modell — demselben Tool, das Schweizer Banken intern für
-              Hypothekarvergaben verwenden.
+              Wir bewerten Ihre Immobilie mit den bankanerkannten Modellen
+              von IAZI und Wüest Partner (WUP) — denselben Tools, die über
+              30 Schweizer Banken intern für Hypothekarvergaben verwenden.
             </p>
 
             <div className="mt-8 rounded-2xl border border-line bg-ink p-6">
               <div className="font-mono text-xs uppercase tracking-wide text-amber">
-                Was wir mit IAZI prüfen
+                Was wir mit IAZI &amp; WUP prüfen
               </div>
               <ul className="mt-3 space-y-2.5">
                 {checkList.map((item) => (

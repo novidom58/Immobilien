@@ -2,7 +2,7 @@ import { Percent, ShieldCheck, Users, Sparkles } from "lucide-react";
 import { Reveal } from "@/lib/reveal";
 
 const items = [
-  { icon: Percent, label: "Fixe 0.95% Kommission" },
+  { icon: Percent, label: "Kommission ab 0.95%" },
   { icon: ShieldCheck, label: "Volle Transparenz" },
   { icon: Users, label: "Persönliche Betreuung" },
   { icon: Sparkles, label: "Digitale Vermarktung" },

@@ -21,7 +21,7 @@ export default function DatenschutzPage() {
           <section>
             <h2 className="font-display text-xl font-semibold text-ivory">Verantwortliche Stelle</h2>
             <p className="mt-2">
-              NoviDom Immo, Jana Schnuderl, Region Basel, Schweiz. Kontakt siehe{" "}
+              NoviDom Immo, Basel &amp; Zug, Schweiz. Kontakt siehe{" "}
               <Link href="/#kontakt" className="text-amber-soft underline underline-offset-4">
                 Kontaktformular
               </Link>

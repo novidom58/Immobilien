@@ -65,7 +65,7 @@ export function CommissionCompare() {
               </div>
               <p className="mt-2 text-xs text-ivory-dim/70">
                 Beispiel: Verkaufspreis CHF 1.2 Mio. — CHF 36&apos;000 (3%) statt
-                CHF 11&apos;400 (0.95%) · 100% erfolgsbasiert
+                CHF 11&apos;400 (ab 0.95%) · 100% erfolgsbasiert
               </p>
             </div>
           </div>

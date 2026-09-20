@@ -3,12 +3,12 @@ import { Marquee } from "@/components/ui/Marquee";
 const items = [
   "IAZI-Bewertung",
   "Matterport-3D-Rundgang",
-  "0.95% Provision",
+  "Ab 0.95% Provision",
   "10+ Immobilienportale",
   "Käuferprüfung inklusive",
   "Kein Verkauf = keine Kosten",
   "20+ Jahre Bankerfahrung",
-  "Basel & Zug",
+  "Nordwestschweiz bis Vierwaldstättersee",
 ];
 
 export function UspMarquee() {

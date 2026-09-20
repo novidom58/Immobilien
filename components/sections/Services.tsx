@@ -1,12 +1,13 @@
-import { Landmark, Scan, LayoutGrid, Gem, Handshake, ShieldOff } from "lucide-react";
+import { Landmark, Scan, LayoutGrid, DoorOpen, Gem, Handshake, ShieldOff } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { MatterportDemo } from "./MatterportDemo";
 
 const services = [
-  { icon: Landmark, name: "IAZI-Bewertung", text: "Bankanerkannt" },
+  { icon: Landmark, name: "IAZI- & WUP-Bewertung", text: "Bankanerkannt" },
   { icon: Scan, name: "Matterport 3D", text: "Rundgang & Fotos" },
   { icon: LayoutGrid, name: "10+ Portale", text: "Maximale Reichweite" },
+  { icon: DoorOpen, name: "Besichtigungen", text: "Wir führen sie für Sie durch" },
   { icon: Gem, name: "Käuferprüfung", text: "Finanzierbarkeit vorab" },
   { icon: Handshake, name: "Bis zum Notar", text: "Persönlich dabei" },
   { icon: ShieldOff, name: "Kein Risiko", text: "Kein Verkauf = keine Kosten" },

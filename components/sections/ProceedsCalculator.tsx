@@ -49,7 +49,7 @@ export function ProceedsCalculator() {
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
               Verkaufspreis und Restschuld eingeben — wir rechnen Ihren
-              geschätzten Nettoerlös nach unserer fixen 0.95%-Kommission
+              geschätzten Nettoerlös nach unserer Kommission ab 0.95%
               sofort aus.
             </p>
             <p className="mt-4 max-w-md text-sm text-ivory-dim/60">
@@ -91,7 +91,7 @@ export function ProceedsCalculator() {
 
               <div className="mt-6 flex flex-col gap-2 border-t border-line pt-6 text-sm">
                 <div className="flex items-baseline justify-between text-ivory-dim">
-                  <span>NoviDom Kommission (0.95%)</span>
+                  <span>NoviDom Kommission (ab 0.95%)</span>
                   <span className="font-mono text-ivory">− {formatChf(commission)}</span>
                 </div>
                 <div className="flex items-baseline justify-between text-ivory-dim">

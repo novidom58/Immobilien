@@ -8,11 +8,11 @@ import { Reveal } from "@/lib/reveal";
 const faqs = [
   {
     q: "Was kostet mich der Verkauf mit NoviDom?",
-    a: "Eine fixe Kommission von 0.95% des Verkaufspreises — erfolgsbasiert. Kommt kein Verkauf zustande, entstehen Ihnen keine Kosten.",
+    a: "Eine Kommission ab 0.95% des Verkaufspreises — erfolgsbasiert. Kommt kein Verkauf zustande, entstehen Ihnen keine Kosten.",
   },
   {
     q: "Was ist in der Kommission enthalten?",
-    a: "Eine bankanerkannte IAZI-Bewertung, professionelle Fotografie mit Matterport-3D-Rundgang, die Vermarktung über mehr als 10 Immobilienportale sowie eine Finanzierbarkeitsprüfung der Interessenten.",
+    a: "Eine bankanerkannte IAZI- und WUP-Bewertung, Fotos und Grundrisse mit Giraffe360-Technologie, ein Matterport-3D-Rundgang, die Vermarktung über mehr als 10 Immobilienportale, soziale Medien sowie eine Finanzierbarkeitsprüfung der Interessenten.",
   },
   {
     q: "Wie läuft der Verkauf konkret ab?",
@@ -23,8 +23,12 @@ const faqs = [
     a: "Ja — die Finanzierbarkeit von Interessenten wird vorab geprüft, bevor es zu einer Besichtigung kommt. Das spart Zeit und schafft Sicherheit.",
   },
   {
+    q: "Muss ich die Besichtigungen selbst durchführen?",
+    a: "Nein. Sie geben uns nur die Zeitfenster vor, in denen Sie ausser Haus sind — Interessenten buchen ihren Termin direkt online, und wir führen die Besichtigung komplett für Sie durch. Ihr Rundum-sorglos-Paket, bei minimaler Provision.",
+  },
+  {
     q: "In welchen Gebieten ist NoviDom aktiv?",
-    a: "Mit Büros in Basel und Zug sind wir in der gesamten Nordwestschweiz — Basel-Stadt, Baselland, Solothurn, Fricktal — sowie in der Region Zug aktiv.",
+    a: "Mit Büros in Basel und Zug sind wir in der Nordwestschweiz (Basel-Stadt, Baselland, Fricktal), im Kanton Aargau, Solothurn, Zürich, Zug sowie rund um den Vierwaldstättersee (Luzern) aktiv.",
   },
   {
     q: "Wer begleitet meinen Verkauf persönlich?",

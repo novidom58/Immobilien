@@ -1,8 +1,18 @@
+import { MapPin } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { ServiceMapClient } from "@/components/map/ServiceMapClient";
 import { createClient } from "@/lib/supabase/server";
 import type { MapListing } from "@/components/map/MapCanvas";
+
+const cantons = [
+  "Basel-Stadt & Baselland",
+  "Aargau",
+  "Solothurn",
+  "Zürich",
+  "Zug",
+  "Luzern",
+];
 
 export async function ServiceMap() {
   let listings: MapListing[] = [];
@@ -26,15 +36,27 @@ export async function ServiceMap() {
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-center lg:gap-16">
           <Reveal>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Zuhause in der
+              Zuhause von der Nordwestschweiz
               <br />
-              <span className="text-amber-soft">gesamten Nordwestschweiz.</span>
+              <span className="text-amber-soft">bis zum Vierwaldstättersee.</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
-              Von Basel-Stadt über das Baselbiet bis ins Fricktal und
-              Schwarzbubenland — wir kennen die lokalen Märkte, Preise und
-              Käuferkreise persönlich.
+              Von Basel-Stadt über das Baselbiet, Fricktal und
+              Schwarzbubenland bis in die Kantone Aargau, Solothurn, Zürich,
+              Zug und die Region Luzern — wir kennen die lokalen Märkte,
+              Preise und Käuferkreise persönlich.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {cantons.map((canton) => (
+                <span
+                  key={canton}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 font-mono text-xs uppercase tracking-wide text-ivory-dim"
+                >
+                  <MapPin className="h-3 w-3 text-amber" strokeWidth={1.5} />
+                  {canton}
+                </span>
+              ))}
+            </div>
             {listings.length > 0 && (
               <p className="mt-4 max-w-md text-sm text-ivory-dim/70">
                 {listings.length} aktive{listings.length === 1 ? "s Inserat" : " Inserate"} auf der Karte.

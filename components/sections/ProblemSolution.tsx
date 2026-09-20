@@ -4,7 +4,7 @@ import { Reveal } from "@/lib/reveal";
 const problems = [
   {
     title: "Falscher Verkaufspreis kostet Zehntausende",
-    text: "Wer den Wert seiner Immobilie nicht kennt, verkauft zu günstig — oder scheitert mit einem zu hohen Preis. Ohne bankanerkannte IAZI-Bewertung ist jeder Preis ein Ratespiel.",
+    text: "Wer den Wert seiner Immobilie nicht kennt, verkauft zu günstig — oder scheitert mit einem zu hohen Preis. Ohne bankanerkannte IAZI- und WUP-Bewertung ist jeder Preis ein Ratespiel.",
   },
   {
     title: "Schlechte Vermarktung = monatelanges Warten",
@@ -12,7 +12,7 @@ const problems = [
   },
   {
     title: "Unqualifizierte Käufer verschwenden Ihre Zeit",
-    text: "Besichtigungen mit Interessenten, die sich die Finanzierung gar nicht leisten können. Dank unserer 18-jährigen Hypothekenexpertise prüfen wir Käufer vorab auf ihre Finanzierungsfähigkeit.",
+    text: "Besichtigungen mit Interessenten, die sich die Finanzierung gar nicht leisten können. Dank unserer 20-jährigen Hypothekenexpertise prüfen wir Käufer vorab auf ihre Finanzierungsfähigkeit.",
   },
   {
     title: "Überhöhte Provision schmälert Ihren Erlös",
@@ -21,12 +21,12 @@ const problems = [
 ];
 
 const solutions = [
-  "IAZI-Bewertung für den höchstmöglichen Verkaufspreis",
+  "IAZI- & WUP-Bewertung für den höchstmöglichen Verkaufspreis",
   "Matterport-3D-Rundgang & Fotos inklusive",
   "Käufer werden auf Finanzierbarkeit geprüft",
   "10+ Immobilienportale gleichzeitig",
-  "Breite Käuferkartei aus aktiver Hypothekenberatung",
-  "Nur 0.95% Provision statt 3%",
+  "Breite Käuferkartei aus unserer Kundendatei & Partnernetzwerk",
+  "Ab 0.95% Provision statt 3%",
   "Keine Knebelverträge, keine versteckten Kosten",
   "100% erfolgsbasiert — kein Verkauf, keine Kosten",
 ];

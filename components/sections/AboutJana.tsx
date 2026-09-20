@@ -11,7 +11,7 @@ const certs = [
 const stats = [
   { value: "500+", label: "Bewertungen" },
   { value: "20+", label: "Jahre Praxis" },
-  { value: "0.95%", label: "Provision" },
+  { value: "ab 0.95%", label: "Provision" },
 ];
 
 export function AboutJana() {

@@ -10,19 +10,19 @@ const steps = [
     n: "01",
     icon: Users,
     title: "Kennenlernen",
-    text: "Wir kommen bei Ihnen vorbei, besprechen die realistische Marktwerteinschätzung — dann Profi-Fotografie, Bildbearbeitung und eine eigene Webseite für Ihr Objekt, startklar in 5–7 Tagen.",
+    text: "Wir kommen bei Ihnen vorbei, besprechen die realistische Marktwerteinschätzung — dann Fotos und Grundrisse mit Giraffe360 (automatisiertes Rundum-Kamerasystem), professionelle Bildbearbeitung und eine eigene Webseite für Ihr Objekt, startklar in 5–7 Tagen.",
   },
   {
     n: "02",
     icon: Megaphone,
     title: "Vermarktung",
-    text: "Sobald alle Bilder online sind: Schaltung auf allen relevanten Immobilienportalen plus direkter Versand an unsere über 300 Kontakte aus 10 Jahren Finanzierungs- und Versicherungsgeschäft.",
+    text: "Sobald alle Bilder online sind: Schaltung auf allen relevanten Immobilienportalen, gezielte Vermarktung über soziale Medien sowie direkter Versand an unsere Kundendatei und die Kundendateien diverser Partnerfirmen.",
   },
   {
     n: "03",
     icon: Handshake,
     title: "Besichtigung & Verkauf",
-    text: "Interessenten buchen Besichtigungen direkt online, wir prüfen und qualifizieren jeden Käufer und bereiten die Hypothek für den Kauf gleich mit vor.",
+    text: "Sie nennen uns nur die Zeitfenster, in denen Sie ausser Haus sind — Interessenten buchen ihren Termin direkt online, und wir führen die Besichtigungen komplett für Sie durch, inklusive Käuferprüfung und Hypotheken-Vorbereitung.",
   },
   {
     n: "04",

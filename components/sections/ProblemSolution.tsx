@@ -8,7 +8,7 @@ const problems = [
   },
   {
     title: "Schlechte Vermarktung = monatelanges Warten",
-    text: "Ein einziges Inserat reicht nicht. Ohne virtuelle 360°-Besichtigung und professionelle Fotos verpufft das Interesse nach wenigen Tagen.",
+    text: "Ein einziges Inserat reicht nicht. Ohne virtuelle 360°-Besichtigung, professionelle Fotos und einen sauberen Grundriss — viele Eigentümer haben gar keinen oder nur einen unleserlichen — verpufft das Interesse nach wenigen Tagen.",
   },
   {
     title: "Unqualifizierte Käufer verschwenden Ihre Zeit",
@@ -22,9 +22,10 @@ const problems = [
 
 const solutions = [
   "IAZI- & WUP-Bewertung für den höchstmöglichen Verkaufspreis",
-  "360°-Rundgang mit Giraffe360 & Fotos inklusive",
+  "360°-Rundgang, Fotos & präzise Grundrisse mit Giraffe360 inklusive",
   "Käufer werden auf Finanzierbarkeit geprüft",
-  "10+ Immobilienportale gleichzeitig",
+  "Gezielte Portale (inkl. Homegate) & Social Media — je nach Objekt",
+  "Auf Wunsch auch diskret off-market",
   "Breite Käuferkartei aus unserer Kundendatei & Partnernetzwerk",
   "Ab 0.95% Provision statt 3%",
   "Keine Knebelverträge, keine versteckten Kosten",

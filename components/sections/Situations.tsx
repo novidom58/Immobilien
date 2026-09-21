@@ -1,4 +1,4 @@
-import { Home, HeartCrack, Scroll, RefreshCw, Sunset, Zap, Building2, Hammer } from "lucide-react";
+import { Home, HeartCrack, Scroll, RefreshCw, Sunset, Zap, Building2, Hammer, EyeOff } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -42,6 +42,11 @@ const situations = [
     icon: Hammer,
     name: "Sanierungsbedarf",
     text: "Renovationsstau statt Bauchgefühl: Wir zeigen den realistischen Zustandswert und was sich lohnt, vorher noch zu machen.",
+  },
+  {
+    icon: EyeOff,
+    name: "Diskreter Verkauf",
+    text: "Kein öffentliches Inserat gewünscht? Wir vermitteln auf Wunsch auch off-market, direkt aus unserer Kundendatei.",
   },
 ];
 

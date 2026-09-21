@@ -4,8 +4,8 @@ import { Reveal } from "@/lib/reveal";
 
 const services = [
   { icon: Landmark, name: "Bankanerkannte Immobilienbewertung", text: "Fundierte Marktwerteinschätzung durch IAZI und Wüest Partner" },
-  { icon: Scan, name: "Professionelle 360°-Rundgänge mit Giraffe360", text: "Virtueller Rundgang & Präsentation" },
-  { icon: LayoutGrid, name: "Immobilienportale", text: "Maximale digitale Reichweite" },
+  { icon: Scan, name: "Professionelle 360°-Rundgänge mit Giraffe360", text: "Virtueller Rundgang, Fotos & präzise Grundrisse" },
+  { icon: LayoutGrid, name: "Portale & Social Media", text: "Inkl. Homegate — gezielt je nach Objekt" },
   { icon: DoorOpen, name: "Besichtigungen", text: "Von uns persönlich durchgeführt" },
   { icon: Gem, name: "Käuferprüfung", text: "Finanzierbarkeit frühzeitig geklärt" },
   { icon: Handshake, name: "Begleitung bis zum Notar", text: "Persönlich an Ihrer Seite" },

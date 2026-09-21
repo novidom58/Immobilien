@@ -16,7 +16,7 @@ const steps = [
     n: "02",
     icon: Megaphone,
     title: "Vermarktung",
-    text: "Sobald alle Bilder online sind: Schaltung auf allen relevanten Immobilienportalen, gezielte Vermarktung über soziale Medien sowie direkter Versand an unsere Kundendatei und die Kundendateien diverser Partnerfirmen.",
+    text: "Sobald alle Bilder online sind: gezielte Schaltung auf den passenden Portalen (inkl. Homegate), Vermarktung über soziale Medien sowie direkter Versand an unsere Kundendatei und die Kundendateien diverser Partnerfirmen — oder diskret off-market, ganz nach Bedarf.",
   },
   {
     n: "03",

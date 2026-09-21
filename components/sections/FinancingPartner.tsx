@@ -15,6 +15,7 @@ export function FinancingPartner() {
               <span className="text-amber-soft">aus einer Hand.</span>
             </h2>
             <p className="mt-6 max-w-xl text-balance text-lg text-ivory-dim">
+              Ja — bei NoviDom erhalten Sie auf Wunsch auch die Finanzierung.
               Ein erfolgreicher Immobilienverkauf endet nicht bei der Suche
               nach dem passenden Käufer. Entscheidend ist auch, dass die
               Finanzierung sichergestellt ist.

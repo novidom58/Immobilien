@@ -1,4 +1,4 @@
-import { Landmark, Scan, LayoutGrid, DoorOpen, Gem, Handshake, ShieldOff } from "lucide-react";
+import { Landmark, Scan, LayoutGrid, DoorOpen, Gem, PiggyBank, Handshake, ShieldOff } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -8,6 +8,7 @@ const services = [
   { icon: LayoutGrid, name: "Portale & Social Media", text: "Inkl. Homegate — gezielt je nach Objekt" },
   { icon: DoorOpen, name: "Besichtigungen", text: "Von uns persönlich durchgeführt" },
   { icon: Gem, name: "Käuferprüfung", text: "Finanzierbarkeit frühzeitig geklärt" },
+  { icon: PiggyBank, name: "Finanzierung", text: "Mit Hypocasa als Partner" },
   { icon: Handshake, name: "Begleitung bis zum Notar", text: "Persönlich an Ihrer Seite" },
   { icon: ShieldOff, name: "Kein Risiko", text: "Kein Verkauf = Keine Kosten" },
 ];

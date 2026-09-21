@@ -16,6 +16,7 @@ import { Situations } from "@/components/sections/Situations";
 import { StatsAndArea } from "@/components/sections/StatsAndArea";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
+import { FinancingPartner } from "@/components/sections/FinancingPartner";
 import { RatgeberTeaser } from "@/components/sections/RatgeberTeaser";
 import { Faq } from "@/components/sections/Faq";
 import { BookingSection } from "@/components/sections/BookingSection";
@@ -41,6 +42,7 @@ export default function Home() {
         <StatsAndArea />
         <ServiceMap />
         <AboutJana />
+        <FinancingPartner />
         <RatgeberTeaser />
         <SalesCockpit />
         <Faq />

@@ -67,7 +67,7 @@ export async function FeaturedListings() {
           <div>
             <SectionLabel>Aktuelle Objekte</SectionLabel>
             <h2 className="mt-4 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Diese Zuhause verkaufen
+              Diese Immobilien verkaufen
               <br />
               <span className="text-amber-soft">wir gerade.</span>
             </h2>

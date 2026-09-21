@@ -432,7 +432,7 @@ export function ListingCard({
             name="tour_url"
             type="url"
             defaultValue={listing.tour_url ?? ""}
-            placeholder="Matterport-Link (z.B. https://my.matterport.com/show/?m=...)"
+            placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
             className={`${editFieldClasses} sm:col-span-2`}
           />
           <button

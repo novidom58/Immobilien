@@ -8,7 +8,7 @@ import { LogIn, Menu, X } from "lucide-react";
 const links = [
   { href: "/#warum", label: "Warum NoviDom" },
   { href: "/#prozess", label: "Prozess" },
-  { href: "/#kommission", label: "Kommission" },
+  { href: "/#kommission", label: "Provision" },
   { href: "/immobilien", label: "Immobilien" },
   { href: "/#ueber-uns", label: "Über uns" },
 ];

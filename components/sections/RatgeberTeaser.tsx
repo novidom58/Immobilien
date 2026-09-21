@@ -72,13 +72,13 @@ export function RatgeberTeaser() {
               Gratis Download
             </span>
             <h2 className="mt-4 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Ihr kostenloser
+              Das 1×1 des
               <br />
-              <span className="text-amber-soft">Ratgeber.</span>
+              <span className="text-amber-soft">Immobilienverkaufs in der Schweiz.</span>
             </h2>
             <p className="mt-5 max-w-md text-balance text-lg text-ivory-dim">
-              18 Jahre Erfahrung kompakt — damit Sie keinen teuren Fehler
-              machen.
+              Die wichtigsten Schritte, Entscheidungen und Fehler — kompakt
+              erklärt.
             </p>
 
             {status === "done" ? (
@@ -106,7 +106,7 @@ export function RatgeberTeaser() {
                   disabled={status === "sending"}
                   className="mt-1 rounded-full bg-amber px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60"
                 >
-                  {status === "sending" ? "Wird gesendet…" : "Jetzt kostenlos anfordern →"}
+                  {status === "sending" ? "Wird gesendet…" : "Kostenlos als PDF erhalten →"}
                 </button>
               </form>
             )}

@@ -8,7 +8,7 @@ const problems = [
   },
   {
     title: "Schlechte Vermarktung = monatelanges Warten",
-    text: "Ein einziges Inserat reicht nicht. Ohne Matterport-3D-Rundgang und professionelle Fotos verpufft das Interesse nach wenigen Tagen.",
+    text: "Ein einziges Inserat reicht nicht. Ohne virtuelle 360°-Besichtigung und professionelle Fotos verpufft das Interesse nach wenigen Tagen.",
   },
   {
     title: "Unqualifizierte Käufer verschwenden Ihre Zeit",
@@ -22,7 +22,7 @@ const problems = [
 
 const solutions = [
   "IAZI- & WUP-Bewertung für den höchstmöglichen Verkaufspreis",
-  "Matterport-3D-Rundgang & Fotos inklusive",
+  "360°-Rundgang mit Giraffe360 & Fotos inklusive",
   "Käufer werden auf Finanzierbarkeit geprüft",
   "10+ Immobilienportale gleichzeitig",
   "Breite Käuferkartei aus unserer Kundendatei & Partnernetzwerk",

@@ -36,7 +36,7 @@ export default async function Image() {
           Ihr Zuhause verdient den besten Preis.
         </div>
         <div style={{ display: "flex", marginTop: 32, fontSize: 30, color: "#f2c177" }}>
-          Nordwestschweiz bis Vierwaldstättersee · Kommission ab 0.95%
+          Nordwestschweiz bis Vierwaldstättersee · Provision ab 0.95%
         </div>
       </div>
     ),

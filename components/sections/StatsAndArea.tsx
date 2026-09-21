@@ -4,9 +4,8 @@ import { Marquee } from "@/components/ui/Marquee";
 import { Reveal } from "@/lib/reveal";
 
 const stats = [
-  { to: 0.95, decimals: 2, suffix: "%", label: "Provision statt 3%" },
-  { to: 500, suffix: "+", label: "Immobilienbewertungen" },
-  { to: 20, suffix: "+", label: "Jahre Bankerfahrung" },
+  { to: 0.95, decimals: 2, prefix: "ab ", suffix: "%", label: "Provision" },
+  { to: 20, suffix: "+", label: "Jahre Erfahrung in Immobilien & Finanzierung" },
   { to: 10, suffix: "+", label: "Immobilienportale" },
 ];
 
@@ -27,12 +26,13 @@ export function StatsAndArea() {
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionLabel>Erfolge</SectionLabel>
 
-        <div className="mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-10 sm:grid-cols-3">
           {stats.map((stat, i) => (
             <Reveal key={stat.label} delay={i * 0.1}>
               <Counter
                 to={stat.to}
                 decimals={"decimals" in stat ? stat.decimals : 0}
+                prefix={"prefix" in stat ? stat.prefix : ""}
                 suffix={stat.suffix}
                 className="font-display text-5xl font-semibold text-amber lg:text-6xl"
               />

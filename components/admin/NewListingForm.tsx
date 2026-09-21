@@ -47,7 +47,7 @@ export function NewListingForm() {
       <input
         name="tour_url"
         type="url"
-        placeholder="Matterport-Link (z.B. https://my.matterport.com/show/?m=...)"
+        placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
         className={`${inputClasses} sm:col-span-2`}
       />
       {state.error && <p className="text-sm text-red-400 sm:col-span-2">{state.error}</p>}

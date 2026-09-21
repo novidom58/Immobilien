@@ -1,16 +1,15 @@
 import { Landmark, Scan, LayoutGrid, DoorOpen, Gem, Handshake, ShieldOff } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
-import { MatterportDemo } from "./MatterportDemo";
 
 const services = [
-  { icon: Landmark, name: "IAZI- & WUP-Bewertung", text: "Bankanerkannt" },
-  { icon: Scan, name: "Matterport 3D", text: "Rundgang & Fotos" },
-  { icon: LayoutGrid, name: "10+ Portale", text: "Maximale Reichweite" },
-  { icon: DoorOpen, name: "Besichtigungen", text: "Wir führen sie für Sie durch" },
-  { icon: Gem, name: "Käuferprüfung", text: "Finanzierbarkeit vorab" },
-  { icon: Handshake, name: "Bis zum Notar", text: "Persönlich dabei" },
-  { icon: ShieldOff, name: "Kein Risiko", text: "Kein Verkauf = keine Kosten" },
+  { icon: Landmark, name: "Bankanerkannte Immobilienbewertung", text: "Fundierte Marktwerteinschätzung durch IAZI und Wüest Partner" },
+  { icon: Scan, name: "Professionelle 360°-Rundgänge mit Giraffe360", text: "Virtueller Rundgang & Präsentation" },
+  { icon: LayoutGrid, name: "Immobilienportale", text: "Maximale digitale Reichweite" },
+  { icon: DoorOpen, name: "Besichtigungen", text: "Von uns persönlich durchgeführt" },
+  { icon: Gem, name: "Käuferprüfung", text: "Finanzierbarkeit frühzeitig geklärt" },
+  { icon: Handshake, name: "Begleitung bis zum Notar", text: "Persönlich an Ihrer Seite" },
+  { icon: ShieldOff, name: "Kein Risiko", text: "Kein Verkauf = Keine Kosten" },
 ];
 
 export function Services() {
@@ -35,8 +34,6 @@ export function Services() {
             </Reveal>
           ))}
         </div>
-
-        <MatterportDemo />
       </div>
     </section>
   );

@@ -118,10 +118,10 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
           >
-            Gleiche Qualität wie grosse Makler — professionelle IAZI- und
-            WUP-Bewertung, Matterport-3D-Rundgang und persönliche Begleitung
-            bis zum Notar.
-            Ab <span className="font-mono text-amber-soft">0.95%</span> statt 3%.
+            Professioneller Immobilienverkauf zum fairen Preis. Persönliche
+            Betreuung, fundierte Immobilienbewertung, moderne Vermarktung und
+            Begleitung bis zum erfolgreichen Abschluss.
+            Ab <span className="font-mono text-amber-soft">0.95%</span> Provision statt 3%.
           </motion.p>
 
           <motion.div

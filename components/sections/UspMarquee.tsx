@@ -2,7 +2,7 @@ import { Marquee } from "@/components/ui/Marquee";
 
 const items = [
   "IAZI-Bewertung",
-  "Matterport-3D-Rundgang",
+  "Virtuelle 360°-Besichtigung",
   "Ab 0.95% Provision",
   "10+ Immobilienportale",
   "Käuferprüfung inklusive",

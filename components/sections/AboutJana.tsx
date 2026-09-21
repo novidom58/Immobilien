@@ -4,9 +4,11 @@ import { Reveal } from "@/lib/reveal";
 const certs = [
   "Eidg. dipl. Kauffrau",
   "IAZI-zertifiziert",
-  "Matterport",
+  "Giraffe360",
   "20+ J. Bankerfahrung",
 ];
+
+const competences = ["Immobilienverkauf", "Bewertung", "Finanzierung", "Vermarktung"];
 
 const stats = [
   { value: "500+", label: "Bewertungen" },
@@ -38,11 +40,20 @@ export function AboutJana() {
               NoviDom Immo · Basel &amp; Zug
             </p>
             <p className="mt-8 max-w-2xl text-balance text-lg text-ivory-dim">
-              Wir vereinen 20+ Jahre Erfahrung in Immobilien, Hypotheken und
-              Bankwesen. Wir kennen den Markt, die lokalen Preise und die
-              Anforderungen der Banken — aus der Praxis, nicht aus dem
-              Lehrbuch.
+              Hinter NoviDom steht ein erfahrenes Team mit Kompetenzen in
+              Immobilienverkauf, Immobilienbewertung, Finanzierung und
+              digitaler Vermarktung. Gemeinsam begleiten wir unsere Kunden
+              persönlich und professionell vom ersten Gespräch bis zum
+              erfolgreichen Abschluss.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-xs uppercase tracking-widest text-blueprint">
+              {competences.map((c, i) => (
+                <span key={c} className="flex items-center gap-3">
+                  {i > 0 && <span aria-hidden className="text-ivory-dim/30">·</span>}
+                  {c}
+                </span>
+              ))}
+            </div>
             <p className="mt-5 max-w-2xl text-balance text-lg text-ivory-dim">
               Was uns unterscheidet: Wir denken Immobilienverkauf und
               Finanzierung zusammen. Käufer werden direkt auf ihre

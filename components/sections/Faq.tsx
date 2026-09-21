@@ -8,11 +8,11 @@ import { Reveal } from "@/lib/reveal";
 const faqs = [
   {
     q: "Was kostet mich der Verkauf mit NoviDom?",
-    a: "Eine Kommission ab 0.95% des Verkaufspreises — erfolgsbasiert. Kommt kein Verkauf zustande, entstehen Ihnen keine Kosten.",
+    a: "Eine Provision ab 0.95% des Verkaufspreises — erfolgsbasiert. Kommt kein Verkauf zustande, entstehen Ihnen keine Kosten.",
   },
   {
-    q: "Was ist in der Kommission enthalten?",
-    a: "Eine bankanerkannte IAZI- und WUP-Bewertung, Fotos und Grundrisse mit Giraffe360-Technologie, ein Matterport-3D-Rundgang, die Vermarktung über mehr als 10 Immobilienportale, soziale Medien sowie eine Finanzierbarkeitsprüfung der Interessenten.",
+    q: "Was ist in der Provision enthalten?",
+    a: "Eine bankanerkannte IAZI- und WUP-Bewertung, Fotos, Grundrisse und ein virtueller 360°-Rundgang mit Giraffe360, die Vermarktung über mehr als 10 Immobilienportale, soziale Medien sowie eine Finanzierbarkeitsprüfung der Interessenten.",
   },
   {
     q: "Wie läuft der Verkauf konkret ab?",

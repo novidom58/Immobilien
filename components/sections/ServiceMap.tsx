@@ -36,9 +36,9 @@ export async function ServiceMap() {
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-center lg:gap-16">
           <Reveal>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Zuhause von der Nordwestschweiz
-              <br />
-              <span className="text-amber-soft">bis zum Vierwaldstättersee.</span>
+              Mit Präsenz in Basel und Zug begleiten wir Immobilienverkäufe
+              in der Nordwestschweiz, im Mittelland und in der{" "}
+              <span className="text-amber-soft">Zentralschweiz.</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
               Von Basel-Stadt über das Baselbiet, Fricktal und

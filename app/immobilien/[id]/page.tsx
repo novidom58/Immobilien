@@ -118,9 +118,9 @@ export default async function ListingDetailPage({
         {listing.tour_url && (
           <div className="mt-10">
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-xl font-semibold text-ivory">3D-Rundgang</h2>
+              <h2 className="font-display text-xl font-semibold text-ivory">360°-Rundgang</h2>
               <span className="rounded-full border border-amber/40 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber-soft">
-                Matterport
+                Giraffe360
               </span>
             </div>
             <p className="mt-1 text-sm text-ivory-dim">

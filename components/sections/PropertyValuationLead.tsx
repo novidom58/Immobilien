@@ -73,9 +73,11 @@ export function PropertyValuationLead() {
               <span className="text-amber-soft italic">wirklich wert?</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
-              Wir bewerten Ihre Immobilie mit den bankanerkannten Modellen
-              von IAZI und Wüest Partner (WUP) — denselben Tools, die über
-              30 Schweizer Banken intern für Hypothekarvergaben verwenden.
+              Der richtige Verkauf beginnt mit einer realistischen
+              Einschätzung des Marktwerts. Wir analysieren Ihre Immobilie
+              anhand professioneller und bankanerkannter Bewertungsmodelle,
+              aktueller Marktdaten und unserer Erfahrung im Immobilien- und
+              Finanzierungsbereich.
             </p>
 
             <div className="mt-8 rounded-2xl border border-line bg-ink p-6">

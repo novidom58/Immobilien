@@ -132,3 +132,20 @@ body {
 .leaflet-control-attribution a {
   color: var(--color-amber-soft) !important;
 }
+
+.coverage-map-label.leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ivory) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.coverage-map-label.leaflet-tooltip::before {
+  display: none !important;
+}

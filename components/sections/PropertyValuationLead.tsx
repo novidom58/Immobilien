@@ -8,6 +8,7 @@ import { Reveal } from "@/lib/reveal";
 
 const PROPERTY_TYPES = ["Einfamilienhaus", "Doppelhaushälfte", "Eigentumswohnung", "Mehrfamilienhaus"];
 const CONDITIONS = ["Sehr gut (renoviert)", "Gut (gepflegt)", "Mittel", "Renovationsbedürftig"];
+const PARKING_OPTIONS = ["Kein Parkplatz", "1 Aussenparkplatz", "1 Garagenplatz", "Mehrere Parkplätze/Garage"];
 const TOTAL_STEPS = 4;
 
 const checkList = [
@@ -67,6 +68,7 @@ export function PropertyValuationLead() {
     if (!currentStepValid()) return;
     setStatus("sending");
     const form = new FormData(e.currentTarget);
+    const isApartment = form.get("propertyType") === "Eigentumswohnung";
     const message = [
       `Objektart: ${form.get("propertyType") || "—"}`,
       `Adresse: ${form.get("address") || "—"}`,
@@ -74,7 +76,11 @@ export function PropertyValuationLead() {
       `Wohnfläche: ${form.get("area") || "—"} m²`,
       `Baujahr: ${form.get("year") || "—"}`,
       `Zimmer: ${form.get("rooms") || "—"}`,
-      `Grundstücksfläche: ${form.get("land") || "—"} m²`,
+      isApartment
+        ? `Etage: ${form.get("floor") || "—"}${form.get("lift") ? " (Lift vorhanden)" : ""}`
+        : `Grundstücksfläche: ${form.get("land") || "—"} m²`,
+      `Parkplatz: ${form.get("parking") || "—"}`,
+      `Renoviert seit: ${form.get("renovationYear") || "—"}`,
       `Zustand: ${form.get("condition") || "—"}`,
     ].join("\n");
 
@@ -218,7 +224,30 @@ export function PropertyValuationLead() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <input name="rooms" type="number" step="0.5" placeholder="Zimmer (z.B. 5.5)" className={fieldClasses} />
-                      <input name="land" type="number" placeholder="Grundstück m²" className={fieldClasses} />
+                      {propertyType === "Eigentumswohnung" ? (
+                        <input name="floor" type="number" placeholder="Etage" className={fieldClasses} />
+                      ) : (
+                        <input name="land" type="number" placeholder="Grundstück m²" className={fieldClasses} />
+                      )}
+                    </div>
+                    {propertyType === "Eigentumswohnung" && (
+                      <label className="flex items-center gap-2.5 text-sm text-ivory-dim">
+                        <input name="lift" type="checkbox" className="h-4 w-4 rounded border-line bg-ink accent-amber" />
+                        Lift vorhanden
+                      </label>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <select name="parking" defaultValue="" className={fieldClasses}>
+                        <option value="" disabled>
+                          Parkplatz
+                        </option>
+                        {PARKING_OPTIONS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                      <input name="renovationYear" type="number" placeholder="Renoviert seit (optional)" className={fieldClasses} />
                     </div>
                     <select name="condition" defaultValue="" className={fieldClasses}>
                       <option value="" disabled>

@@ -102,6 +102,11 @@ export function FinalCta() {
             Ein persönliches Bewertungsgespräch mit unserem Team —
             unverbindlich und kostenlos.
           </p>
+          <p className="mx-auto mt-4 max-w-xl text-balance text-sm text-ivory-dim/60">
+            Wir betreuen bewusst nur eine begrenzte Anzahl Mandate
+            gleichzeitig, damit jeder Verkauf die volle persönliche
+            Aufmerksamkeit bekommt.
+          </p>
         </Reveal>
 
         <Reveal delay={0.15}>

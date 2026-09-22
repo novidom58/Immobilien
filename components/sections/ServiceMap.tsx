@@ -1,7 +1,6 @@
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { ServiceMapClient } from "@/components/map/ServiceMapClient";
-import { CoverageNetwork } from "@/components/map/CoverageNetwork";
 import { createClient } from "@/lib/supabase/server";
 import type { MapListing } from "@/components/map/MapCanvas";
 
@@ -37,9 +36,6 @@ export async function ServiceMap() {
               Zug und die Region Luzern — wir kennen die lokalen Märkte,
               Preise und Käuferkreise persönlich.
             </p>
-            <div className="mt-6">
-              <CoverageNetwork />
-            </div>
             {listings.length > 0 && (
               <p className="mt-4 max-w-md text-sm text-ivory-dim/70">
                 {listings.length} aktive{listings.length === 1 ? "s Inserat" : " Inserate"} auf der Karte.

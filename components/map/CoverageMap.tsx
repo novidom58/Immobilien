@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Polyline, Tooltip, ZoomControl, AttributionControl } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, Tooltip, Popup, ZoomControl, AttributionControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -10,15 +10,71 @@ type Place = {
   lat: number;
   lng: number;
   hub?: boolean;
+  address?: string;
+  popupText: string;
+  ctaHref: string;
+  ctaLabel: string;
 };
 
 const PLACES: Place[] = [
-  { key: "basel", label: "Basel · Büro", lat: 47.5596, lng: 7.5886, hub: true },
-  { key: "solothurn", label: "Solothurn", lat: 47.2088, lng: 7.5323 },
-  { key: "aargau", label: "Aargau", lat: 47.3925, lng: 8.0442 },
-  { key: "zuerich", label: "Zürich", lat: 47.3769, lng: 8.5417 },
-  { key: "zug", label: "Zug · Büro", lat: 47.1662, lng: 8.5155, hub: true },
-  { key: "luzern", label: "Luzern", lat: 47.0502, lng: 8.3093 },
+  {
+    key: "basel",
+    label: "Basel · Büro",
+    lat: 47.5596,
+    lng: 7.5886,
+    hub: true,
+    address: "Güterstrasse 14, 4053 Basel (vorläufig — definitive Adresse folgt)",
+    popupText: "Unser Büro in Basel — persönliche Beratung vor Ort.",
+    ctaHref: "/#kontakt",
+    ctaLabel: "Kontakt aufnehmen →",
+  },
+  {
+    key: "solothurn",
+    label: "Solothurn",
+    lat: 47.2088,
+    lng: 7.5323,
+    popupText: "Aktiv im Kanton Solothurn.",
+    ctaHref: "/#bewertung",
+    ctaLabel: "Kostenlose Bewertung →",
+  },
+  {
+    key: "aargau",
+    label: "Aargau",
+    lat: 47.3925,
+    lng: 8.0442,
+    popupText: "Aktiv im Kanton Aargau.",
+    ctaHref: "/#bewertung",
+    ctaLabel: "Kostenlose Bewertung →",
+  },
+  {
+    key: "zuerich",
+    label: "Zürich",
+    lat: 47.3769,
+    lng: 8.5417,
+    popupText: "Aktiv im Kanton Zürich.",
+    ctaHref: "/#bewertung",
+    ctaLabel: "Kostenlose Bewertung →",
+  },
+  {
+    key: "zug",
+    label: "Zug · Büro",
+    lat: 47.1662,
+    lng: 8.5155,
+    hub: true,
+    address: "Baarerstrasse 12, 6300 Zug (vorläufig — definitive Adresse folgt)",
+    popupText: "Unser Büro in Zug — persönliche Beratung vor Ort.",
+    ctaHref: "/#kontakt",
+    ctaLabel: "Kontakt aufnehmen →",
+  },
+  {
+    key: "luzern",
+    label: "Luzern",
+    lat: 47.0502,
+    lng: 8.3093,
+    popupText: "Aktiv in der Region Luzern.",
+    ctaHref: "/#bewertung",
+    ctaLabel: "Kostenlose Bewertung →",
+  },
 ];
 
 const LINKS: [string, string][] = [
@@ -84,6 +140,19 @@ export default function CoverageMap() {
           <Tooltip permanent direction="top" offset={[0, p.hub ? -10 : -7]} className="coverage-map-label">
             {p.label}
           </Tooltip>
+          <Popup className="coverage-map-popup">
+            <div className="min-w-[180px]">
+              <div className="font-medium">{p.label}</div>
+              {p.address && <p className="mt-1 text-xs opacity-70">{p.address}</p>}
+              <p className="mt-1 text-xs opacity-80">{p.popupText}</p>
+              <a
+                href={p.ctaHref}
+                className="mt-2 inline-block text-xs font-medium underline underline-offset-2"
+              >
+                {p.ctaLabel}
+              </a>
+            </div>
+          </Popup>
         </Marker>
       ))}
     </MapContainer>

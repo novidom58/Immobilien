@@ -96,7 +96,13 @@ export function PropertyValuationLead() {
     }
   }
 
-  const stepTitles = ["Objektart", "Adresse", "Eckdaten", "Kontakt"];
+  const stepTitles = ["Objektart", "Eckdaten", "Adresse", "Kontakt"];
+  const stepHints = [
+    "Wählen Sie den passenden Typ, dann geht's direkt weiter.",
+    "Je genauer Ihre Angaben, desto präziser die Bewertung.",
+    "Nur für die lokale Markteinschätzung — bleibt vertraulich.",
+    "Fast geschafft! Wir melden uns mit Ihrer persönlichen Einschätzung.",
+  ];
 
   return (
     <section id="bewertung" className="relative bg-ink-2 py-28 lg:py-36">
@@ -184,6 +190,7 @@ export function PropertyValuationLead() {
                     className="h-full rounded-full bg-amber"
                   />
                 </div>
+                <p className="mt-2 text-xs text-ivory-dim/60">{stepHints[step - 1]}</p>
 
                 <form ref={formRef} onSubmit={handleSubmit} className="mt-6">
                   <div data-step="1" className={step === 1 ? "grid animate-[fadeIn_0.3s_ease-out] grid-cols-2 gap-3" : "hidden"}>
@@ -205,11 +212,6 @@ export function PropertyValuationLead() {
                   </div>
 
                   <div data-step="2" className={step === 2 ? "flex animate-[fadeIn_0.3s_ease-out] flex-col gap-3" : "hidden"}>
-                    <input name="address" required={step === 2} placeholder="Strasse & Hausnummer" className={fieldClasses} />
-                    <input name="place" required={step === 2} placeholder="PLZ / Ort" className={fieldClasses} />
-                  </div>
-
-                  <div data-step="3" className={step === 3 ? "flex animate-[fadeIn_0.3s_ease-out] flex-col gap-3" : "hidden"}>
                     <div className="grid grid-cols-2 gap-3">
                       <input name="area" type="number" placeholder="Wohnfläche m²" className={fieldClasses} />
                       <input name="year" type="number" placeholder="Baujahr" className={fieldClasses} />
@@ -228,6 +230,11 @@ export function PropertyValuationLead() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div data-step="3" className={step === 3 ? "flex animate-[fadeIn_0.3s_ease-out] flex-col gap-3" : "hidden"}>
+                    <input name="address" required={step === 3} placeholder="Strasse & Hausnummer" className={fieldClasses} />
+                    <input name="place" required={step === 3} placeholder="PLZ / Ort" className={fieldClasses} />
                   </div>
 
                   <div data-step="4" className={step === 4 ? "flex animate-[fadeIn_0.3s_ease-out] flex-col gap-3" : "hidden"}>

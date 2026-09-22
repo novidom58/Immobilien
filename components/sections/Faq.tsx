@@ -12,7 +12,7 @@ const faqs = [
   },
   {
     q: "Was ist in der Provision enthalten?",
-    a: "Eine bankanerkannte IAZI- und WUP-Bewertung, Fotos, Grundrisse und ein virtueller 360°-Rundgang mit Giraffe360, die Vermarktung über mehr als 10 Immobilienportale, soziale Medien sowie eine Finanzierbarkeitsprüfung der Interessenten.",
+    a: "Eine bankanerkannte IAZI- und WUP-Bewertung, Fotos, Grundrisse und ein virtueller 360°-Rundgang mit Giraffe360, die gezielte Vermarktung auf den passenden Portalen (u.a. Homegate, ImmoScout24, Newhome) und sozialen Medien sowie eine Finanzierbarkeitsprüfung der Interessenten.",
   },
   {
     q: "Wie läuft der Verkauf konkret ab?",

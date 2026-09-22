@@ -1,18 +1,9 @@
-import { MapPin } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { ServiceMapClient } from "@/components/map/ServiceMapClient";
+import { CoverageNetwork } from "@/components/map/CoverageNetwork";
 import { createClient } from "@/lib/supabase/server";
 import type { MapListing } from "@/components/map/MapCanvas";
-
-const cantons = [
-  "Basel-Stadt & Baselland",
-  "Aargau",
-  "Solothurn",
-  "Zürich",
-  "Zug",
-  "Luzern",
-];
 
 export async function ServiceMap() {
   let listings: MapListing[] = [];
@@ -46,16 +37,8 @@ export async function ServiceMap() {
               Zug und die Region Luzern — wir kennen die lokalen Märkte,
               Preise und Käuferkreise persönlich.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {cantons.map((canton) => (
-                <span
-                  key={canton}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 font-mono text-xs uppercase tracking-wide text-ivory-dim"
-                >
-                  <MapPin className="h-3 w-3 text-amber" strokeWidth={1.5} />
-                  {canton}
-                </span>
-              ))}
+            <div className="mt-6">
+              <CoverageNetwork />
             </div>
             {listings.length > 0 && (
               <p className="mt-4 max-w-md text-sm text-ivory-dim/70">

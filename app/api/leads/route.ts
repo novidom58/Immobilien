@@ -58,6 +58,11 @@ export async function POST(request: Request) {
     });
     results.stored = !error;
 
+    if (results.stored && listingId) {
+      // Best-effort - zählt für das Verkaufs-Cockpit des Eigentümers mit.
+      await supabase.rpc("log_listing_viewing_request", { p_listing_id: listingId });
+    }
+
     if (newsletterOptIn) {
       // Best-effort - Duplikate (bereits abonniert, unique-Constraint) sind kein Fehlerfall.
       await supabase.from("newsletter_subscribers").insert({ email, source: type });

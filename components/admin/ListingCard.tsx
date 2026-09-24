@@ -11,6 +11,7 @@ import {
   assignListingOwner,
   unassignListingOwner,
   deleteListing,
+  BERATER_OPTIONS,
 } from "@/app/admin/actions";
 
 type AdminListing = {
@@ -26,6 +27,7 @@ type AdminListing = {
   living_area: number | null;
   description: string | null;
   tour_url: string | null;
+  berater: string | null;
   lat: number | null;
   photoCount: number;
   hasOwner: boolean;
@@ -220,8 +222,12 @@ export function ListingCard({
               Karte: {listing.lat ? "Ja" : "Nein"}
             </span>
             <span>{listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}</span>
+            <span>Berater: {listing.berater || "—"}</span>
             <Link href={`/immobilien/${listing.id}`} className="text-amber underline underline-offset-2">
               Detailseite ansehen
+            </Link>
+            <Link href={`/immobilien/${listing.id}/expose`} target="_blank" className="text-amber underline underline-offset-2">
+              Exposé ansehen
             </Link>
           </div>
 
@@ -402,6 +408,14 @@ export function ListingCard({
             {TYPE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
+              </option>
+            ))}
+          </select>
+          <select name="berater" defaultValue={listing.berater ?? ""} className={editFieldClasses}>
+            <option value="">Berater zuweisen</option>
+            {BERATER_OPTIONS.map((b) => (
+              <option key={b} value={b}>
+                {b}
               </option>
             ))}
           </select>

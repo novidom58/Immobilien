@@ -97,6 +97,7 @@ alter table listings add column if not exists rooms numeric;
 alter table listings add column if not exists living_area integer;
 alter table listings add column if not exists description text;
 alter table listings add column if not exists tour_url text;
+alter table listings add column if not exists berater text;
 
 -- ---------------------------------------------------------------------
 -- listing_photos: Objektfotos (Dateien liegen im Storage-Bucket
@@ -390,6 +391,66 @@ end;
 $$;
 
 grant execute on function public.admin_list_customers() to authenticated;
+
+-- ---------------------------------------------------------------------
+-- Verkaufs-Cockpit: Zähler + Aktivitäts-Log für öffentliche Inserat-
+-- Interaktionen (Aufruf, 3D-Rundgang, Exposé-Download, Besichtigungs-
+-- anfrage). SECURITY DEFINER, weil anonyme Besucher sonst wegen RLS
+-- nichts in listings/listing_activity schreiben dürften - jede Funktion
+-- tut nur genau einen Zähler-Increment + optional einen Activity-Eintrag.
+-- ---------------------------------------------------------------------
+create or replace function public.log_listing_view(p_listing_id uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update listings set views = views + 1 where id = p_listing_id;
+$$;
+
+grant execute on function public.log_listing_view(uuid) to anon, authenticated;
+
+create or replace function public.log_listing_tour_view(p_listing_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update listings set tour_views = tour_views + 1 where id = p_listing_id;
+  insert into listing_activity (listing_id, text) values (p_listing_id, '3D-Rundgang angesehen');
+end;
+$$;
+
+grant execute on function public.log_listing_tour_view(uuid) to anon, authenticated;
+
+create or replace function public.log_listing_expose_download(p_listing_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update listings set expose_downloads = expose_downloads + 1 where id = p_listing_id;
+  insert into listing_activity (listing_id, text) values (p_listing_id, 'Exposé heruntergeladen');
+end;
+$$;
+
+grant execute on function public.log_listing_expose_download(uuid) to anon, authenticated;
+
+create or replace function public.log_listing_viewing_request(p_listing_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update listings set viewing_requests = viewing_requests + 1 where id = p_listing_id;
+  insert into listing_activity (listing_id, text) values (p_listing_id, 'Neue Besichtigungsanfrage erhalten');
+end;
+$$;
+
+grant execute on function public.log_listing_viewing_request(uuid) to anon, authenticated;
 
 -- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter

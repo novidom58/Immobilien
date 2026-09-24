@@ -6,6 +6,7 @@ import { MapPin, BedDouble, Ruler, Home } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingViewingRequest } from "@/components/ListingViewingRequest";
+import { ListingTour } from "@/components/ListingTour";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,8 @@ async function getListing(id: string) {
     .maybeSingle();
 
   if (!data) return null;
+
+  await supabase.rpc("log_listing_view", { p_listing_id: id });
 
   const photos = ((data.listing_photos as { url: string; sort_order: number }[] | null) ?? []).sort(
     (a, b) => a.sort_order - b.sort_order
@@ -115,29 +118,7 @@ export default async function ListingDetailPage({
         </div>
 
         {/* 3D-Rundgang */}
-        {listing.tour_url && (
-          <div className="mt-10">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-xl font-semibold text-ivory">360°-Rundgang</h2>
-              <span className="rounded-full border border-amber/40 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber-soft">
-                Giraffe360
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-ivory-dim">
-              Bewegen Sie sich frei durch die Räume — wie bei einer echten Besichtigung.
-            </p>
-            <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-ink-2">
-              <iframe
-                src={listing.tour_url}
-                title="3D-Rundgang"
-                className="h-full w-full"
-                allow="xr-spatial-tracking; gyroscope; accelerometer"
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-          </div>
-        )}
+        {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
 
         {/* Kopf */}
         <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
@@ -199,6 +180,13 @@ export default async function ListingDetailPage({
               Besichtigung anfragen
             </p>
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
+            <Link
+              href={`/immobilien/${listing.id}/expose`}
+              target="_blank"
+              className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+            >
+              Exposé als PDF →
+            </Link>
             <p className="mt-4 text-xs text-ivory-dim/60">
               Persönliche Auskunft durch unser Team, NoviDom Immo.
             </p>

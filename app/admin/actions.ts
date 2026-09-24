@@ -7,6 +7,7 @@ import { createResendClient } from "@/lib/resend";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
+export const BERATER_OPTIONS = ["Ruedi", "Kim", "Gregy"] as const;
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -43,6 +44,7 @@ export async function createListing(formData: FormData) {
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
+  const beraterRaw = String(formData.get("berater") || "").trim();
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -63,6 +65,7 @@ export async function createListing(formData: FormData) {
     living_area: areaRaw ? Number(areaRaw) : null,
     description: description || null,
     tour_url: tourUrl || null,
+    berater: beraterRaw || null,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   });
@@ -89,6 +92,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
+  const beraterRaw = String(formData.get("berater") || "").trim();
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -110,6 +114,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       living_area: areaRaw ? Number(areaRaw) : null,
       description: description || null,
       tour_url: tourUrl || null,
+      berater: beraterRaw || null,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
     .eq("id", listingId);

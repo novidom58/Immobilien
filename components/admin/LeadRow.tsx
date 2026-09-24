@@ -41,7 +41,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
     ? `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(
         `Weiterleitung: ${lead.name} benötigt Finanzierungsberatung`
       )}&body=${encodeURIComponent(
-        `Hallo\n\nDieser Kunde von NoviDom Immo interessiert sich zusätzlich für eine unabhängige Finanzierungsberatung:\n\nName: ${lead.name}\nE-Mail: ${lead.email}\nTelefon: ${lead.phone || "—"}\n\nNachricht:\n${lead.message || "—"}\n\nFreundliche Grüsse`
+        `Hallo\n\nDieser Kunde von NoviDom Immo interessiert sich zusätzlich für eine Finanzierungsberatung:\n\nName: ${lead.name}\nE-Mail: ${lead.email}\nTelefon: ${lead.phone || "—"}\n\nNachricht:\n${lead.message || "—"}\n\nFreundliche Grüsse`
       )}`
     : undefined;
 
@@ -52,7 +52,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
         {lead.name}
         {lead.wants_financing && (
           <span
-            title={referralHref ? "An hypotheken-analyse.ch weiterleiten" : "Finanzierungsberatung gewünscht"}
+            title={referralHref ? "An Finanzierungspartner weiterleiten" : "Finanzierungsberatung gewünscht"}
             className="ml-2 inline-block rounded-full border border-blueprint/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-blueprint"
           >
             Finanzierung

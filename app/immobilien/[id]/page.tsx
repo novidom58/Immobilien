@@ -180,6 +180,13 @@ export default async function ListingDetailPage({
               Besichtigung anfragen
             </p>
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
+            <Link
+              href={`/immobilien/${listing.id}/expose`}
+              target="_blank"
+              className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+            >
+              Exposé als PDF →
+            </Link>
             <p className="mt-4 text-xs text-ivory-dim/60">
               Persönliche Auskunft durch unser Team, NoviDom Immo.
             </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { createListing } from "@/app/admin/actions";
+import { createListing, BERATER_OPTIONS } from "@/app/admin/actions";
 
 const initialState = { error: null as string | null };
 
@@ -33,6 +33,14 @@ export function NewListingForm() {
         <option value="Stockwerkeigentum">Stockwerkeigentum</option>
         <option value="Rendite">Renditeliegenschaft</option>
         <option value="Andere">Andere</option>
+      </select>
+      <select name="berater" defaultValue="" className={inputClasses}>
+        <option value="">Berater zuweisen</option>
+        {BERATER_OPTIONS.map((b) => (
+          <option key={b} value={b}>
+            {b}
+          </option>
+        ))}
       </select>
       <div className="grid grid-cols-2 gap-3">
         <input name="rooms" inputMode="decimal" placeholder="Zimmer (z.B. 5.5)" className={inputClasses} />

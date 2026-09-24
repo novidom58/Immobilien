@@ -7,6 +7,7 @@ import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { NewListingForm } from "@/components/admin/NewListingForm";
 import { ListingCard } from "@/components/admin/ListingCard";
 import { LeadRow } from "@/components/admin/LeadRow";
+import { AcquisitionTool } from "@/components/admin/AcquisitionTool";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -44,7 +45,7 @@ export default async function AdminPage() {
     supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, lat, listing_photos(count), listing_documents(id, name, url)"
+        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, lat, listing_photos(count), listing_documents(id, name, url)"
       )
       .order("created_at", { ascending: false }),
     supabase
@@ -76,6 +77,7 @@ export default async function AdminPage() {
     living_area: (l.living_area as number | null) ?? null,
     description: (l.description as string | null) ?? null,
     tour_url: (l.tour_url as string | null) ?? null,
+    berater: (l.berater as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
     hasOwner: Boolean(l.owner_id),
@@ -124,6 +126,17 @@ export default async function AdminPage() {
                 </tbody>
               </table>
             )}
+          </div>
+        </section>
+
+        <section className="mt-14">
+          <h2 className="font-display text-2xl font-semibold text-ivory">Akquise-E-Mail</h2>
+          <p className="mt-2 text-sm text-ivory-dim">
+            Objektdaten eintragen, Text wird automatisch erstellt — direkt kopieren oder im
+            E-Mail-Programm öffnen.
+          </p>
+          <div className="mt-4">
+            <AcquisitionTool />
           </div>
         </section>
 

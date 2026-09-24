@@ -97,6 +97,7 @@ alter table listings add column if not exists rooms numeric;
 alter table listings add column if not exists living_area integer;
 alter table listings add column if not exists description text;
 alter table listings add column if not exists tour_url text;
+alter table listings add column if not exists berater text;
 
 -- ---------------------------------------------------------------------
 -- listing_photos: Objektfotos (Dateien liegen im Storage-Bucket

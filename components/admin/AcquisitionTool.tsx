@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Copy, Mail, Check } from "lucide-react";
-import { BERATER_OPTIONS } from "@/app/admin/actions";
+import { BERATER_OPTIONS } from "@/lib/constants";
 
 const OBJEKT_TYPES = ["Einfamilienhaus", "Eigentumswohnung", "Mehrfamilienhaus", "Renditeobjekt"];
 

@@ -7,7 +7,6 @@ import { createResendClient } from "@/lib/resend";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
-export const BERATER_OPTIONS = ["Ruedi", "Kim", "Gregy"] as const;
 
 async function requireAdmin() {
   const supabase = await createClient();

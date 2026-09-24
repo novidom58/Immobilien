@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import { updateLeadStatus } from "@/app/admin/actions";
+import { LeadActivityPanel } from "./LeadActivityPanel";
 
 type AdminLead = {
   id: string;
@@ -15,6 +17,8 @@ type AdminLead = {
   wants_financing: boolean;
   created_at: string;
   daysOpen: number;
+  follow_up_at: string | null;
+  activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
 const STATUS_OPTIONS = [
@@ -30,6 +34,7 @@ const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 export function LeadRow({ lead }: { lead: AdminLead }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function handleStatus(status: string) {
     setBusy(true);
@@ -49,6 +54,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
   const isOverdue = (lead.status === "neu" || lead.status === "kontaktiert") && lead.daysOpen >= 3;
 
   return (
+    <>
     <tr className={`border-t border-line align-top ${isOverdue ? "bg-red-500/5" : ""}`}>
       <td className="px-4 py-3 text-amber-soft">
         {lead.type}
@@ -106,6 +112,24 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
             </span>
           ))}
       </td>
+      <td className="px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-ivory"
+        >
+          Details
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
+        </button>
+      </td>
     </tr>
+    {open && (
+      <tr className="border-t border-line">
+        <td colSpan={8} className="bg-ink-2 px-4 py-4">
+          <LeadActivityPanel leadId={lead.id} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+        </td>
+      </tr>
+    )}
+    </>
   );
 }

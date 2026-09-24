@@ -221,6 +221,50 @@ export async function updateLeadNote(leadId: string, note: string) {
   return { error: null };
 }
 
+export async function updateLeadFollowUp(leadId: string, followUpAt: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ follow_up_at: followUpAt || null })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+const VALID_ACTIVITY_TYPES = ["email", "anruf", "besuch", "notiz"] as const;
+
+export async function addLeadActivity(leadId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const text = String(formData.get("text") || "").trim();
+  const typeRaw = String(formData.get("type") || "notiz");
+  if (!text) return { error: "Text darf nicht leer sein." };
+
+  const type = (VALID_ACTIVITY_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "notiz";
+
+  const { error } = await supabase.from("lead_activity").insert({ lead_id: leadId, type, text });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+export async function deleteLeadActivity(activityId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("lead_activity").delete().eq("id", activityId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
 export async function assignListingOwner(listingId: string, email: string) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };

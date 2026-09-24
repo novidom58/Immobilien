@@ -11,8 +11,8 @@ import {
   assignListingOwner,
   unassignListingOwner,
   deleteListing,
-  BERATER_OPTIONS,
 } from "@/app/admin/actions";
+import { BERATER_OPTIONS } from "@/lib/constants";
 
 type AdminListing = {
   id: string;

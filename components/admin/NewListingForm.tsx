@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { createListing, BERATER_OPTIONS } from "@/app/admin/actions";
+import { createListing } from "@/app/admin/actions";
+import { BERATER_OPTIONS } from "@/lib/constants";
 
 const initialState = { error: null as string | null };
 

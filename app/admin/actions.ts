@@ -137,11 +137,16 @@ export async function updateListingStatus(listingId: string, status: string) {
 
   const { data: before } = await supabase
     .from("listings")
-    .select("title, address, city, price_chf, status")
+    .select("title, address, city, price_chf, status, activated_at")
     .eq("id", listingId)
     .single();
 
-  const { error } = await supabase.from("listings").update({ status }).eq("id", listingId);
+  const updatePayload: Record<string, unknown> = { status };
+  if (before && before.status !== "active" && status === "active" && !before.activated_at) {
+    updatePayload.activated_at = new Date().toISOString();
+  }
+
+  const { error } = await supabase.from("listings").update(updatePayload).eq("id", listingId);
   if (error) return { error: error.message };
 
   // Bei Erstaktivierung: Newsletter-Abonnenten über das neue Objekt informieren.
@@ -254,5 +259,60 @@ export async function deleteListing(listingId: string) {
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/immobilien");
+  return { error: null };
+}
+
+export async function updateCustomerDetails(customerId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const fullName = String(formData.get("full_name") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const birthdate = String(formData.get("birthdate") || "").trim();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: fullName || null,
+      phone: phone || null,
+      birthdate: birthdate || null,
+    })
+    .eq("id", customerId);
+
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+const VALID_LEAD_TYPES = ["contact", "valuation", "access_request"] as const;
+
+export async function createLeadManually(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const typeRaw = String(formData.get("type") || "contact");
+  const listingId = String(formData.get("listing_id") || "").trim();
+
+  if (!name || !email) return { error: "Name und E-Mail sind Pflichtfelder." };
+
+  const type = (VALID_LEAD_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "contact";
+
+  const { error } = await supabase.from("leads").insert({
+    type,
+    name,
+    email,
+    phone: phone || null,
+    message: message || null,
+    listing_id: listingId || null,
+  });
+
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin");
   return { error: null };
 }

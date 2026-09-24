@@ -14,6 +14,7 @@ type AdminLead = {
   status: string;
   wants_financing: boolean;
   created_at: string;
+  daysOpen: number;
 };
 
 const STATUS_OPTIONS = [
@@ -45,14 +46,23 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
       )}`
     : undefined;
 
+  const isOverdue = (lead.status === "neu" || lead.status === "kontaktiert") && lead.daysOpen >= 3;
+
   return (
-    <tr className="border-t border-line align-top">
-      <td className="px-4 py-3 text-amber-soft">{lead.type}</td>
+    <tr className={`border-t border-line align-top ${isOverdue ? "bg-red-500/5" : ""}`}>
+      <td className="px-4 py-3 text-amber-soft">
+        {lead.type}
+        {isOverdue && (
+          <span className="ml-2 inline-block rounded-full border border-red-400/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-red-400">
+            {lead.daysOpen} Tage überfällig
+          </span>
+        )}
+      </td>
       <td className="px-4 py-3 text-ivory">
         {lead.name}
         {lead.wants_financing && (
           <span
-            title={referralHref ? "An Finanzierungspartner weiterleiten" : "Finanzierungsberatung gewünscht"}
+            title={referralHref ? "An hypotheken-analyse.ch weiterleiten" : "Finanzierungsberatung gewünscht"}
             className="ml-2 inline-block rounded-full border border-blueprint/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-blueprint"
           >
             Finanzierung
@@ -88,7 +98,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
               href={referralHref}
               className="font-mono text-[11px] uppercase tracking-wide text-amber underline underline-offset-2 hover:text-amber-soft"
             >
-              An Partner weiterleiten
+              An hypotheken-analyse.ch weiterleiten
             </a>
           ) : (
             <span className="font-mono text-[11px] uppercase tracking-wide text-ivory-dim/40">

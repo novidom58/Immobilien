@@ -8,6 +8,9 @@ import { NewListingForm } from "@/components/admin/NewListingForm";
 import { ListingCard } from "@/components/admin/ListingCard";
 import { LeadRow } from "@/components/admin/LeadRow";
 import { AcquisitionTool } from "@/components/admin/AcquisitionTool";
+import { CustomerRow } from "@/components/admin/CustomerRow";
+import { LeadCreateForm } from "@/components/admin/LeadCreateForm";
+import { daysSince } from "@/lib/dates";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -45,7 +48,7 @@ export default async function AdminPage() {
     supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, lat, listing_photos(count), listing_documents(id, name, url)"
+        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, lat, listing_photos(count), listing_documents(id, name, url)"
       )
       .order("created_at", { ascending: false }),
     supabase
@@ -55,12 +58,17 @@ export default async function AdminPage() {
     supabase.rpc("admin_list_customers"),
   ]);
 
-  const leads = leadsRes.data ?? [];
+  const leads = (leadsRes.data ?? []).map((l) => ({
+    ...l,
+    daysOpen: daysSince(l.created_at),
+  }));
   const subscribers = newsletterRes.data ?? [];
   const customers = (customersRes.data ?? []) as {
     id: string;
     email: string;
     full_name: string | null;
+    phone: string | null;
+    birthdate: string | null;
     role: string;
     created_at: string;
   }[];
@@ -78,6 +86,9 @@ export default async function AdminPage() {
     description: (l.description as string | null) ?? null,
     tour_url: (l.tour_url as string | null) ?? null,
     berater: (l.berater as string | null) ?? null,
+    activated_at: (l.activated_at as string | null) ?? null,
+    sale_deadline_months: (l.sale_deadline_months as number) ?? 4,
+    ownerId: (l.owner_id as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
     hasOwner: Boolean(l.owner_id),
@@ -163,6 +174,16 @@ export default async function AdminPage() {
         </section>
 
         <section className="mt-14">
+          <h2 className="font-display text-2xl font-semibold text-ivory">Lead erfassen</h2>
+          <p className="mt-2 text-sm text-ivory-dim">
+            Für Anfragen, die telefonisch oder persönlich reinkommen, nicht über die Webseite.
+          </p>
+          <div className="mt-4 rounded-2xl border border-line bg-ink-2 p-5">
+            <LeadCreateForm listings={listings.map((l) => ({ id: l.id, label: `${l.address}, ${l.city}` }))} />
+          </div>
+        </section>
+
+        <section className="mt-14">
           <h2 className="font-display text-2xl font-semibold text-ivory">
             Registrierte Kunden ({customers.length})
           </h2>
@@ -175,18 +196,21 @@ export default async function AdminPage() {
             ) : (
               <ul className="divide-y divide-line">
                 {customers.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                    <span className="text-ivory">
-                      {c.full_name || "—"}{" "}
-                      <span className="text-ivory-dim">
-                        {c.full_name ? `· ${c.email}` : c.email}
-                      </span>
-                    </span>
-                    <span className="font-mono text-xs text-ivory-dim/60">
-                      {c.role === "admin" ? "Admin" : "Kunde"} ·{" "}
-                      {new Date(c.created_at).toLocaleDateString("de-CH")}
-                    </span>
-                  </li>
+                  <CustomerRow
+                    key={c.id}
+                    customer={c}
+                    assignedListings={listings
+                      .filter((l) => l.ownerId === c.id)
+                      .map((l) => ({
+                        id: l.id,
+                        address: l.address,
+                        city: l.city,
+                        status: l.status,
+                        activated_at: l.activated_at,
+                        sale_deadline_months: l.sale_deadline_months,
+                        documents: l.documents,
+                      }))}
+                  />
                 ))}
               </ul>
             )}

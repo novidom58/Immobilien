@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Check, ChevronLeft } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
+import { LEAD_SOURCE_OPTIONS } from "@/lib/constants";
 
 const PROPERTY_TYPES = ["Einfamilienhaus", "Doppelhaushälfte", "Eigentumswohnung", "Mehrfamilienhaus"];
 const CONDITIONS = ["Sehr gut (renoviert)", "Gut (gepflegt)", "Mittel", "Renovationsbedürftig"];
@@ -94,6 +95,7 @@ export function PropertyValuationLead() {
           email: form.get("email"),
           phone: form.get("phone"),
           message,
+          source: form.get("source") || undefined,
         }),
       });
       setStatus(res.ok ? "done" : "error");
@@ -277,6 +279,14 @@ export function PropertyValuationLead() {
                     />
                     <input name="email" type="email" required={step === 4} placeholder="Ihre E-Mail" className={fieldClasses} />
                     <input name="phone" type="tel" placeholder="Telefon (optional)" className={fieldClasses} />
+                    <select name="source" defaultValue="" className={fieldClasses}>
+                      <option value="">Wie sind Sie auf uns aufmerksam geworden? (optional)</option>
+                      {LEAD_SOURCE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />

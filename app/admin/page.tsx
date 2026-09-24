@@ -39,16 +39,16 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/admin/login");
 
-  const [leadsRes, listingsRes, newsletterRes, customersRes] = await Promise.all([
+  const [leadsRes, listingsRes, newsletterRes, customersRes, activityRes] = await Promise.all([
     supabase
       .from("leads")
-      .select("id, type, name, email, phone, message, status, wants_financing, created_at")
+      .select("id, type, name, email, phone, message, status, wants_financing, follow_up_at, listing_id, source, created_at")
       .order("created_at", { ascending: false })
       .limit(30),
     supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, lat, listing_photos(count), listing_documents(id, name, url)"
+        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, posted_portals, lat, listing_photos(count), listing_documents(id, name, url)"
       )
       .order("created_at", { ascending: false }),
     supabase
@@ -56,11 +56,20 @@ export default async function AdminPage() {
       .select("email, source, created_at")
       .order("created_at", { ascending: false }),
     supabase.rpc("admin_list_customers"),
+    supabase.from("lead_activity").select("id, lead_id, type, text, created_at").order("created_at", { ascending: false }),
   ]);
+
+  const activityByLead = new Map<string, { id: string; type: string; text: string; created_at: string }[]>();
+  for (const a of activityRes.data ?? []) {
+    const list = activityByLead.get(a.lead_id) ?? [];
+    list.push(a);
+    activityByLead.set(a.lead_id, list);
+  }
 
   const leads = (leadsRes.data ?? []).map((l) => ({
     ...l,
     daysOpen: daysSince(l.created_at),
+    activity: activityByLead.get(l.id) ?? [],
   }));
   const subscribers = newsletterRes.data ?? [];
   const customers = (customersRes.data ?? []) as {
@@ -88,12 +97,20 @@ export default async function AdminPage() {
     berater: (l.berater as string | null) ?? null,
     activated_at: (l.activated_at as string | null) ?? null,
     sale_deadline_months: (l.sale_deadline_months as number) ?? 4,
+    posted_portals: (l.posted_portals as string[] | null) ?? [],
     ownerId: (l.owner_id as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
     hasOwner: Boolean(l.owner_id),
     documents: (l.listing_documents as { id: string; name: string; url: string }[] | null) ?? [],
   }));
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const dueToday = leads.filter((l) => l.follow_up_at && l.follow_up_at <= todayStr);
+  const overdueLeads = leads.filter(
+    (l) => (l.status === "neu" || l.status === "kontaktiert") && l.daysOpen >= 3
+  );
+  const viewingRequests = leads.filter((l) => l.listing_id && l.status !== "abgeschlossen" && l.status !== "irrelevant");
 
   return (
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
@@ -113,6 +130,29 @@ export default async function AdminPage() {
         </div>
 
         <section className="mt-8">
+          <h2 className="font-display text-2xl font-semibold text-ivory">Heute</h2>
+          <p className="mt-1 text-sm text-ivory-dim">{new Date().toLocaleDateString("de-CH", { weekday: "long", day: "numeric", month: "long" })}</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-line bg-ink-2 p-5">
+              <div className="font-display text-3xl font-semibold text-amber">{dueToday.length}</div>
+              <div className="mt-1 text-sm text-ivory-dim">Wiedervorlagen fällig</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-ink-2 p-5">
+              <div className="font-display text-3xl font-semibold text-red-400">{overdueLeads.length}</div>
+              <div className="mt-1 text-sm text-ivory-dim">Leads überfällig (Nachfassen)</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-ink-2 p-5">
+              <div className="font-display text-3xl font-semibold text-blueprint">{viewingRequests.length}</div>
+              <div className="mt-1 text-sm text-ivory-dim">Offene Objekt-Anfragen</div>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-ivory-dim/50">
+            Kein Kalender-Abgleich — Cal.com-Termine erscheinen hier nicht automatisch, nur was in den
+            Leads unten als Wiedervorlage gesetzt ist.
+          </p>
+        </section>
+
+        <section className="mt-14">
           <h2 className="font-display text-2xl font-semibold text-ivory">Leads</h2>
           <div className="mt-4 overflow-hidden rounded-2xl border border-line">
             {leads.length === 0 ? (
@@ -128,6 +168,7 @@ export default async function AdminPage() {
                     <th className="px-4 py-3">Datum</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Finanzierung</th>
+                    <th className="px-4 py-3">Details</th>
                   </tr>
                 </thead>
                 <tbody>

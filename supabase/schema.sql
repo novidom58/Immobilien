@@ -321,6 +321,28 @@ alter table leads add column if not exists status text not null default 'neu'
 alter table leads add column if not exists wants_financing boolean not null default false;
 alter table leads add column if not exists newsletter_opt_in boolean not null default false;
 alter table leads add column if not exists admin_note text;
+alter table leads add column if not exists follow_up_at date;
+alter table leads add column if not exists source text;
+
+-- Portal-Status pro Inserat: manuelle Checkliste, wo ein Objekt bereits
+-- geschaltet ist (keine echte API-Automatisierung ohne Portal-Zugangsdaten).
+alter table listings add column if not exists posted_portals text[] not null default '{}';
+
+-- Kontakthistorie pro Lead (Anrufe, Besuche, Notizen) - fürs "Heute"-Dashboard
+-- und die Lead-Detailansicht im Admin.
+create table if not exists lead_activity (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid not null references leads (id) on delete cascade,
+  type text not null default 'notiz' check (type in ('email', 'anruf', 'besuch', 'notiz')),
+  text text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table lead_activity enable row level security;
+
+drop policy if exists "lead_activity_admin_all" on lead_activity;
+create policy "lead_activity_admin_all" on lead_activity
+  for all using (public.is_admin());
 
 -- ---------------------------------------------------------------------
 -- newsletter_subscribers: eigenständige Newsletter-Anmeldungen (Footer etc.)

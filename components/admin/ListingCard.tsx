@@ -12,7 +12,7 @@ import {
   unassignListingOwner,
   deleteListing,
 } from "@/app/admin/actions";
-import { BERATER_OPTIONS } from "@/lib/constants";
+import { BERATER_OPTIONS, PORTAL_OPTIONS } from "@/lib/constants";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
 
 type AdminListing = {
@@ -31,6 +31,7 @@ type AdminListing = {
   berater: string | null;
   activated_at: string | null;
   sale_deadline_months: number;
+  posted_portals: string[];
   lat: number | null;
   photoCount: number;
   hasOwner: boolean;
@@ -226,6 +227,9 @@ export function ListingCard({
             </span>
             <span>{listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}</span>
             <span>Berater: {listing.berater || "—"}</span>
+            <span>
+              Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}
+            </span>
             <Link href={`/immobilien/${listing.id}`} className="text-amber underline underline-offset-2">
               Detailseite ansehen
             </Link>
@@ -458,6 +462,25 @@ export function ListingCard({
             placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
             className={`${editFieldClasses} sm:col-span-2`}
           />
+          <div className="sm:col-span-2">
+            <div className="mb-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+              Auf Portalen aufgeschaltet
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {PORTAL_OPTIONS.map((p) => (
+                <label key={p} className="flex items-center gap-1.5 text-sm text-ivory-dim">
+                  <input
+                    type="checkbox"
+                    name="posted_portals"
+                    value={p}
+                    defaultChecked={listing.posted_portals.includes(p)}
+                    className="h-4 w-4 rounded border-line bg-ink accent-amber"
+                  />
+                  {p}
+                </label>
+              ))}
+            </div>
+          </div>
           <button
             type="submit"
             disabled={busy === "edit"}

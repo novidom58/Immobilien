@@ -44,6 +44,7 @@ export async function createListing(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
   const beraterRaw = String(formData.get("berater") || "").trim();
+  const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -65,6 +66,7 @@ export async function createListing(formData: FormData) {
     description: description || null,
     tour_url: tourUrl || null,
     berater: beraterRaw || null,
+    posted_portals: postedPortals,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   });
@@ -92,6 +94,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
   const beraterRaw = String(formData.get("berater") || "").trim();
+  const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -114,6 +117,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       description: description || null,
       tour_url: tourUrl || null,
       berater: beraterRaw || null,
+      posted_portals: postedPortals,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
     .eq("id", listingId);
@@ -221,6 +225,50 @@ export async function updateLeadNote(leadId: string, note: string) {
   return { error: null };
 }
 
+export async function updateLeadFollowUp(leadId: string, followUpAt: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ follow_up_at: followUpAt || null })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+const VALID_ACTIVITY_TYPES = ["email", "anruf", "besuch", "notiz"] as const;
+
+export async function addLeadActivity(leadId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const text = String(formData.get("text") || "").trim();
+  const typeRaw = String(formData.get("type") || "notiz");
+  if (!text) return { error: "Text darf nicht leer sein." };
+
+  const type = (VALID_ACTIVITY_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "notiz";
+
+  const { error } = await supabase.from("lead_activity").insert({ lead_id: leadId, type, text });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+export async function deleteLeadActivity(activityId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("lead_activity").delete().eq("id", activityId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
 export async function assignListingOwner(listingId: string, email: string) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };
@@ -297,6 +345,7 @@ export async function createLeadManually(formData: FormData) {
   const message = String(formData.get("message") || "").trim();
   const typeRaw = String(formData.get("type") || "contact");
   const listingId = String(formData.get("listing_id") || "").trim();
+  const source = String(formData.get("source") || "").trim();
 
   if (!name || !email) return { error: "Name und E-Mail sind Pflichtfelder." };
 
@@ -309,6 +358,7 @@ export async function createLeadManually(formData: FormData) {
     phone: phone || null,
     message: message || null,
     listing_id: listingId || null,
+    source: source || null,
   });
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };

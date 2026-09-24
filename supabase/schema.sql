@@ -98,6 +98,15 @@ alter table listings add column if not exists living_area integer;
 alter table listings add column if not exists description text;
 alter table listings add column if not exists tour_url text;
 alter table listings add column if not exists berater text;
+alter table listings add column if not exists activated_at timestamptz;
+alter table listings add column if not exists sale_deadline_months integer not null default 4;
+
+alter table profiles add column if not exists phone text;
+alter table profiles add column if not exists birthdate date;
+
+drop policy if exists "profiles_admin_update" on profiles;
+create policy "profiles_admin_update" on profiles
+  for update using (public.is_admin());
 
 -- ---------------------------------------------------------------------
 -- listing_photos: Objektfotos (Dateien liegen im Storage-Bucket
@@ -372,7 +381,7 @@ grant execute on function public.admin_assign_listing_owner(uuid, text) to authe
 -- SECURITY DEFINER aus demselben Grund wie oben (auth.users-Zugriff).
 -- ---------------------------------------------------------------------
 create or replace function public.admin_list_customers()
-returns table (id uuid, email text, full_name text, role text, created_at timestamptz)
+returns table (id uuid, email text, full_name text, phone text, birthdate date, role text, created_at timestamptz)
 language plpgsql
 security definer
 set search_path = public
@@ -383,7 +392,7 @@ begin
   end if;
 
   return query
-    select p.id, u.email::text, p.full_name, p.role, p.created_at
+    select p.id, u.email::text, p.full_name, p.phone, p.birthdate, p.role, p.created_at
     from public.profiles p
     join auth.users u on u.id = p.id
     order by p.created_at desc;

@@ -13,6 +13,7 @@ import {
   deleteListing,
 } from "@/app/admin/actions";
 import { BERATER_OPTIONS } from "@/lib/constants";
+import { SaleDeadlineBar } from "./SaleDeadlineBar";
 
 type AdminListing = {
   id: string;
@@ -28,6 +29,8 @@ type AdminListing = {
   description: string | null;
   tour_url: string | null;
   berater: string | null;
+  activated_at: string | null;
+  sale_deadline_months: number;
   lat: number | null;
   photoCount: number;
   hasOwner: boolean;
@@ -230,6 +233,12 @@ export function ListingCard({
               Exposé ansehen
             </Link>
           </div>
+
+          {(listing.status === "active" || listing.status === "reserved") && (
+            <div className="mt-3 max-w-xs">
+              <SaleDeadlineBar activatedAt={listing.activated_at} deadlineMonths={listing.sale_deadline_months} />
+            </div>
+          )}
 
           <div className="mt-3">
             {listing.hasOwner ? (

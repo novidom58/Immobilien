@@ -379,7 +379,11 @@ grant execute on function public.admin_assign_listing_owner(uuid, text) to authe
 -- Admin: Liste aller registrierten Kundenkonten (mit E-Mail) abrufen, damit
 -- im Admin-UI aus einer Liste statt blind per E-Mail zugewiesen werden kann.
 -- SECURITY DEFINER aus demselben Grund wie oben (auth.users-Zugriff).
+-- DROP zuerst noetig: Postgres erlaubt CREATE OR REPLACE nicht, wenn sich
+-- die Rueckgabespalten (OUT-Parameter) einer Funktion aendern.
 -- ---------------------------------------------------------------------
+drop function if exists public.admin_list_customers();
+
 create or replace function public.admin_list_customers()
 returns table (id uuid, email text, full_name text, phone text, birthdate date, role text, created_at timestamptz)
 language plpgsql

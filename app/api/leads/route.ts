@@ -37,6 +37,7 @@ export async function POST(request: Request) {
   const wantsFinancing = body.wantsFinancing === true;
   const newsletterOptIn = body.newsletterOptIn === true;
   const listingId = typeof body.listingId === "string" && UUID_RE.test(body.listingId) ? body.listingId : null;
+  const source = typeof body.source === "string" ? body.source.trim().slice(0, 100) : "";
 
   if (!name || !EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Name und eine gültige E-Mail-Adresse sind erforderlich." }, { status: 400 });
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
       wants_financing: wantsFinancing,
       newsletter_opt_in: newsletterOptIn,
       listing_id: listingId,
+      source: source || null,
     });
     results.stored = !error;
 

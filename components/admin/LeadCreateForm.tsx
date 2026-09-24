@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { createLeadManually } from "@/app/admin/actions";
+import { LEAD_SOURCE_OPTIONS } from "@/lib/constants";
 
 const initialState = { error: null as string | null };
 
@@ -23,6 +24,14 @@ export function LeadCreateForm({ listings }: { listings: { id: string; label: st
         <option value="contact">Kontakt</option>
         <option value="valuation">Bewertungsanfrage</option>
         <option value="access_request">Ratgeber-Anfrage</option>
+      </select>
+      <select name="source" defaultValue="" className={fieldClasses}>
+        <option value="">Quelle (optional)</option>
+        {LEAD_SOURCE_OPTIONS.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
       </select>
       {listings.length > 0 && (
         <select name="listing_id" defaultValue="" className={`${fieldClasses} sm:col-span-2`}>

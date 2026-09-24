@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MagneticSubmitButton } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/lib/reveal";
+import { LEAD_SOURCE_OPTIONS } from "@/lib/constants";
 
 const CONTACT_EMAIL = "beratung@novidom-immo.ch";
 const PROPERTY_TYPES = ["Haus", "Wohnung", "Andere"] as const;
@@ -20,6 +21,7 @@ export function FinalCta() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [timeframe, setTimeframe] = useState("");
+  const [source, setSource] = useState("");
   const [wantsFinancing, setWantsFinancing] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -46,6 +48,7 @@ export function FinalCta() {
           message: `Objekttyp: ${propertyType}\nAdresse: ${address}\nZeithorizont: ${timeframe || "keine Angabe"}`,
           wantsFinancing,
           newsletterOptIn,
+          source: source || undefined,
         }),
       });
       const data = await res.json();
@@ -199,6 +202,18 @@ export function FinalCta() {
                     <option value="In 3–6 Monaten">In 3–6 Monaten</option>
                     <option value="In 6–12 Monaten">In 6–12 Monaten</option>
                     <option value="Nur unverbindlich informieren">Nur unverbindlich informieren</option>
+                  </select>
+                  <select
+                    value={source}
+                    onChange={(e) => setSource(e.target.value)}
+                    className={`${fieldClasses} text-ivory-dim`}
+                  >
+                    <option value="">Wie sind Sie auf uns aufmerksam geworden? (optional)</option>
+                    {LEAD_SOURCE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
                   </select>
                   <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 

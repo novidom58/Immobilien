@@ -44,6 +44,7 @@ export async function createListing(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
   const beraterRaw = String(formData.get("berater") || "").trim();
+  const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -65,6 +66,7 @@ export async function createListing(formData: FormData) {
     description: description || null,
     tour_url: tourUrl || null,
     berater: beraterRaw || null,
+    posted_portals: postedPortals,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   });
@@ -92,6 +94,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const tourUrl = String(formData.get("tour_url") || "").trim();
   const beraterRaw = String(formData.get("berater") || "").trim();
+  const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
 
@@ -114,6 +117,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       description: description || null,
       tour_url: tourUrl || null,
       berater: beraterRaw || null,
+      posted_portals: postedPortals,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
     .eq("id", listingId);
@@ -341,6 +345,7 @@ export async function createLeadManually(formData: FormData) {
   const message = String(formData.get("message") || "").trim();
   const typeRaw = String(formData.get("type") || "contact");
   const listingId = String(formData.get("listing_id") || "").trim();
+  const source = String(formData.get("source") || "").trim();
 
   if (!name || !email) return { error: "Name und E-Mail sind Pflichtfelder." };
 
@@ -353,6 +358,7 @@ export async function createLeadManually(formData: FormData) {
     phone: phone || null,
     message: message || null,
     listing_id: listingId || null,
+    source: source || null,
   });
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };

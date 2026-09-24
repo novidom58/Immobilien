@@ -18,6 +18,7 @@ type AdminLead = {
   created_at: string;
   daysOpen: number;
   follow_up_at: string | null;
+  source: string | null;
   activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
@@ -82,6 +83,11 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
       <td className="max-w-xs truncate px-4 py-3 text-ivory-dim">{lead.message}</td>
       <td className="px-4 py-3 text-ivory-dim/60">
         {new Date(lead.created_at).toLocaleDateString("de-CH")}
+        {lead.source && (
+          <span className="mt-1 block w-fit rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/60">
+            {lead.source}
+          </span>
+        )}
       </td>
       <td className="px-4 py-3">
         <select

@@ -42,13 +42,13 @@ export default async function AdminPage() {
   const [leadsRes, listingsRes, newsletterRes, customersRes, activityRes] = await Promise.all([
     supabase
       .from("leads")
-      .select("id, type, name, email, phone, message, status, wants_financing, follow_up_at, listing_id, created_at")
+      .select("id, type, name, email, phone, message, status, wants_financing, follow_up_at, listing_id, source, created_at")
       .order("created_at", { ascending: false })
       .limit(30),
     supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, lat, listing_photos(count), listing_documents(id, name, url)"
+        "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, posted_portals, lat, listing_photos(count), listing_documents(id, name, url)"
       )
       .order("created_at", { ascending: false }),
     supabase
@@ -97,6 +97,7 @@ export default async function AdminPage() {
     berater: (l.berater as string | null) ?? null,
     activated_at: (l.activated_at as string | null) ?? null,
     sale_deadline_months: (l.sale_deadline_months as number) ?? 4,
+    posted_portals: (l.posted_portals as string[] | null) ?? [],
     ownerId: (l.owner_id as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,

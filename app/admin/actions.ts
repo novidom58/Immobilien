@@ -73,7 +73,7 @@ export async function createListing(formData: FormData) {
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePath("/immobilien");
   return { error: null };
@@ -124,7 +124,7 @@ export async function updateListing(listingId: string, formData: FormData) {
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePath("/immobilien");
   revalidatePath(`/immobilien/${listingId}`);
@@ -158,7 +158,7 @@ export async function updateListingStatus(listingId: string, status: string) {
     await notifyNewsletterSubscribers(supabase, listingId, before);
   }
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePath("/immobilien");
   return { error: null };
@@ -207,7 +207,7 @@ export async function updateLeadStatus(leadId: string, status: string) {
   const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -221,7 +221,7 @@ export async function updateLeadNote(leadId: string, note: string) {
     .eq("id", leadId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -235,7 +235,7 @@ export async function updateLeadFollowUp(leadId: string, followUpAt: string) {
     .eq("id", leadId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -254,7 +254,7 @@ export async function addLeadActivity(leadId: string, formData: FormData) {
   const { error } = await supabase.from("lead_activity").insert({ lead_id: leadId, type, text });
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -265,7 +265,7 @@ export async function deleteLeadActivity(activityId: string) {
   const { error } = await supabase.from("lead_activity").delete().eq("id", activityId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -282,7 +282,7 @@ export async function assignListingOwner(listingId: string, email: string) {
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -293,7 +293,7 @@ export async function unassignListingOwner(listingId: string) {
   const { error } = await supabase.from("listings").update({ owner_id: null }).eq("id", listingId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -304,7 +304,7 @@ export async function deleteListing(listingId: string) {
   const { error } = await supabase.from("listings").delete().eq("id", listingId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePath("/immobilien");
   return { error: null };
@@ -329,7 +329,7 @@ export async function updateCustomerDetails(customerId: string, formData: FormDa
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }
 
@@ -363,6 +363,6 @@ export async function createLeadManually(formData: FormData) {
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   return { error: null };
 }

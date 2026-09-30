@@ -29,8 +29,6 @@ export function AdminShell({
   userEmail: string;
   counts: {
     leads: number;
-    nachfassen: number;
-    unterlagen: number;
     fristen: number;
   };
 }) {
@@ -50,8 +48,6 @@ export function AdminShell({
         { href: "/admin", label: "Heute", icon: "☀️" },
         { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
         { href: "/admin/leads", label: "Leads", icon: "⚡", badge: counts.leads, badgeTone: "red" },
-        { href: "/admin/nachfassen", label: "Nachfassen", icon: "📨", badge: counts.nachfassen, badgeTone: "gold" },
-        { href: "/admin/unterlagen", label: "Unterlagen", icon: "📎", badge: counts.unterlagen, badgeTone: "gold" },
       ],
     },
     {
@@ -60,7 +56,6 @@ export function AdminShell({
         { href: "/admin/kunden", label: "Alle Kunden", icon: "👤" },
         { href: "/admin/fristen", label: "Ablaufende Fristen", icon: "⏰", badge: counts.fristen, badgeTone: "gold" },
         { href: "/admin/inserate", label: "Alle Inserate", icon: "🏠" },
-        { href: "/admin/kanaele", label: "Was bringt was", icon: "💰" },
       ],
     },
     {
@@ -98,7 +93,9 @@ export function AdminShell({
         <button className="crm-burger" type="button" onClick={() => setNavOpen((v) => !v)} aria-label="Menü">
           {navOpen ? "✕" : "☰"}
         </button>
-        <div className="crm-topbar-logo">NoviDom</div>
+        <div className="crm-topbar-logo">
+          Novi<span>Dom</span>
+        </div>
         <div className="crm-topbar-sep" />
         <div className="crm-topbar-title">Admin-CRM</div>
         <div className="crm-topbar-user">{userEmail}</div>

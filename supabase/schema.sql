@@ -488,6 +488,25 @@ $$;
 grant execute on function public.log_listing_viewing_request(uuid) to anon, authenticated;
 
 -- ---------------------------------------------------------------------
+-- berater: wer in den Auswahlfeldern (Inserat, Akquise-E-Mail) zur
+-- Verfügung steht - admin-gepflegt statt fest im Code verdrahtet.
+-- ---------------------------------------------------------------------
+create table if not exists berater (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  created_at timestamptz not null default now()
+);
+
+alter table berater enable row level security;
+
+drop policy if exists "berater_admin_all" on berater;
+create policy "berater_admin_all" on berater
+  for all using (public.is_admin());
+
+insert into berater (name) values ('Ruedi'), ('Kim'), ('Gregy')
+on conflict (name) do nothing;
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

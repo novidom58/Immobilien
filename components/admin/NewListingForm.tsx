@@ -2,11 +2,10 @@
 
 import { useActionState } from "react";
 import { createListing } from "@/app/admin/actions";
-import { BERATER_OPTIONS } from "@/lib/constants";
 
 const initialState = { error: null as string | null };
 
-export function NewListingForm() {
+export function NewListingForm({ beraterOptions }: { beraterOptions: string[] }) {
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData) => {
       return createListing(formData);
@@ -30,7 +29,7 @@ export function NewListingForm() {
       </select>
       <select name="berater" defaultValue="" className="field-select">
         <option value="">Berater zuweisen</option>
-        {BERATER_OPTIONS.map((b) => (
+        {beraterOptions.map((b) => (
           <option key={b} value={b}>
             {b}
           </option>

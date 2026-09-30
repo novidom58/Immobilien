@@ -13,3 +13,11 @@ export const LEAD_SOURCE_OPTIONS = [
 ] as const;
 
 export const PORTAL_OPTIONS = ["Homegate", "ImmoScout24", "Newhome", "ImmoStreet", "Comparis"] as const;
+
+export const LEAD_STATUS_OPTIONS = [
+  { value: "neu", label: "Neu" },
+  { value: "kontaktiert", label: "Kontaktiert" },
+  { value: "termin", label: "Termin vereinbart" },
+  { value: "abgeschlossen", label: "Abgeschlossen" },
+  { value: "irrelevant", label: "Irrelevant" },
+] as const;

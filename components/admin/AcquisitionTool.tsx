@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Copy, Mail, Check } from "lucide-react";
-import { BERATER_OPTIONS } from "@/lib/constants";
 
 const OBJEKT_TYPES = ["Einfamilienhaus", "Eigentumswohnung", "Mehrfamilienhaus", "Renditeobjekt"];
 
@@ -49,13 +48,13 @@ function buildEmail({
   return { subject, body };
 }
 
-export function AcquisitionTool() {
+export function AcquisitionTool({ beraterOptions }: { beraterOptions: string[] }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [objektTyp, setObjektTyp] = useState(OBJEKT_TYPES[0]);
-  const [berater, setBerater] = useState<string>(BERATER_OPTIONS[0]);
+  const [berater, setBerater] = useState<string>(beraterOptions[0] ?? "");
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -90,7 +89,7 @@ export function AcquisitionTool() {
             ))}
           </select>
           <select value={berater} onChange={(e) => setBerater(e.target.value)} className="field-select">
-            {BERATER_OPTIONS.map((b) => (
+            {beraterOptions.map((b) => (
               <option key={b} value={b}>
                 {b}
               </option>

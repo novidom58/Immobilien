@@ -82,6 +82,11 @@ export async function getCustomers(supabase: Supabase) {
   }[];
 }
 
+export async function getBeraterNames(supabase: Supabase) {
+  const { data } = await supabase.from("berater").select("id, name").order("name");
+  return (data ?? []) as { id: string; name: string }[];
+}
+
 export async function getNewsletterSubscribers(supabase: Supabase) {
   const { data } = await supabase
     .from("newsletter_subscribers")

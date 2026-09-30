@@ -12,7 +12,7 @@ import {
   unassignListingOwner,
   deleteListing,
 } from "@/app/admin/actions";
-import { BERATER_OPTIONS, PORTAL_OPTIONS } from "@/lib/constants";
+import { PORTAL_OPTIONS } from "@/lib/constants";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
 
 type AdminListing = {
@@ -63,9 +63,11 @@ const STATUS_BADGE: Record<string, string> = {
 export function ListingCard({
   listing,
   customerEmails = [],
+  beraterOptions,
 }: {
   listing: AdminListing;
   customerEmails?: string[];
+  beraterOptions: string[];
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -371,7 +373,7 @@ export function ListingCard({
             </select>
             <select name="berater" defaultValue={listing.berater ?? ""} className="field-select">
               <option value="">Berater zuweisen</option>
-              {BERATER_OPTIONS.map((b) => (
+              {beraterOptions.map((b) => (
                 <option key={b} value={b}>
                   {b}
                 </option>

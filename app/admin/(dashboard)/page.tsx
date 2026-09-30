@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLeadsWithActivity, dueTodayLeads, overdueLeads, viewingRequestLeads } from "@/lib/admin-data";
+import { getLeadsWithActivity, dueTodayLeads, overdueLeads } from "@/lib/admin-data";
 
 export const metadata: Metadata = {
   title: "Heute — Admin",
@@ -15,7 +15,6 @@ export default async function AdminHeutePage() {
   const leads = await getLeadsWithActivity(supabase);
   const dueToday = dueTodayLeads(leads);
   const overdue = overdueLeads(leads);
-  const viewingRequests = viewingRequestLeads(leads);
   const attention = [...dueToday, ...overdue.filter((l) => !dueToday.some((d) => d.id === l.id))];
   const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -30,24 +29,6 @@ export default async function AdminHeutePage() {
         </div>
         <Link href="/admin/erfassen" className="btn btn-primary">
           + Lead erfassen
-        </Link>
-      </div>
-
-      <div className="kpi-grid">
-        <Link href="/admin/nachfassen" className="kpi warn">
-          <div className="kpi-num">{dueToday.length}</div>
-          <div className="kpi-label">Wiedervorlagen fällig</div>
-          <div className="kpi-sub">Heute dran</div>
-        </Link>
-        <Link href="/admin/nachfassen" className="kpi alert">
-          <div className="kpi-num">{overdue.length}</div>
-          <div className="kpi-label">Leads überfällig</div>
-          <div className="kpi-sub">Seit 3+ Tagen offen</div>
-        </Link>
-        <Link href="/admin/leads" className="kpi blue">
-          <div className="kpi-num">{viewingRequests.length}</div>
-          <div className="kpi-label">Offene Objekt-Anfragen</div>
-          <div className="kpi-sub">Noch nicht abgeschlossen</div>
         </Link>
       </div>
 

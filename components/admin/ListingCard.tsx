@@ -46,15 +46,19 @@ const TYPE_OPTIONS = [
   { value: "Andere", label: "Andere" },
 ];
 
-const editFieldClasses =
-  "rounded-lg border border-line bg-ink px-3 py-2 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none";
-
 const STATUS_OPTIONS = [
   { value: "draft", label: "Entwurf (nicht öffentlich)" },
   { value: "active", label: "Zum Verkauf" },
   { value: "reserved", label: "Reserviert" },
   { value: "sold", label: "Verkauft" },
 ];
+
+const STATUS_BADGE: Record<string, string> = {
+  draft: "badge-muted",
+  active: "badge-blue",
+  reserved: "badge-gold",
+  sold: "badge-green-solid",
+};
 
 export function ListingCard({
   listing,
@@ -208,109 +212,21 @@ export function ListingCard({
   }
 
   return (
-    <div className="rounded-2xl border border-line bg-ink-2 p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="card" id={listing.id}>
+      <div className="card-header" style={{ alignItems: "flex-start" }}>
         <div>
-          <div className="font-display text-lg font-semibold text-ivory">
-            {listing.title || `${listing.address}, ${listing.city}`}
-          </div>
-          <div className="mt-1 text-sm text-ivory-dim">
+          <div className="card-title">{listing.title || `${listing.address}, ${listing.city}`}</div>
+          <div className="card-sub">
             {listing.address}, {listing.city} · {listing.property_type}
-            {listing.price_chf
-              ? ` · CHF ${listing.price_chf.toLocaleString("en-US").replace(/,/g, "'")}`
-              : ""}
+            {listing.price_chf ? ` · CHF ${listing.price_chf.toLocaleString("en-US").replace(/,/g, "'")}` : ""}
           </div>
-          <div className="mt-2 flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" strokeWidth={1.5} />
-              Karte: {listing.lat ? "Ja" : "Nein"}
-            </span>
-            <span>{listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}</span>
-            <span>Berater: {listing.berater || "—"}</span>
-            <span>
-              Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}
-            </span>
-            <Link href={`/immobilien/${listing.id}`} className="text-amber underline underline-offset-2">
-              Detailseite ansehen
-            </Link>
-            <Link href={`/immobilien/${listing.id}/expose`} target="_blank" className="text-amber underline underline-offset-2">
-              Exposé ansehen
-            </Link>
-          </div>
-
-          {(listing.status === "active" || listing.status === "reserved") && (
-            <div className="mt-3 max-w-xs">
-              <SaleDeadlineBar activatedAt={listing.activated_at} deadlineMonths={listing.sale_deadline_months} />
-            </div>
-          )}
-
-          <div className="mt-3">
-            {listing.hasOwner ? (
-              <button
-                type="button"
-                disabled={busy === "unassign"}
-                onClick={handleUnassign}
-                className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-red-400 disabled:opacity-50"
-              >
-                <UserX className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Kunde verknüpft — entfernen
-              </button>
-            ) : assigning ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="email"
-                  autoFocus
-                  list={`customers-${listing.id}`}
-                  placeholder="kunde@email.ch"
-                  value={assignEmail}
-                  onChange={(e) => setAssignEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAssign()}
-                  className="rounded-lg border border-line bg-ink px-2.5 py-1.5 text-xs text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
-                />
-                <datalist id={`customers-${listing.id}`}>
-                  {customerEmails.map((email) => (
-                    <option key={email} value={email} />
-                  ))}
-                </datalist>
-                <button
-                  type="button"
-                  disabled={busy === "assign" || !assignEmail.trim()}
-                  onClick={handleAssign}
-                  className="font-mono text-[11px] uppercase tracking-wide text-amber hover:text-amber-soft disabled:opacity-50"
-                >
-                  {busy === "assign" ? "…" : "Bestätigen"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAssigning(false);
-                    setAssignEmail("");
-                  }}
-                  className="font-mono text-[11px] uppercase tracking-wide text-ivory-dim/40 hover:text-ivory-dim"
-                >
-                  Abbrechen
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setAssigning(true)}
-                className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-amber"
-              >
-                <UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Kunde per E-Mail zuweisen
-              </button>
-            )}
-          </div>
+          <span className={`badge ${STATUS_BADGE[listing.status] ?? "badge-muted"}`} style={{ marginTop: 8, display: "inline-flex" }}>
+            {STATUS_OPTIONS.find((o) => o.value === listing.status)?.label ?? listing.status}
+          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={listing.status}
-            disabled={busy === "status"}
-            onChange={(e) => handleStatus(e.target.value)}
-            className="rounded-xl border border-line bg-ink px-3 py-2 text-sm text-ivory focus:border-amber focus:outline-none"
-          >
+          <select value={listing.status} disabled={busy === "status"} onChange={(e) => handleStatus(e.target.value)} className="filter-select">
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -318,180 +234,198 @@ export function ListingCard({
             ))}
           </select>
 
-          <button
-            type="button"
-            disabled={busy === "upload"}
-            onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ivory-dim hover:border-amber/50 hover:text-ivory disabled:opacity-50"
-          >
-            <ImagePlus className="h-4 w-4" strokeWidth={1.5} />
+          <button type="button" disabled={busy === "upload"} onClick={() => fileRef.current?.click()} className="btn btn-ghost btn-sm">
+            <ImagePlus className="h-3.5 w-3.5" strokeWidth={1.75} />
             {busy === "upload" ? "Lädt…" : "Fotos"}
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => handleUpload(e.target.files)}
-          />
+          <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
 
-          <button
-            type="button"
-            disabled={busy === "doc-upload"}
-            onClick={() => docFileRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ivory-dim hover:border-amber/50 hover:text-ivory disabled:opacity-50"
-          >
-            <FileUp className="h-4 w-4" strokeWidth={1.5} />
+          <button type="button" disabled={busy === "doc-upload"} onClick={() => docFileRef.current?.click()} className="btn btn-ghost btn-sm">
+            <FileUp className="h-3.5 w-3.5" strokeWidth={1.75} />
             {busy === "doc-upload" ? "Lädt…" : "Dokumente"}
           </button>
-          <input
-            ref={docFileRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => handleDocUpload(e.target.files)}
-          />
+          <input ref={docFileRef} type="file" multiple className="hidden" onChange={(e) => handleDocUpload(e.target.files)} />
 
-          <button
-            type="button"
-            onClick={() => setEditing((v) => !v)}
-            className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ivory-dim hover:border-amber/50 hover:text-ivory"
-          >
-            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+          <button type="button" onClick={() => setEditing((v) => !v)} className="btn btn-ghost btn-sm">
+            <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
             {editing ? "Abbrechen" : "Bearbeiten"}
           </button>
 
-          <button
-            type="button"
-            disabled={busy === "delete"}
-            onClick={handleDelete}
-            className="flex items-center gap-1.5 rounded-xl border border-red-400/30 px-3 py-2 text-sm text-red-400/80 hover:border-red-400/60 hover:text-red-400 disabled:opacity-50"
-          >
-            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+          <button type="button" disabled={busy === "delete"} onClick={handleDelete} className="btn btn-danger btn-sm">
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
             Löschen
           </button>
         </div>
       </div>
 
-      {listing.documents.length > 0 && (
-        <div className="mt-4 border-t border-line pt-4">
-          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
-            <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
-            Verkaufsdossier &amp; Dokumente
-          </div>
-          <ul className="space-y-1.5">
-            {listing.documents.map((doc) => (
-              <li key={doc.id} className="flex items-center justify-between gap-2 text-sm text-ivory-dim">
-                <span className="truncate">{doc.name}</span>
-                <button
-                  type="button"
-                  disabled={busy === `doc-delete-${doc.id}`}
-                  onClick={() => handleDocDelete(doc)}
-                  className="shrink-0 text-ivory-dim/60 hover:text-red-400 disabled:opacity-50"
-                  aria-label="Dokument löschen"
-                >
-                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                </button>
-              </li>
-            ))}
-          </ul>
+      <div style={{ padding: "16px 20px" }}>
+        <div className="flex flex-wrap gap-3" style={{ fontSize: 11 }}>
+          <span className="flex items-center gap-1 td-light">
+            <MapPin className="h-3 w-3" strokeWidth={1.75} />
+            Karte: {listing.lat ? "Ja" : "Nein"}
+          </span>
+          <span className="td-light">
+            {listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}
+          </span>
+          {listing.berater && <span className="bchip">{listing.berater}</span>}
+          <span className="td-light">
+            Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}
+          </span>
+          <Link href={`/immobilien/${listing.id}`} style={{ color: "var(--blue)", textDecoration: "underline" }}>
+            Detailseite ansehen
+          </Link>
+          <Link href={`/immobilien/${listing.id}/expose`} target="_blank" style={{ color: "var(--blue)", textDecoration: "underline" }}>
+            Exposé ansehen
+          </Link>
         </div>
-      )}
 
-      {editing && (
-        <form action={handleUpdate} className="mt-4 grid gap-2.5 border-t border-line pt-4 sm:grid-cols-2">
-          <input
-            name="title"
-            defaultValue={listing.title ?? ""}
-            placeholder="Titel"
-            className={`${editFieldClasses} sm:col-span-2`}
-          />
-          <input name="address" required defaultValue={listing.address} placeholder="Adresse *" className={editFieldClasses} />
-          <input name="city" required defaultValue={listing.city} placeholder="Ort *" className={editFieldClasses} />
-          <input name="postal_code" defaultValue={listing.postal_code ?? ""} placeholder="PLZ" className={editFieldClasses} />
-          <input
-            name="price_chf"
-            inputMode="numeric"
-            defaultValue={listing.price_chf ?? ""}
-            placeholder="Preis (CHF)"
-            className={editFieldClasses}
-          />
-          <select name="property_type" defaultValue={listing.property_type} className={editFieldClasses}>
-            {TYPE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <select name="berater" defaultValue={listing.berater ?? ""} className={editFieldClasses}>
-            <option value="">Berater zuweisen</option>
-            {BERATER_OPTIONS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-          <div className="grid grid-cols-2 gap-2.5">
-            <input
-              name="rooms"
-              inputMode="decimal"
-              defaultValue={listing.rooms ?? ""}
-              placeholder="Zimmer"
-              className={editFieldClasses}
-            />
-            <input
-              name="living_area"
-              inputMode="numeric"
-              defaultValue={listing.living_area ?? ""}
-              placeholder="Wohnfläche m²"
-              className={editFieldClasses}
-            />
+        {(listing.status === "active" || listing.status === "reserved") && (
+          <div className="mt-3" style={{ maxWidth: 320 }}>
+            <SaleDeadlineBar activatedAt={listing.activated_at} deadlineMonths={listing.sale_deadline_months} />
           </div>
-          <textarea
-            name="description"
-            rows={3}
-            defaultValue={listing.description ?? ""}
-            placeholder="Beschreibung"
-            className={`${editFieldClasses} resize-none sm:col-span-2`}
-          />
-          <input
-            name="tour_url"
-            type="url"
-            defaultValue={listing.tour_url ?? ""}
-            placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
-            className={`${editFieldClasses} sm:col-span-2`}
-          />
-          <div className="sm:col-span-2">
-            <div className="mb-1.5 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
-              Auf Portalen aufgeschaltet
+        )}
+
+        <div className="mt-3">
+          {listing.hasOwner ? (
+            <button type="button" disabled={busy === "unassign"} onClick={handleUnassign} className="btn btn-ghost btn-sm">
+              <UserX className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Kunde verknüpft — entfernen
+            </button>
+          ) : assigning ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="email"
+                autoFocus
+                list={`customers-${listing.id}`}
+                placeholder="kunde@email.ch"
+                value={assignEmail}
+                onChange={(e) => setAssignEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAssign()}
+                className="search-input"
+              />
+              <datalist id={`customers-${listing.id}`}>
+                {customerEmails.map((email) => (
+                  <option key={email} value={email} />
+                ))}
+              </datalist>
+              <button type="button" disabled={busy === "assign" || !assignEmail.trim()} onClick={handleAssign} className="btn btn-primary btn-sm">
+                {busy === "assign" ? "…" : "Bestätigen"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAssigning(false);
+                  setAssignEmail("");
+                }}
+                className="btn btn-ghost btn-sm"
+              >
+                Abbrechen
+              </button>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {PORTAL_OPTIONS.map((p) => (
-                <label key={p} className="flex items-center gap-1.5 text-sm text-ivory-dim">
-                  <input
-                    type="checkbox"
-                    name="posted_portals"
-                    value={p}
-                    defaultChecked={listing.posted_portals.includes(p)}
-                    className="h-4 w-4 rounded border-line bg-ink accent-amber"
-                  />
-                  {p}
-                </label>
+          ) : (
+            <button type="button" onClick={() => setAssigning(true)} className="btn btn-ghost btn-sm">
+              <UserPlus className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Kunde per E-Mail zuweisen
+            </button>
+          )}
+        </div>
+
+        {listing.documents.length > 0 && (
+          <div className="mt-4" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div className="detail-label flex items-center gap-1.5" style={{ marginBottom: 8 }}>
+              <FileText className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Verkaufsdossier &amp; Dokumente
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {listing.documents.map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between gap-2" style={{ fontSize: 13 }}>
+                  <span className="truncate td-light">{doc.name}</span>
+                  <button
+                    type="button"
+                    disabled={busy === `doc-delete-${doc.id}`}
+                    onClick={() => handleDocDelete(doc)}
+                    aria-label="Dokument löschen"
+                    style={{ background: "none", border: "none", color: "var(--ink-light)", cursor: "pointer" }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={busy === "edit"}
-            className="rounded-xl bg-amber px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60 sm:col-span-2"
-          >
-            {busy === "edit" ? "Speichert…" : "Änderungen speichern"}
-          </button>
-        </form>
-      )}
+        )}
 
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        {editing && (
+          <form action={handleUpdate} className="mt-4 grid gap-2.5 sm:grid-cols-2" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <input name="title" defaultValue={listing.title ?? ""} placeholder="Titel" className="field-input sm:col-span-2" />
+            <input name="address" required defaultValue={listing.address} placeholder="Adresse *" className="field-input" />
+            <input name="city" required defaultValue={listing.city} placeholder="Ort *" className="field-input" />
+            <input name="postal_code" defaultValue={listing.postal_code ?? ""} placeholder="PLZ" className="field-input" />
+            <input name="price_chf" inputMode="numeric" defaultValue={listing.price_chf ?? ""} placeholder="Preis (CHF)" className="field-input" />
+            <select name="property_type" defaultValue={listing.property_type} className="field-select">
+              {TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <select name="berater" defaultValue={listing.berater ?? ""} className="field-select">
+              <option value="">Berater zuweisen</option>
+              {BERATER_OPTIONS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2.5">
+              <input name="rooms" inputMode="decimal" defaultValue={listing.rooms ?? ""} placeholder="Zimmer" className="field-input" />
+              <input name="living_area" inputMode="numeric" defaultValue={listing.living_area ?? ""} placeholder="Wohnfläche m²" className="field-input" />
+            </div>
+            <textarea
+              name="description"
+              rows={3}
+              defaultValue={listing.description ?? ""}
+              placeholder="Beschreibung"
+              className="field-textarea sm:col-span-2"
+            />
+            <input
+              name="tour_url"
+              type="url"
+              defaultValue={listing.tour_url ?? ""}
+              placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
+              className="field-input sm:col-span-2"
+            />
+            <div className="sm:col-span-2">
+              <div className="field-label" style={{ marginBottom: 6 }}>
+                Auf Portalen aufgeschaltet
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {PORTAL_OPTIONS.map((p) => (
+                  <label key={p} className="flex items-center gap-1.5" style={{ fontSize: 13 }}>
+                    <input
+                      type="checkbox"
+                      name="posted_portals"
+                      value={p}
+                      defaultChecked={listing.posted_portals.includes(p)}
+                      style={{ accentColor: "var(--blue)" }}
+                    />
+                    {p}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button type="submit" disabled={busy === "edit"} className="btn btn-primary sm:col-span-2">
+              {busy === "edit" ? "Speichert…" : "Änderungen speichern"}
+            </button>
+          </form>
+        )}
+
+        {error && (
+          <p className="mt-3" style={{ fontSize: 13, color: "var(--red)" }}>
+            {error}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

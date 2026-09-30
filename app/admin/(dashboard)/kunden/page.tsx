@@ -16,15 +16,24 @@ export default async function AdminKundenPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Registrierte Kunden ({customers.length})</h1>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+      <div className="page-header">
+        <div>
+          <div className="page-title">Registrierte Kunden</div>
+          <div className="page-sub">{customers.length} Kund:innen</div>
+        </div>
+      </div>
+
+      <div className="card">
         {customers.length === 0 ? (
-          <p className="p-6 text-sm text-ivory-dim">
-            Noch niemand registriert. Kund:innen müssen sich zuerst unter /login anmelden, bevor ihr sie
-            einem Inserat zuweisen könnt.
-          </p>
+          <div className="empty">
+            <div className="empty-icon">👤</div>
+            <div className="empty-text">Noch niemand registriert</div>
+            <div className="empty-sub">
+              Kund:innen müssen sich zuerst unter /login anmelden, bevor ihr sie einem Inserat zuweisen könnt.
+            </div>
+          </div>
         ) : (
-          <ul className="divide-y divide-line">
+          <div>
             {customers.map((c) => (
               <CustomerRow
                 key={c.id}
@@ -42,7 +51,7 @@ export default async function AdminKundenPage() {
                   }))}
               />
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

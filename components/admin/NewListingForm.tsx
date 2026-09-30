@@ -6,9 +6,6 @@ import { BERATER_OPTIONS } from "@/lib/constants";
 
 const initialState = { error: null as string | null };
 
-const inputClasses =
-  "rounded-xl border border-line bg-ink px-4 py-3 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none";
-
 export function NewListingForm() {
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData) => {
@@ -19,23 +16,19 @@ export function NewListingForm() {
 
   return (
     <form action={formAction} className="grid gap-3 sm:grid-cols-2">
-      <input
-        name="title"
-        placeholder="Titel (z.B. Charmantes Einfamilienhaus mit Garten)"
-        className={`${inputClasses} sm:col-span-2`}
-      />
-      <input name="address" required placeholder="Adresse *" className={inputClasses} />
-      <input name="city" required placeholder="Ort *" className={inputClasses} />
-      <input name="postal_code" placeholder="PLZ" className={inputClasses} />
-      <input name="price_chf" inputMode="numeric" placeholder="Preis (CHF)" className={inputClasses} />
-      <select name="property_type" defaultValue="Haus" className={inputClasses}>
+      <input name="title" placeholder="Titel (z.B. Charmantes Einfamilienhaus mit Garten)" className="field-input sm:col-span-2" />
+      <input name="address" required placeholder="Adresse *" className="field-input" />
+      <input name="city" required placeholder="Ort *" className="field-input" />
+      <input name="postal_code" placeholder="PLZ" className="field-input" />
+      <input name="price_chf" inputMode="numeric" placeholder="Preis (CHF)" className="field-input" />
+      <select name="property_type" defaultValue="Haus" className="field-select">
         <option value="Haus">Einfamilienhaus</option>
         <option value="Wohnung">Wohnung</option>
         <option value="Stockwerkeigentum">Stockwerkeigentum</option>
         <option value="Rendite">Renditeliegenschaft</option>
         <option value="Andere">Andere</option>
       </select>
-      <select name="berater" defaultValue="" className={inputClasses}>
+      <select name="berater" defaultValue="" className="field-select">
         <option value="">Berater zuweisen</option>
         {BERATER_OPTIONS.map((b) => (
           <option key={b} value={b}>
@@ -44,27 +37,22 @@ export function NewListingForm() {
         ))}
       </select>
       <div className="grid grid-cols-2 gap-3">
-        <input name="rooms" inputMode="decimal" placeholder="Zimmer (z.B. 5.5)" className={inputClasses} />
-        <input name="living_area" inputMode="numeric" placeholder="Wohnfläche m²" className={inputClasses} />
+        <input name="rooms" inputMode="decimal" placeholder="Zimmer (z.B. 5.5)" className="field-input" />
+        <input name="living_area" inputMode="numeric" placeholder="Wohnfläche m²" className="field-input" />
       </div>
       <textarea
         name="description"
         rows={3}
         placeholder="Beschreibung für die öffentliche Detailseite"
-        className={`${inputClasses} resize-none sm:col-span-2`}
+        className="field-textarea sm:col-span-2"
       />
-      <input
-        name="tour_url"
-        type="url"
-        placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
-        className={`${inputClasses} sm:col-span-2`}
-      />
-      {state.error && <p className="text-sm text-red-400 sm:col-span-2">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-full bg-amber px-6 py-3 font-display text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60 sm:col-span-2"
-      >
+      <input name="tour_url" type="url" placeholder="360°-Rundgang-Link (z.B. von Giraffe360)" className="field-input sm:col-span-2" />
+      {state.error && (
+        <p className="sm:col-span-2" style={{ fontSize: 13, color: "var(--red)" }}>
+          {state.error}
+        </p>
+      )}
+      <button type="submit" disabled={pending} className="btn btn-primary sm:col-span-2" style={{ width: "fit-content" }}>
         {pending ? "Wird angelegt…" : "Inserat anlegen"}
       </button>
     </form>

@@ -9,14 +9,13 @@ export const metadata: Metadata = {
 export default function AdminAkquisePage() {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Akquise-E-Mail</h1>
-      <p className="mt-2 text-sm text-ivory-dim">
-        Objektdaten eintragen, Text wird automatisch erstellt — direkt kopieren oder im E-Mail-Programm
-        öffnen.
-      </p>
-      <div className="mt-4">
-        <AcquisitionTool />
+      <div className="page-header">
+        <div>
+          <div className="page-title">Akquise-E-Mail</div>
+          <div className="page-sub">Objektdaten eintragen, Text wird automatisch erstellt — direkt kopieren oder im E-Mail-Programm öffnen</div>
+        </div>
       </div>
+      <AcquisitionTool />
     </div>
   );
 }

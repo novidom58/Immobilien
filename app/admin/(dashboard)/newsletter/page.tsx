@@ -15,21 +15,30 @@ export default async function AdminNewsletterPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Newsletter-Abonnenten ({subscribers.length})</h1>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+      <div className="page-header">
+        <div>
+          <div className="page-title">Newsletter-Abonnenten</div>
+          <div className="page-sub">{subscribers.length} Anmeldungen</div>
+        </div>
+      </div>
+
+      <div className="card">
         {subscribers.length === 0 ? (
-          <p className="p-6 text-sm text-ivory-dim">Noch keine Anmeldungen.</p>
+          <div className="empty">
+            <div className="empty-icon">📭</div>
+            <div className="empty-text">Noch keine Anmeldungen</div>
+          </div>
         ) : (
-          <ul className="divide-y divide-line">
+          <div>
             {subscribers.map((s) => (
-              <li key={s.email} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="text-ivory">{s.email}</span>
-                <span className="font-mono text-xs text-ivory-dim/60">
+              <div key={s.email} className="flex items-center justify-between" style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)" }}>
+                <span className="td-name">{s.email}</span>
+                <span className="td-light" style={{ fontSize: 12 }}>
                   {s.source ?? "—"} · {new Date(s.created_at).toLocaleDateString("de-CH")}
                 </span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

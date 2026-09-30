@@ -29,6 +29,11 @@ export async function getLeadsWithActivity(supabase: Supabase) {
 
 export type AdminLeadWithActivity = Awaited<ReturnType<typeof getLeadsWithActivity>>[number];
 
+export async function getAllLeadsForStats(supabase: Supabase) {
+  const { data } = await supabase.from("leads").select("id, source, status, created_at");
+  return data ?? [];
+}
+
 export async function getListingsForAdmin(supabase: Supabase) {
   const { data } = await supabase
     .from("listings")

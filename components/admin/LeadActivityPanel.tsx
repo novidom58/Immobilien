@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, Mail, Users, StickyNote, Trash2 } from "lucide-react";
-import { updateLeadFollowUp, addLeadActivity, deleteLeadActivity } from "@/app/admin/actions";
+import { updateLeadStatus, updateLeadFollowUp, addLeadActivity, deleteLeadActivity } from "@/app/admin/actions";
+import { LEAD_STATUS_OPTIONS } from "@/lib/constants";
 
 type Activity = { id: string; type: string; text: string; created_at: string };
 
@@ -23,17 +24,26 @@ const TYPE_TONE: Record<string, string> = {
 
 export function LeadActivityPanel({
   leadId,
+  status,
   phone,
   followUpAt,
   activity,
 }: {
   leadId: string;
+  status: string;
   phone: string | null;
   followUpAt: string | null;
   activity: Activity[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+
+  async function handleStatus(newStatus: string) {
+    setBusy(true);
+    await updateLeadStatus(leadId, newStatus);
+    setBusy(false);
+    router.refresh();
+  }
 
   async function handleFollowUp(date: string) {
     setBusy(true);
@@ -65,6 +75,16 @@ export function LeadActivityPanel({
             Anrufen ({phone})
           </a>
         )}
+        <label className="field-group">
+          <span className="field-label">Status</span>
+          <select value={status} disabled={busy} onChange={(e) => handleStatus(e.target.value)} className="field-select">
+            {LEAD_STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="field-group">
           <span className="field-label">Wiedervorlage</span>
           <input

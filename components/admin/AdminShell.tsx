@@ -3,29 +3,13 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Sun,
-  Zap,
-  AlarmClock,
-  Paperclip,
-  Users,
-  Clock,
-  Building2,
-  PieChart,
-  UserPlus,
-  Send,
-  Mail,
-  ExternalLink,
-  Menu,
-  X,
-} from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { AdminPasswordChange } from "@/components/admin/AdminPasswordChange";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof Sun;
+  icon: string;
   badge?: number;
   badgeTone?: "red" | "gold";
   external?: boolean;
@@ -63,39 +47,44 @@ export function AdminShell({
     {
       title: "Übersicht",
       items: [
-        { href: "/admin", label: "Heute", icon: Sun },
-        { href: "/admin/leads", label: "Leads", icon: Zap, badge: counts.leads, badgeTone: "red" },
-        { href: "/admin/nachfassen", label: "Nachfassen", icon: AlarmClock, badge: counts.nachfassen, badgeTone: "gold" },
-        { href: "/admin/unterlagen", label: "Unterlagen", icon: Paperclip, badge: counts.unterlagen, badgeTone: "gold" },
+        { href: "/admin", label: "Heute", icon: "☀️" },
+        { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
+        { href: "/admin/leads", label: "Leads", icon: "⚡", badge: counts.leads, badgeTone: "red" },
+        { href: "/admin/nachfassen", label: "Nachfassen", icon: "📨", badge: counts.nachfassen, badgeTone: "gold" },
+        { href: "/admin/unterlagen", label: "Unterlagen", icon: "📎", badge: counts.unterlagen, badgeTone: "gold" },
       ],
     },
     {
       title: "Kunden",
       items: [
-        { href: "/admin/kunden", label: "Alle Kunden", icon: Users },
-        { href: "/admin/fristen", label: "Ablaufende Fristen", icon: Clock, badge: counts.fristen, badgeTone: "gold" },
-        { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+        { href: "/admin/kunden", label: "Alle Kunden", icon: "👤" },
+        { href: "/admin/fristen", label: "Ablaufende Fristen", icon: "⏰", badge: counts.fristen, badgeTone: "gold" },
+        { href: "/admin/inserate", label: "Alle Inserate", icon: "🏠" },
+        { href: "/admin/kanaele", label: "Was bringt was", icon: "💰" },
       ],
     },
     {
-      title: "Inserate",
-      items: [{ href: "/admin/inserate", label: "Alle Inserate", icon: Building2 }],
-    },
-    {
-      title: "Auswertung",
-      items: [{ href: "/admin/kanaele", label: "Was bringt was", icon: PieChart }],
-    },
-    {
       title: "Erfassen",
-      items: [{ href: "/admin/erfassen", label: "Lead erfassen", icon: UserPlus }],
+      items: [
+        { href: "/admin/erfassen", label: "Lead erfassen", icon: "➕" },
+        { href: "/admin/kunde-erfassen", label: "Kunde erfassen", icon: "➕" },
+        { href: "/admin/import", label: "Excel-Import", icon: "📥" },
+      ],
+    },
+    {
+      title: "Einstellungen",
+      items: [
+        { href: "/admin/kalender", label: "Kalender", icon: "🗓️" },
+        { href: "/admin/berater", label: "Berater", icon: "🧑‍💼" },
+      ],
     },
     {
       title: "Tools",
-      items: [{ href: "/admin/akquise", label: "Akquise-E-Mail", icon: Send }],
+      items: [{ href: "/admin/akquise", label: "Akquise-E-Mail", icon: "✉️" }],
     },
     {
       title: "Links",
-      items: [{ href: "/dashboard", label: "Kundenportal", icon: ExternalLink, external: true }],
+      items: [{ href: "/dashboard", label: "Kundenportal", icon: "🔗", external: true }],
     },
   ];
 
@@ -107,7 +96,7 @@ export function AdminShell({
     <div className="crm-theme" style={{ background: "var(--bg)", color: "var(--ink)" }}>
       <div className="crm-topbar">
         <button className="crm-burger" type="button" onClick={() => setNavOpen((v) => !v)} aria-label="Menü">
-          {navOpen ? <X className="h-4 w-4" strokeWidth={2} /> : <Menu className="h-4 w-4" strokeWidth={2} />}
+          {navOpen ? "✕" : "☰"}
         </button>
         <div className="crm-topbar-logo">NoviDom</div>
         <div className="crm-topbar-sep" />
@@ -123,7 +112,6 @@ export function AdminShell({
               <div className="crm-sidebar-section">{section.title}</div>
               {section.items.map((item) => {
                 const active = !item.external && isActive(item.href);
-                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
@@ -132,7 +120,7 @@ export function AdminShell({
                     rel={item.external ? "noopener noreferrer" : undefined}
                     className={`crm-nav-item ${active ? "active" : ""}`}
                   >
-                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+                    <span aria-hidden>{item.icon}</span>
                     {item.label}
                     {typeof item.badge === "number" && item.badge > 0 && (
                       <span className={`crm-nav-badge ${item.badgeTone === "gold" ? "gold" : ""}`}>{item.badge}</span>

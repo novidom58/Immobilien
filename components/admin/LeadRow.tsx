@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { updateLeadStatus } from "@/app/admin/actions";
+import { LEAD_STATUS_OPTIONS } from "@/lib/constants";
 import { LeadActivityPanel } from "./LeadActivityPanel";
 
 type AdminLead = {
@@ -22,14 +21,6 @@ type AdminLead = {
   activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
-const STATUS_OPTIONS = [
-  { value: "neu", label: "Neu" },
-  { value: "kontaktiert", label: "Kontaktiert" },
-  { value: "termin", label: "Termin vereinbart" },
-  { value: "abgeschlossen", label: "Abgeschlossen" },
-  { value: "irrelevant", label: "Irrelevant" },
-];
-
 const STATUS_BADGE: Record<string, string> = {
   neu: "badge-blue",
   kontaktiert: "badge-gold",
@@ -41,16 +32,7 @@ const STATUS_BADGE: Record<string, string> = {
 const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 
 export function LeadRow({ lead }: { lead: AdminLead }) {
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
-
-  async function handleStatus(status: string) {
-    setBusy(true);
-    await updateLeadStatus(lead.id, status);
-    setBusy(false);
-    router.refresh();
-  }
 
   const referralHref = PARTNER_EMAIL
     ? `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(
@@ -99,15 +81,8 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
           )}
         </td>
         <td>
-          <select value={lead.status} disabled={busy} onChange={(e) => handleStatus(e.target.value)} className="filter-select">
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <span className={`badge ${STATUS_BADGE[lead.status] ?? "badge-muted"}`} style={{ marginLeft: 8 }}>
-            {STATUS_OPTIONS.find((o) => o.value === lead.status)?.label ?? lead.status}
+          <span className={`badge ${STATUS_BADGE[lead.status] ?? "badge-muted"}`}>
+            {LEAD_STATUS_OPTIONS.find((o) => o.value === lead.status)?.label ?? lead.status}
           </span>
         </td>
         <td>
@@ -132,7 +107,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
       {open && (
         <tr>
           <td colSpan={8} style={{ background: "var(--bg)", padding: "16px 20px" }}>
-            <LeadActivityPanel leadId={lead.id} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+            <LeadActivityPanel leadId={lead.id} status={lead.status} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
           </td>
         </tr>
       )}

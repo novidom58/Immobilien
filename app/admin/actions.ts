@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
 import { createResendClient } from "@/lib/resend";
@@ -365,4 +366,89 @@ export async function createLeadManually(formData: FormData) {
 
   revalidatePath("/admin", "layout");
   return { error: null };
+}
+
+export async function createBerater(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Name erforderlich." };
+
+  const { error } = await supabase.from("berater").insert({ name });
+  if (error) return { error: error.message.includes("duplicate") ? "Dieser Name existiert bereits." : error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function deleteBerater(id: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("berater").delete().eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Legt einen neuen Kunden-Login an und schickt eine Einladungsmail
+ * (Supabase setzt Passwort-Link). Braucht SUPABASE_SERVICE_ROLE_KEY -
+ * ohne den Key meldet die Funktion sauber einen Fehler statt zu crashen.
+ * Das profiles-Row entsteht automatisch über den handle_new_user()-Trigger.
+ */
+export async function inviteCustomer(formData: FormData) {
+  const { error: authError } = await requireAdmin();
+  if (authError) return { error: authError, success: false };
+
+  const email = String(formData.get("email") || "").trim();
+  const fullName = String(formData.get("full_name") || "").trim();
+  if (!email) return { error: "E-Mail-Adresse erforderlich.", success: false };
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    return { error: "SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt - Einladungen sind serverseitig noch nicht eingerichtet.", success: false };
+  }
+
+  const adminClient = createSupabaseClient(url, serviceKey);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch";
+
+  const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    data: fullName ? { full_name: fullName } : undefined,
+    redirectTo: `${siteUrl}/reset-password`,
+  });
+
+  if (error) return { error: error.message, success: false };
+
+  revalidatePath("/admin", "layout");
+  return { error: null, success: true };
+}
+
+type ImportRow = { name: string; email: string; phone: string; message: string };
+
+export async function bulkImportLeads(rows: ImportRow[]) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError, count: 0 };
+
+  const payload = rows
+    .filter((r) => r.name.trim() && r.email.trim())
+    .map((r) => ({
+      type: "contact" as const,
+      name: r.name.trim(),
+      email: r.email.trim(),
+      phone: r.phone.trim() || null,
+      message: r.message.trim() || null,
+      source: "Excel-Import",
+    }));
+
+  if (payload.length === 0) return { error: "Keine gültigen Zeilen (Name und E-Mail sind Pflicht).", count: 0 };
+
+  const { error } = await supabase.from("leads").insert(payload);
+  if (error) return { error: error.message, count: 0 };
+
+  revalidatePath("/admin", "layout");
+  return { error: null, count: payload.length };
 }

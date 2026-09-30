@@ -19,26 +19,33 @@ export default async function AdminNachfassenPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Nachfassen ({combined.length})</h1>
-      <p className="mt-2 text-sm text-ivory-dim">
-        Wiedervorlagen, die heute fällig sind, sowie Leads, die seit 3+ Tagen unbearbeitet offen stehen.
-      </p>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+      <div className="page-header">
+        <div>
+          <div className="page-title">Nachfassen</div>
+          <div className="page-sub">Wiedervorlagen, die heute fällig sind, sowie seit 3+ Tagen offene Leads</div>
+        </div>
+      </div>
+
+      <div className="card">
         {combined.length === 0 ? (
-          <p className="p-6 text-sm text-ivory-dim">Nichts offen — alles bearbeitet. 🎉</p>
+          <div className="empty">
+            <div className="empty-icon">✅</div>
+            <div className="empty-text">Nichts offen</div>
+            <div className="empty-sub">Alles bearbeitet.</div>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-ink-2 text-xs uppercase tracking-wide text-ivory-dim/60">
+          <div className="crm-table-scroll">
+            <table>
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Typ</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Kontakt</th>
-                  <th className="px-4 py-3">Nachricht</th>
-                  <th className="px-4 py-3">Datum</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Finanzierung</th>
-                  <th className="px-4 py-3">Details</th>
+                  <th>Typ</th>
+                  <th>Name</th>
+                  <th>Kontakt</th>
+                  <th>Nachricht</th>
+                  <th>Datum</th>
+                  <th>Status</th>
+                  <th>Finanzierung</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>

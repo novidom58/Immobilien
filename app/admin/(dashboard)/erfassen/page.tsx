@@ -16,12 +16,16 @@ export default async function AdminErfassenPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Lead erfassen</h1>
-      <p className="mt-2 text-sm text-ivory-dim">
-        Für Anfragen, die telefonisch oder persönlich reinkommen, nicht über die Webseite.
-      </p>
-      <div className="mt-4 max-w-2xl rounded-2xl border border-line bg-ink-2 p-5">
-        <LeadCreateForm listings={listings.map((l) => ({ id: l.id, label: `${l.address}, ${l.city}` }))} />
+      <div className="page-header">
+        <div>
+          <div className="page-title">Lead erfassen</div>
+          <div className="page-sub">Für Anfragen, die telefonisch oder persönlich reinkommen, nicht über die Webseite</div>
+        </div>
+      </div>
+      <div className="card" style={{ maxWidth: 640 }}>
+        <div style={{ padding: 20 }}>
+          <LeadCreateForm listings={listings.map((l) => ({ id: l.id, label: `${l.address}, ${l.city}` }))} />
+        </div>
       </div>
     </div>
   );

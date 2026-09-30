@@ -16,23 +16,32 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Leads ({leads.length})</h1>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+      <div className="page-header">
+        <div>
+          <div className="page-title">Leads</div>
+          <div className="page-sub">{leads.length} Einsendungen</div>
+        </div>
+      </div>
+
+      <div className="card">
         {leads.length === 0 ? (
-          <p className="p-6 text-sm text-ivory-dim">Noch keine Einsendungen.</p>
+          <div className="empty">
+            <div className="empty-icon">📭</div>
+            <div className="empty-text">Noch keine Einsendungen</div>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-ink-2 text-xs uppercase tracking-wide text-ivory-dim/60">
+          <div className="crm-table-scroll">
+            <table>
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Typ</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Kontakt</th>
-                  <th className="px-4 py-3">Nachricht</th>
-                  <th className="px-4 py-3">Datum</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Finanzierung</th>
-                  <th className="px-4 py-3">Details</th>
+                  <th>Typ</th>
+                  <th>Name</th>
+                  <th>Kontakt</th>
+                  <th>Nachricht</th>
+                  <th>Datum</th>
+                  <th>Status</th>
+                  <th>Finanzierung</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>

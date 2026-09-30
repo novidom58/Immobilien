@@ -30,6 +30,14 @@ const STATUS_OPTIONS = [
   { value: "irrelevant", label: "Irrelevant" },
 ];
 
+const STATUS_BADGE: Record<string, string> = {
+  neu: "badge-blue",
+  kontaktiert: "badge-gold",
+  termin: "badge-green",
+  abgeschlossen: "badge-green-solid",
+  irrelevant: "badge-muted",
+};
+
 const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 
 export function LeadRow({ lead }: { lead: AdminLead }) {
@@ -56,86 +64,78 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
 
   return (
     <>
-    <tr className={`border-t border-line align-top ${isOverdue ? "bg-red-500/5" : ""}`}>
-      <td className="px-4 py-3 text-amber-soft">
-        {lead.type}
-        {isOverdue && (
-          <span className="ml-2 inline-block rounded-full border border-red-400/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-red-400">
-            {lead.daysOpen} Tage überfällig
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-3 text-ivory">
-        {lead.name}
-        {lead.wants_financing && (
-          <span
-            title={referralHref ? "An hypotheken-analyse.ch weiterleiten" : "Finanzierungsberatung gewünscht"}
-            className="ml-2 inline-block rounded-full border border-blueprint/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-blueprint"
-          >
-            Finanzierung
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-3 text-ivory-dim">
-        {lead.email}
-        {lead.phone ? ` · ${lead.phone}` : ""}
-      </td>
-      <td className="max-w-xs truncate px-4 py-3 text-ivory-dim">{lead.message}</td>
-      <td className="px-4 py-3 text-ivory-dim/60">
-        {new Date(lead.created_at).toLocaleDateString("de-CH")}
-        {lead.source && (
-          <span className="mt-1 block w-fit rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/60">
-            {lead.source}
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-3">
-        <select
-          value={lead.status}
-          disabled={busy}
-          onChange={(e) => handleStatus(e.target.value)}
-          className="rounded-lg border border-line bg-ink px-2.5 py-1.5 text-xs text-ivory focus:border-amber focus:outline-none"
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </td>
-      <td className="px-4 py-3">
-        {lead.wants_financing &&
-          (referralHref ? (
-            <a
-              href={referralHref}
-              className="font-mono text-[11px] uppercase tracking-wide text-amber underline underline-offset-2 hover:text-amber-soft"
-            >
-              An hypotheken-analyse.ch weiterleiten
-            </a>
-          ) : (
-            <span className="font-mono text-[11px] uppercase tracking-wide text-ivory-dim/40">
-              Partner-E-Mail fehlt
+      <tr className={isOverdue ? "termin-offen" : ""}>
+        <td className="td-light">{lead.type}</td>
+        <td className="td-name">
+          {lead.name}
+          {isOverdue && (
+            <span className="badge badge-red" style={{ marginLeft: 6 }}>
+              {lead.daysOpen}T überfällig
             </span>
-          ))}
-      </td>
-      <td className="px-4 py-3">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60 hover:text-ivory"
-        >
-          Details
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
-        </button>
-      </td>
-    </tr>
-    {open && (
-      <tr className="border-t border-line">
-        <td colSpan={8} className="bg-ink-2 px-4 py-4">
-          <LeadActivityPanel leadId={lead.id} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+          )}
+          {lead.wants_financing && (
+            <span
+              title={referralHref ? "An hypotheken-analyse.ch weiterleiten" : "Finanzierungsberatung gewünscht"}
+              className="badge badge-blue"
+              style={{ marginLeft: 6 }}
+            >
+              Finanzierung
+            </span>
+          )}
+        </td>
+        <td className="td-light">
+          {lead.email}
+          {lead.phone ? ` · ${lead.phone}` : ""}
+        </td>
+        <td className="td-light" style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {lead.message}
+        </td>
+        <td className="td-light">
+          {new Date(lead.created_at).toLocaleDateString("de-CH")}
+          {lead.source && (
+            <span className="badge badge-muted" style={{ marginTop: 4, display: "block", width: "fit-content" }}>
+              {lead.source}
+            </span>
+          )}
+        </td>
+        <td>
+          <select value={lead.status} disabled={busy} onChange={(e) => handleStatus(e.target.value)} className="filter-select">
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <span className={`badge ${STATUS_BADGE[lead.status] ?? "badge-muted"}`} style={{ marginLeft: 8 }}>
+            {STATUS_OPTIONS.find((o) => o.value === lead.status)?.label ?? lead.status}
+          </span>
+        </td>
+        <td>
+          {lead.wants_financing &&
+            (referralHref ? (
+              <a href={referralHref} className="btn btn-ghost btn-sm">
+                An hypotheken-analyse.ch
+              </a>
+            ) : (
+              <span className="td-light" style={{ fontSize: 11 }}>
+                Partner-E-Mail fehlt
+              </span>
+            ))}
+        </td>
+        <td>
+          <button type="button" onClick={() => setOpen((v) => !v)} className="btn btn-ghost btn-sm">
+            Details
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
+          </button>
         </td>
       </tr>
-    )}
+      {open && (
+        <tr>
+          <td colSpan={8} style={{ background: "var(--bg)", padding: "16px 20px" }}>
+            <LeadActivityPanel leadId={lead.id} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+          </td>
+        </tr>
+      )}
     </>
   );
 }

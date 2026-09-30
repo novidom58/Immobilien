@@ -74,25 +74,22 @@ export function AcquisitionTool() {
     subject
   )}&body=${encodeURIComponent(body)}`;
 
-  const fieldClasses =
-    "rounded-lg border border-line bg-ink px-3 py-2 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none";
-
   return (
-    <div className="rounded-2xl border border-line bg-ink-2 p-5">
-      <div className="grid gap-4 lg:grid-cols-2">
+    <div className="card">
+      <div className="grid gap-4 lg:grid-cols-2" style={{ padding: 20 }}>
         <div className="grid grid-cols-2 gap-2.5">
-          <input placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} className={fieldClasses} />
-          <input placeholder="E-Mail Empfänger" value={recipientEmail} onChange={(e) => setRecipientEmail(e.target.value)} className={fieldClasses} />
-          <input placeholder="Strasse & Hausnummer" value={address} onChange={(e) => setAddress(e.target.value)} className={fieldClasses} />
-          <input placeholder="PLZ / Ort" value={city} onChange={(e) => setCity(e.target.value)} className={fieldClasses} />
-          <select value={objektTyp} onChange={(e) => setObjektTyp(e.target.value)} className={fieldClasses}>
+          <input placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} className="field-input" />
+          <input placeholder="E-Mail Empfänger" value={recipientEmail} onChange={(e) => setRecipientEmail(e.target.value)} className="field-input" />
+          <input placeholder="Strasse & Hausnummer" value={address} onChange={(e) => setAddress(e.target.value)} className="field-input" />
+          <input placeholder="PLZ / Ort" value={city} onChange={(e) => setCity(e.target.value)} className="field-input" />
+          <select value={objektTyp} onChange={(e) => setObjektTyp(e.target.value)} className="field-select">
             {OBJEKT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
-          <select value={berater} onChange={(e) => setBerater(e.target.value)} className={fieldClasses}>
+          <select value={berater} onChange={(e) => setBerater(e.target.value)} className="field-select">
             {BERATER_OPTIONS.map((b) => (
               <option key={b} value={b}>
                 {b}
@@ -104,29 +101,27 @@ export function AcquisitionTool() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
-            className={`${fieldClasses} col-span-2 resize-none`}
+            className="field-textarea col-span-2"
           />
         </div>
 
-        <div className="rounded-xl border border-line bg-ink p-4">
-          <div className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60">Betreff</div>
-          <div className="mt-1 text-sm text-ivory">{subject}</div>
-          <div className="mt-3 font-mono text-xs uppercase tracking-wide text-ivory-dim/60">Text</div>
-          <pre className="mt-1 max-h-72 overflow-y-auto whitespace-pre-wrap font-sans text-sm text-ivory-dim">{body}</pre>
+        <div style={{ border: "1px solid var(--border)", borderRadius: "var(--r)", padding: 16, background: "var(--bg)" }}>
+          <div className="field-label">Betreff</div>
+          <div className="mt-1" style={{ fontSize: 13 }}>{subject}</div>
+          <div className="field-label mt-3">Text</div>
+          <pre
+            className="mt-1 whitespace-pre-wrap"
+            style={{ maxHeight: 288, overflowY: "auto", fontFamily: "inherit", fontSize: 13, color: "var(--ink-mid)" }}
+          >
+            {body}
+          </pre>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs text-ivory-dim hover:border-amber/50 hover:text-ivory"
-            >
-              {copied ? <Check className="h-3.5 w-3.5" strokeWidth={1.5} /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
+            <button type="button" onClick={handleCopy} className="btn btn-ghost btn-sm">
+              {copied ? <Check className="h-3.5 w-3.5" strokeWidth={1.75} /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />}
               {copied ? "Kopiert" : "Text kopieren"}
             </button>
-            <a
-              href={mailtoHref}
-              className="flex items-center gap-1.5 rounded-lg bg-amber px-3 py-2 text-xs font-semibold text-ink"
-            >
-              <Mail className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <a href={mailtoHref} className="btn btn-primary btn-sm">
+              <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
               In E-Mail-Programm öffnen
             </a>
           </div>

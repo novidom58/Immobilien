@@ -3,7 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { getLeadsWithActivity, getListingsForAdmin, getNewsletterSubscribers, getCustomers, overdueLeads, dueTodayLeads } from "@/lib/admin-data";
+import { getLeadsWithActivity, getListingsForAdmin, overdueLeads, dueTodayLeads } from "@/lib/admin-data";
+import { saleDeadlineProgress } from "@/lib/dates";
+import "../admin-crm.css";
 
 export default async function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -27,21 +29,20 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/admin/login");
 
-  const [leads, listings, subscribers, customers] = await Promise.all([
-    getLeadsWithActivity(supabase),
-    getListingsForAdmin(supabase),
-    getNewsletterSubscribers(supabase),
-    getCustomers(supabase),
-  ]);
+  const [leads, listings] = await Promise.all([getLeadsWithActivity(supabase), getListingsForAdmin(supabase)]);
 
   const nachfassenCount = new Set([...dueTodayLeads(leads), ...overdueLeads(leads)].map((l) => l.id)).size;
+  const unterlagenCount = listings.reduce((sum, l) => sum + l.documents.length, 0);
+  const fristenCount = listings.filter((l) => {
+    if (!l.activated_at || (l.status !== "active" && l.status !== "reserved")) return false;
+    return saleDeadlineProgress(l.activated_at, l.sale_deadline_months).remainingDays <= 30;
+  }).length;
 
   const counts = {
     leads: leads.length,
     nachfassen: nachfassenCount,
-    kunden: customers.length,
-    newsletter: subscribers.length,
-    inserate: listings.length,
+    unterlagen: unterlagenCount,
+    fristen: fristenCount,
   };
 
   return (

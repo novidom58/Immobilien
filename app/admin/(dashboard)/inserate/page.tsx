@@ -18,21 +18,37 @@ export default async function AdminInseratePage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ivory">Inserate ({listings.length})</h1>
-      <div className="mt-4 rounded-2xl border border-line bg-ink-2 p-5">
-        <NewListingForm />
+      <div className="page-header">
+        <div>
+          <div className="page-title">Inserate</div>
+          <div className="page-sub">{listings.length} Objekte</div>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-4">
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">Neues Inserat</div>
+        </div>
+        <div style={{ padding: 20 }}>
+          <NewListingForm />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
         {listings.length === 0 ? (
-          <p className="rounded-2xl border border-line p-6 text-sm text-ivory-dim">Noch keine Inserate.</p>
+          <div className="card">
+            <div className="empty">
+              <div className="empty-icon">🏠</div>
+              <div className="empty-text">Noch keine Inserate</div>
+            </div>
+          </div>
         ) : (
           listings.map((listing) => (
             <ListingCard key={listing.id} listing={listing} customerEmails={customerEmails} />
           ))
         )}
       </div>
-      <p className="mt-3 text-xs text-ivory-dim/60">
+      <p className="td-light" style={{ marginTop: 12, fontSize: 11 }}>
         Kunden per E-Mail-Adresse direkt bei der jeweiligen Objektkarte zuweisen — der Kunde muss sich
         vorher einmal unter /login registriert haben.
       </p>

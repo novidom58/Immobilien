@@ -8,14 +8,12 @@ export function SaleDeadlineBar({
   deadlineMonths?: number;
 }) {
   if (!activatedAt) {
-    return (
-      <div className="text-xs text-ivory-dim/50">Noch nicht aktiviert — Frist läuft ab Online-Schaltung.</div>
-    );
+    return <div className="td-light" style={{ fontSize: 11 }}>Noch nicht aktiviert — Frist läuft ab Online-Schaltung.</div>;
   }
 
   const { pct, remainingDays } = saleDeadlineProgress(activatedAt, deadlineMonths);
 
-  const color = pct >= 90 ? "bg-red-500" : pct >= 65 ? "bg-amber" : "bg-blueprint";
+  const tone = pct >= 90 ? "alert" : pct >= 65 ? "warn" : "";
   const label =
     remainingDays > 0
       ? `Noch ${remainingDays} ${remainingDays === 1 ? "Tag" : "Tage"} bis zur ${deadlineMonths}-Monats-Frist`
@@ -23,10 +21,12 @@ export function SaleDeadlineBar({
 
   return (
     <div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-3">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      <div className="crm-progress-track">
+        <div className={`crm-progress-fill ${tone}`} style={{ width: `${pct}%` }} />
       </div>
-      <div className="mt-1 text-xs text-ivory-dim/70">{label}</div>
+      <div className="td-light" style={{ fontSize: 11, marginTop: 4 }}>
+        {label}
+      </div>
     </div>
   );
 }

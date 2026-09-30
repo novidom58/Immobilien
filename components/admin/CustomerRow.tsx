@@ -26,9 +26,6 @@ type AssignedListing = {
   documents: { id: string; name: string; url: string }[];
 };
 
-const fieldClasses =
-  "rounded-lg border border-line bg-ink px-3 py-2 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none";
-
 export function CustomerRow({
   customer,
   assignedListings,
@@ -51,54 +48,52 @@ export function CustomerRow({
   }
 
   return (
-    <li className="px-4 py-3 text-sm">
+    <div style={{ borderBottom: "1px solid var(--border)", padding: "12px 20px" }}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-4 text-left"
+        style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}
       >
-        <span className="text-ivory">
-          {customer.full_name || "—"}{" "}
-          <span className="text-ivory-dim">{customer.full_name ? `· ${customer.email}` : customer.email}</span>
+        <span className="td-name">
+          {customer.full_name || "—"} <span className="td-light">{customer.full_name ? `· ${customer.email}` : customer.email}</span>
         </span>
-        <span className="flex items-center gap-3 font-mono text-xs text-ivory-dim/60">
+        <span className="flex items-center gap-3 td-light" style={{ fontSize: 12 }}>
           {customer.role === "admin" ? "Admin" : "Kunde"} · {new Date(customer.created_at).toLocaleDateString("de-CH")}
           {assignedListings.length > 0 && (
-            <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
+            <span className="badge badge-blue">
               {assignedListings.length} Objekt{assignedListings.length === 1 ? "" : "e"}
             </span>
           )}
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
+          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.75} />
         </span>
       </button>
 
       {open && (
-        <div className="mt-4 flex flex-col gap-4 border-t border-line pt-4">
+        <div className="mt-4 flex flex-col gap-4" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
           <form action={handleSave} className="grid gap-2.5 sm:grid-cols-3">
-            <input name="full_name" defaultValue={customer.full_name ?? ""} placeholder="Name" className={fieldClasses} />
-            <input name="phone" defaultValue={customer.phone ?? ""} placeholder="Telefonnummer" className={fieldClasses} />
-            <input name="birthdate" type="date" defaultValue={customer.birthdate ?? ""} className={fieldClasses} />
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-lg bg-amber px-4 py-2 text-xs font-semibold uppercase tracking-wide text-ink disabled:opacity-60 sm:col-span-3 sm:w-fit"
-            >
+            <input name="full_name" defaultValue={customer.full_name ?? ""} placeholder="Name" className="field-input" />
+            <input name="phone" defaultValue={customer.phone ?? ""} placeholder="Telefonnummer" className="field-input" />
+            <input name="birthdate" type="date" defaultValue={customer.birthdate ?? ""} className="field-input" />
+            <button type="submit" disabled={busy} className="btn btn-primary btn-sm sm:col-span-3" style={{ width: "fit-content" }}>
               {busy ? "Speichert…" : "Speichern"}
             </button>
           </form>
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && (
+            <p style={{ fontSize: 12, color: "var(--red)" }}>{error}</p>
+          )}
 
           {assignedListings.length === 0 ? (
-            <p className="text-xs text-ivory-dim/60">Kein Objekt zugewiesen.</p>
+            <p className="td-light" style={{ fontSize: 12 }}>Kein Objekt zugewiesen.</p>
           ) : (
             <div className="flex flex-col gap-3">
               {assignedListings.map((l) => (
-                <div key={l.id} className="rounded-xl border border-line bg-ink p-3.5">
+                <div key={l.id} style={{ border: "1px solid var(--border)", borderRadius: "var(--r)", padding: 14, background: "var(--bg)" }}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-ivory">
+                    <span className="td-name">
                       {l.address}, {l.city}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-wide text-ivory-dim/60">{l.status}</span>
+                    <span className="badge badge-muted">{l.status}</span>
                   </div>
                   {(l.status === "active" || l.status === "reserved") && (
                     <div className="mt-2">
@@ -108,11 +103,8 @@ export function CustomerRow({
                   {l.documents.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {l.documents.map((doc) => (
-                        <span
-                          key={doc.id}
-                          className="flex items-center gap-1 rounded-full border border-line px-2 py-0.5 font-mono text-[10px] text-ivory-dim"
-                        >
-                          <FileText className="h-3 w-3" strokeWidth={1.5} />
+                        <span key={doc.id} className="badge badge-muted">
+                          <FileText className="h-3 w-3" strokeWidth={1.75} />
                           {doc.name}
                         </span>
                       ))}
@@ -124,6 +116,6 @@ export function CustomerRow({
           )}
         </div>
       )}
-    </li>
+    </div>
   );
 }

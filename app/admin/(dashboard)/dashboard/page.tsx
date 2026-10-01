@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLeadsWithActivity, getListingsForAdmin, getCrmCustomers } from "@/lib/admin-data";
-import { saleDeadlineProgress } from "@/lib/dates";
+import { getLeadsWithActivity, getListingsForAdmin, getCrmCustomers, getUpcomingTermine } from "@/lib/admin-data";
+import { saleDeadlineProgress, isWithinNextDays } from "@/lib/dates";
 
 export const metadata: Metadata = {
   title: "Dashboard — Admin",
@@ -25,11 +25,14 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const [leads, listings, customers] = await Promise.all([
+  const [leads, listings, customers, termine] = await Promise.all([
     getLeadsWithActivity(supabase),
     getListingsForAdmin(supabase),
     getCrmCustomers(supabase),
+    getUpcomingTermine(supabase),
   ]);
+
+  const termineBald = termine.filter((t) => isWithinNextDays(t.starts_at, 7));
 
   const neueLeads = leads.filter((l) => l.status === "neu");
   const kontaktierteLeads = leads.filter((l) => l.status === "kontaktiert" || l.status === "termin");
@@ -91,6 +94,11 @@ export default async function AdminDashboardPage() {
           <div className="kpi-label">Offene Leads</div>
           <div className="kpi-sub">Total aktive Leads</div>
         </div>
+        <Link href="/admin/kalender" className="kpi warn">
+          <div className="kpi-num">{termineBald.length}</div>
+          <div className="kpi-label">Termine</div>
+          <div className="kpi-sub">Nächste 7 Tage</div>
+        </Link>
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>

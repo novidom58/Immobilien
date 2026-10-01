@@ -16,3 +16,8 @@ export function saleDeadlineProgress(activatedAt: string, deadlineMonths: number
 
   return { pct, remainingDays };
 }
+
+export function isWithinNextDays(dateString: string, days: number): boolean {
+  const target = new Date(Date.now() + days * 24 * 60 * 60 * 1000).getTime();
+  return new Date(dateString).getTime() <= target;
+}

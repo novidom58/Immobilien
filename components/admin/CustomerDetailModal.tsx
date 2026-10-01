@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText } from "lucide-react";
+import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText, Inbox } from "lucide-react";
 import {
   updateCustomer,
   setCustomerTyp,
@@ -11,6 +11,8 @@ import {
   assignCustomerListing,
   invitePortalAccess,
   sendExposeEmail,
+  sendFollowUpEmail,
+  sendDocumentRequestEmail,
   addCustomerActivity,
   deleteCustomerActivity,
 } from "@/app/admin/actions";
@@ -291,6 +293,26 @@ export function CustomerDetailModal({
                   Exposé senden
                 </button>
               )}
+              <button
+                type="button"
+                disabled={busy === "followup-mail" || !customer.email}
+                onClick={() => run("followup-mail", () => sendFollowUpEmail(customer.id))}
+                className="btn btn-gold btn-sm"
+                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
+              >
+                <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Nachfassen
+              </button>
+              <button
+                type="button"
+                disabled={busy === "docs" || !customer.email}
+                onClick={() => run("docs", () => sendDocumentRequestEmail(customer.id))}
+                className="btn btn-ghost btn-sm"
+                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
+              >
+                <Inbox className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Unterlagen anfordern
+              </button>
             </div>
           </div>
 

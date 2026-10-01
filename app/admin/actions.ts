@@ -716,3 +716,131 @@ export async function sendExposeEmail(customerId: string) {
   revalidatePath("/admin", "layout");
   return { error: null };
 }
+
+const REQUIRED_DOCUMENTS = [
+  "Grundbuchauszug",
+  "Grundrisspläne",
+  "Gebäudeversicherungsausweis (GVB/GVZ)",
+  "Energieausweis (GEAK), falls vorhanden",
+  "Ausweiskopie",
+];
+
+/**
+ * Warme Wiedervorlage-Mail an einen Bestandskunden, der länger nichts
+ * mehr gehört hat - Gegenstück zur kalten Akquise-E-Mail.
+ */
+export async function sendFollowUpEmail(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: customer, error: fetchError } = await supabase
+    .from("customers")
+    .select("full_name, email, berater")
+    .eq("id", customerId)
+    .single();
+  if (fetchError || !customer) return { error: fetchError?.message || "Kunde nicht gefunden." };
+  if (!customer.email) return { error: "Diese Kundenakte hat keine E-Mail-Adresse hinterlegt." };
+
+  const resend = createResendClient();
+  if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
+
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const firstName = customer.full_name.split(" ")[0];
+  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+
+  const { error } = await resend.emails.send({
+    from,
+    to: customer.email,
+    subject: "Kurzes Update zu Ihrem Anliegen",
+    text: `Hallo ${firstName}\n\nWir wollten kurz nachfragen, ob sich bei Ihnen in der Zwischenzeit etwas getan hat oder ob noch Fragen offen sind. Gerne melden wir uns auch telefonisch, wenn Ihnen das lieber ist.\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+  });
+  if (error) return { error: error.message };
+
+  await supabase.from("customer_activity").insert({ customer_id: customerId, type: "email", text: "Nachfass-Mail verschickt" });
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Fordert die üblichen Verkaufsunterlagen per E-Mail an.
+ */
+export async function sendDocumentRequestEmail(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: customer, error: fetchError } = await supabase
+    .from("customers")
+    .select("full_name, email, berater")
+    .eq("id", customerId)
+    .single();
+  if (fetchError || !customer) return { error: fetchError?.message || "Kunde nicht gefunden." };
+  if (!customer.email) return { error: "Diese Kundenakte hat keine E-Mail-Adresse hinterlegt." };
+
+  const resend = createResendClient();
+  if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
+
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const firstName = customer.full_name.split(" ")[0];
+  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+  const docList = REQUIRED_DOCUMENTS.map((d) => `• ${d}`).join("\n");
+
+  const { error } = await resend.emails.send({
+    from,
+    to: customer.email,
+    subject: "Unterlagen für den Verkauf",
+    text: `Hallo ${firstName}\n\nDamit wir mit dem Verkauf weiterkommen, benötigen wir noch folgende Unterlagen von Ihnen:\n\n${docList}\n\nSie können uns diese einfach per E-Mail zurücksenden. Vielen Dank!\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+  });
+  if (error) return { error: error.message };
+
+  await supabase.from("customer_activity").insert({ customer_id: customerId, type: "email", text: "Unterlagen angefordert" });
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+const VALID_TERMIN_TYPES = ["erstgespraech", "besichtigung", "notartermin", "sonstiges"] as const;
+
+export async function createTermin(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const title = String(formData.get("title") || "").trim();
+  const typeRaw = String(formData.get("type") || "besichtigung");
+  const date = String(formData.get("date") || "").trim();
+  const time = String(formData.get("time") || "09:00").trim();
+  const customerId = String(formData.get("customer_id") || "").trim();
+  const berater = String(formData.get("berater") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!title || !date) return { error: "Titel und Datum sind Pflichtfelder." };
+
+  const type = (VALID_TERMIN_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "besichtigung";
+  const startsAt = new Date(`${date}T${time || "09:00"}:00`);
+  if (Number.isNaN(startsAt.getTime())) return { error: "Ungültiges Datum/Zeit." };
+
+  const { error } = await supabase.from("termine").insert({
+    title,
+    type,
+    starts_at: startsAt.toISOString(),
+    customer_id: customerId || null,
+    berater: berater || null,
+    notes: notes || null,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function deleteTermin(terminId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("termine").delete().eq("id", terminId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}

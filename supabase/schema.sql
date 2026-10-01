@@ -507,6 +507,51 @@ insert into berater (name) values ('Ruedi'), ('Kim'), ('Gregy')
 on conflict (name) do nothing;
 
 -- ---------------------------------------------------------------------
+-- customers: die eigentliche Kunden-CRM-Akte - bewusst getrennt von
+-- profiles/auth.users, weil nicht jeder Kunde (noch) einen Portal-Login
+-- hat. portal_user_id wird erst gesetzt, sobald jemand eingeladen wurde
+-- und sich angemeldet hat. listing_id verknüpft die Akte optional mit
+-- einem Inserat (Verkäufer) - ein Kunde ohne Inserat ist ein Neukunde/
+-- Käufer-Interessent.
+-- ---------------------------------------------------------------------
+create table if not exists customers (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  email text,
+  phone text,
+  address text,
+  language text not null default 'Deutsch',
+  typ text not null default 'neukunde' check (typ in ('neukunde', 'bestand', 'ex')),
+  ziel text check (ziel in ('verkaufen', 'kaufen') or ziel is null),
+  berater text,
+  notes text,
+  follow_up_at date,
+  listing_id uuid references listings (id) on delete set null,
+  portal_user_id uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table customers enable row level security;
+
+drop policy if exists "customers_admin_all" on customers;
+create policy "customers_admin_all" on customers
+  for all using (public.is_admin());
+
+create table if not exists customer_activity (
+  id uuid primary key default gen_random_uuid(),
+  customer_id uuid not null references customers (id) on delete cascade,
+  type text not null default 'notiz',
+  text text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table customer_activity enable row level security;
+
+drop policy if exists "customer_activity_admin_all" on customer_activity;
+create policy "customer_activity_admin_all" on customer_activity
+  for all using (public.is_admin());
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

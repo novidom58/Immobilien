@@ -82,6 +82,56 @@ export async function getCustomers(supabase: Supabase) {
   }[];
 }
 
+type LinkedListing = {
+  id: string;
+  address: string;
+  city: string;
+  price_chf: number | null;
+  status: string;
+  activated_at: string | null;
+  sale_deadline_months: number;
+};
+
+export async function getCrmCustomers(supabase: Supabase) {
+  const [customersRes, activityRes] = await Promise.all([
+    supabase
+      .from("customers")
+      .select(
+        "id, full_name, email, phone, address, language, typ, ziel, berater, notes, follow_up_at, listing_id, portal_user_id, created_at, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
+      )
+      .order("created_at", { ascending: false }),
+    supabase.from("customer_activity").select("id, customer_id, type, text, created_at").order("created_at", { ascending: false }),
+  ]);
+
+  const activityByCustomer = new Map<string, { id: string; type: string; text: string; created_at: string }[]>();
+  for (const a of activityRes.data ?? []) {
+    const list = activityByCustomer.get(a.customer_id) ?? [];
+    list.push(a);
+    activityByCustomer.set(a.customer_id, list);
+  }
+
+  return (customersRes.data ?? []).map((c) => ({
+    id: c.id as string,
+    full_name: c.full_name as string,
+    email: (c.email as string | null) ?? null,
+    phone: (c.phone as string | null) ?? null,
+    address: (c.address as string | null) ?? null,
+    language: (c.language as string) ?? "Deutsch",
+    typ: (c.typ as string) ?? "neukunde",
+    ziel: (c.ziel as string | null) ?? null,
+    berater: (c.berater as string | null) ?? null,
+    notes: (c.notes as string | null) ?? null,
+    follow_up_at: (c.follow_up_at as string | null) ?? null,
+    listing_id: (c.listing_id as string | null) ?? null,
+    portal_user_id: (c.portal_user_id as string | null) ?? null,
+    created_at: c.created_at as string,
+    listing: (c.listings as unknown as LinkedListing | null) ?? null,
+    activity: activityByCustomer.get(c.id as string) ?? [],
+  }));
+}
+
+export type CrmCustomer = Awaited<ReturnType<typeof getCrmCustomers>>[number];
+
 export async function getBeraterNames(supabase: Supabase) {
   const { data } = await supabase.from("berater").select("id, name").order("name");
   return (data ?? []) as { id: string; name: string }[];
@@ -106,4 +156,13 @@ export function overdueLeads(leads: AdminLeadWithActivity[]) {
 
 export function viewingRequestLeads(leads: AdminLeadWithActivity[]) {
   return leads.filter((l) => l.listing_id && l.status !== "abgeschlossen" && l.status !== "irrelevant");
+}
+
+export function financingRequestLeads(leads: AdminLeadWithActivity[]) {
+  return leads.filter((l) => l.wants_financing && l.status !== "abgeschlossen" && l.status !== "irrelevant");
+}
+
+export function dueTodayCustomers(customers: CrmCustomer[]) {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  return customers.filter((c) => c.follow_up_at && c.follow_up_at <= todayStr && c.typ !== "ex");
 }

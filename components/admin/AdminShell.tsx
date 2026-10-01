@@ -61,7 +61,6 @@ export function AdminShell({
     {
       title: "Erfassen",
       items: [
-        { href: "/admin/erfassen", label: "Lead erfassen", icon: "➕" },
         { href: "/admin/kunde-erfassen", label: "Kunde erfassen", icon: "➕" },
         { href: "/admin/import", label: "Excel-Import", icon: "📥" },
       ],
@@ -72,10 +71,6 @@ export function AdminShell({
         { href: "/admin/kalender", label: "Kalender", icon: "🗓️" },
         { href: "/admin/berater", label: "Berater", icon: "🧑‍💼" },
       ],
-    },
-    {
-      title: "Tools",
-      items: [{ href: "/admin/akquise", label: "Akquise-E-Mail", icon: "✉️" }],
     },
     {
       title: "Links",

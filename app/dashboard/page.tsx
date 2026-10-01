@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { MyDocuments } from "@/components/MyDocuments";
+import { SaleStepper } from "@/components/SaleStepper";
 
 export const metadata: Metadata = {
   title: "Verkaufs-Cockpit",
@@ -210,6 +211,15 @@ export default async function DashboardPage() {
                   Öffentliches Inserat ansehen →
                 </Link>
               )}
+            </div>
+
+            <div className="mt-6">
+              <SaleStepper
+                hasPhotos={photos.length > 0}
+                isOnline={listing.status !== "draft"}
+                hasViewingRequests={listing.viewing_requests > 0}
+                isSold={listing.status === "sold"}
+              />
             </div>
 
             {photos.length > 0 && (

@@ -12,7 +12,7 @@ export default function AdminImportPage() {
       <div className="page-header">
         <div>
           <div className="page-title">Excel-Import</div>
-          <div className="page-sub">Bestandskontakte aus Excel/CSV als Leads importieren</div>
+          <div className="page-sub">Bestandskontakte aus Excel/CSV direkt als Kunden importieren</div>
         </div>
       </div>
       <CsvImportTool />

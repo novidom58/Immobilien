@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLeadsWithActivity, getListingsForAdmin, getCustomers } from "@/lib/admin-data";
+import { getLeadsWithActivity, getListingsForAdmin, getCrmCustomers } from "@/lib/admin-data";
 import { saleDeadlineProgress } from "@/lib/dates";
 
 export const metadata: Metadata = {
@@ -17,6 +17,10 @@ const PIPELINE_STATUS = [
   { value: "irrelevant", label: "Irrelevant" },
 ];
 
+function formatChf(n: number) {
+  return `CHF ${Math.round(n).toLocaleString("en-US").replace(/,/g, "'")}`;
+}
+
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   if (!supabase) return null;
@@ -24,17 +28,22 @@ export default async function AdminDashboardPage() {
   const [leads, listings, customers] = await Promise.all([
     getLeadsWithActivity(supabase),
     getListingsForAdmin(supabase),
-    getCustomers(supabase),
+    getCrmCustomers(supabase),
   ]);
 
   const neueLeads = leads.filter((l) => l.status === "neu");
+  const kontaktierteLeads = leads.filter((l) => l.status === "kontaktiert" || l.status === "termin");
   const offeneLeads = leads.filter((l) => l.status !== "abgeschlossen" && l.status !== "irrelevant");
-  const bestandskunden = customers.filter((c) => c.role !== "admin");
+  const bestandskunden = customers.filter((c) => c.typ === "bestand");
   const fristen6Monate = listings.filter((l) => {
     if (!l.activated_at || (l.status !== "active" && l.status !== "reserved")) return false;
     const { remainingDays } = saleDeadlineProgress(l.activated_at, l.sale_deadline_months);
     return remainingDays <= 180;
   });
+
+  const aktiveListings = listings.filter((l) => l.status === "active" || l.status === "reserved");
+  const pipelineVolumen = aktiveListings.reduce((sum, l) => sum + (l.price_chf ?? 0), 0);
+  const pipelineUmsatz = pipelineVolumen * 0.0095;
 
   const pipelineCounts = PIPELINE_STATUS.map((s) => ({
     ...s,
@@ -47,15 +56,25 @@ export default async function AdminDashboardPage() {
       <div className="page-header">
         <div>
           <div className="page-title">Dashboard</div>
-          <div className="page-sub">Überblick über alle Leads, Fristen und Kunden</div>
+          <div className="page-sub">Überblick über Leads, Fristen, Kunden und Pipeline-Umsatz</div>
         </div>
       </div>
 
       <div className="kpi-grid">
+        <div className="kpi blue">
+          <div className="kpi-num">{formatChf(pipelineUmsatz)}</div>
+          <div className="kpi-label">Pipeline-Umsatz (geschätzt)</div>
+          <div className="kpi-sub">0.95% von {formatChf(pipelineVolumen)} aktivem Volumen</div>
+        </div>
         <div className="kpi alert">
           <div className="kpi-num">{neueLeads.length}</div>
           <div className="kpi-label">Neue Leads</div>
           <div className="kpi-sub">Noch nicht kontaktiert</div>
+        </div>
+        <div className="kpi ok">
+          <div className="kpi-num">{kontaktierteLeads.length}</div>
+          <div className="kpi-label">Kontaktiert</div>
+          <div className="kpi-sub">In Bearbeitung</div>
         </div>
         <div className="kpi warn">
           <div className="kpi-num">{fristen6Monate.length}</div>
@@ -65,7 +84,7 @@ export default async function AdminDashboardPage() {
         <div className="kpi ok">
           <div className="kpi-num">{bestandskunden.length}</div>
           <div className="kpi-label">Bestandskunden</div>
-          <div className="kpi-sub">Registrierte Kund:innen</div>
+          <div className="kpi-sub">Aktive Verkaufsmandate</div>
         </div>
         <div className="kpi blue">
           <div className="kpi-num">{offeneLeads.length}</div>

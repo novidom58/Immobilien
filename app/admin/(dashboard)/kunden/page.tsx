@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { CustomerRow } from "@/components/admin/CustomerRow";
-import { getCustomers, getListingsForAdmin } from "@/lib/admin-data";
+import { CustomerList } from "@/components/admin/CustomerList";
+import { getCrmCustomers, getListingsForAdmin, getBeraterNames } from "@/lib/admin-data";
+import { BERATER_OPTIONS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Kunden — Admin",
@@ -12,48 +13,18 @@ export default async function AdminKundenPage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const [customers, listings] = await Promise.all([getCustomers(supabase), getListingsForAdmin(supabase)]);
+  const [customers, listings, beraterRows] = await Promise.all([
+    getCrmCustomers(supabase),
+    getListingsForAdmin(supabase),
+    getBeraterNames(supabase),
+  ]);
+  const beraterOptions = beraterRows.length > 0 ? beraterRows.map((b) => b.name) : [...BERATER_OPTIONS];
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title">Registrierte Kunden</div>
-          <div className="page-sub">{customers.length} Kund:innen</div>
-        </div>
-      </div>
-
-      <div className="card">
-        {customers.length === 0 ? (
-          <div className="empty">
-            <div className="empty-icon">👤</div>
-            <div className="empty-text">Noch niemand registriert</div>
-            <div className="empty-sub">
-              Kund:innen müssen sich zuerst unter /login anmelden, bevor ihr sie einem Inserat zuweisen könnt.
-            </div>
-          </div>
-        ) : (
-          <div>
-            {customers.map((c) => (
-              <CustomerRow
-                key={c.id}
-                customer={c}
-                assignedListings={listings
-                  .filter((l) => l.ownerId === c.id)
-                  .map((l) => ({
-                    id: l.id,
-                    address: l.address,
-                    city: l.city,
-                    status: l.status,
-                    activated_at: l.activated_at,
-                    sale_deadline_months: l.sale_deadline_months,
-                    documents: l.documents,
-                  }))}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <CustomerList
+      customers={customers}
+      listings={listings.map((l) => ({ id: l.id, address: l.address, city: l.city, status: l.status }))}
+      beraterOptions={beraterOptions}
+    />
   );
 }

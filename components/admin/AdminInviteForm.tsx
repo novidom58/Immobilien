@@ -1,13 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { inviteCustomer } from "@/app/admin/actions";
+import { inviteAdmin } from "@/app/admin/actions";
 
 const initialState = { error: null as string | null, success: false };
 
-export function CustomerInviteForm() {
+export function AdminInviteForm() {
   const [state, formAction, pending] = useActionState(
-    async (_prev: typeof initialState, formData: FormData) => inviteCustomer(formData),
+    async (_prev: typeof initialState, formData: FormData) => inviteAdmin(formData),
     initialState
   );
 
@@ -22,11 +22,11 @@ export function CustomerInviteForm() {
       )}
       {state.success && (
         <p className="sm:col-span-2" style={{ fontSize: 13, color: "var(--green)" }}>
-          Einladung verschickt.
+          Einladung verschickt — sobald sich die Person anmeldet, hat sie vollen Admin-Zugriff.
         </p>
       )}
       <button type="submit" disabled={pending} className="btn btn-primary sm:col-span-2" style={{ width: "fit-content" }}>
-        {pending ? "Wird eingeladen…" : "Einladung senden"}
+        {pending ? "Wird eingeladen…" : "Admin-Zugang einladen"}
       </button>
     </form>
   );

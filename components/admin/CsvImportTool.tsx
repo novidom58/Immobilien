@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { bulkImportLeads } from "@/app/admin/actions";
+import { bulkImportCustomers } from "@/app/admin/actions";
 
 type Row = { name: string; email: string; phone: string; message: string };
 
@@ -74,13 +74,13 @@ export function CsvImportTool() {
   async function handleImport() {
     setBusy(true);
     setError(null);
-    const res = await bulkImportLeads(rows);
+    const res = await bulkImportCustomers(rows);
     setBusy(false);
     if (res.error) {
       setError(res.error);
       return;
     }
-    setResult(`${res.count} Lead${res.count === 1 ? "" : "s"} importiert.`);
+    setResult(`${res.count} Kunde${res.count === 1 ? "" : "n"} importiert.`);
     setRows([]);
     setFileName("");
     if (fileRef.current) fileRef.current.value = "";

@@ -48,13 +48,19 @@ function buildEmail({
   return { subject, body };
 }
 
-export function AcquisitionTool({ beraterOptions }: { beraterOptions: string[] }) {
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [recipientEmail, setRecipientEmail] = useState("");
+export function AcquisitionTool({
+  beraterOptions,
+  initial,
+}: {
+  beraterOptions: string[];
+  initial?: { name?: string; address?: string; city?: string; recipientEmail?: string; berater?: string };
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [address, setAddress] = useState(initial?.address ?? "");
+  const [city, setCity] = useState(initial?.city ?? "");
+  const [recipientEmail, setRecipientEmail] = useState(initial?.recipientEmail ?? "");
   const [objektTyp, setObjektTyp] = useState(OBJEKT_TYPES[0]);
-  const [berater, setBerater] = useState<string>(beraterOptions[0] ?? "");
+  const [berater, setBerater] = useState<string>(initial?.berater || beraterOptions[0] || "");
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
 

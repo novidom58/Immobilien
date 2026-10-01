@@ -393,13 +393,235 @@ export async function deleteBerater(id: string) {
   return { error: null };
 }
 
+function getServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) return null;
+  return createSupabaseClient(url, serviceKey);
+}
+
 /**
- * Legt einen neuen Kunden-Login an und schickt eine Einladungsmail
- * (Supabase setzt Passwort-Link). Braucht SUPABASE_SERVICE_ROLE_KEY -
- * ohne den Key meldet die Funktion sauber einen Fehler statt zu crashen.
- * Das profiles-Row entsteht automatisch über den handle_new_user()-Trigger.
+ * Legt eine neue Kundenakte an (ohne Portal-Login - der kommt erst über
+ * invitePortalAccess dazu, falls gewünscht). Ersetzt "Lead erfassen":
+ * jeder manuell erfasste Kontakt landet direkt im Kundenstamm.
  */
-export async function inviteCustomer(formData: FormData) {
+export async function createCustomer(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const fullName = String(formData.get("full_name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const address = String(formData.get("address") || "").trim();
+  const ziel = String(formData.get("ziel") || "").trim();
+  const berater = String(formData.get("berater") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!fullName) return { error: "Name ist Pflichtfeld." };
+
+  const { error } = await supabase.from("customers").insert({
+    full_name: fullName,
+    email: email || null,
+    phone: phone || null,
+    address: address || null,
+    ziel: ziel || null,
+    berater: berater || null,
+    notes: notes || null,
+  });
+
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function updateCustomer(customerId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const fullName = String(formData.get("full_name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const address = String(formData.get("address") || "").trim();
+  const language = String(formData.get("language") || "Deutsch").trim();
+  const ziel = String(formData.get("ziel") || "").trim();
+  const berater = String(formData.get("berater") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!fullName) return { error: "Name ist Pflichtfeld." };
+
+  const { error } = await supabase
+    .from("customers")
+    .update({
+      full_name: fullName,
+      email: email || null,
+      phone: phone || null,
+      address: address || null,
+      language: language || "Deutsch",
+      ziel: ziel || null,
+      berater: berater || null,
+      notes: notes || null,
+    })
+    .eq("id", customerId);
+
+  if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+const VALID_CUSTOMER_TYPES = ["neukunde", "bestand", "ex"] as const;
+
+export async function setCustomerTyp(customerId: string, typ: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  if (!(VALID_CUSTOMER_TYPES as readonly string[]).includes(typ)) {
+    return { error: "Ungültiger Typ." };
+  }
+
+  const { error } = await supabase.from("customers").update({ typ }).eq("id", customerId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function updateCustomerFollowUp(customerId: string, followUpAt: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase
+    .from("customers")
+    .update({ follow_up_at: followUpAt || null })
+    .eq("id", customerId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function deleteCustomer(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("customers").delete().eq("id", customerId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function addCustomerActivity(customerId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const text = String(formData.get("text") || "").trim();
+  const typeRaw = String(formData.get("type") || "notiz");
+  if (!text) return { error: "Text darf nicht leer sein." };
+
+  const type = (VALID_ACTIVITY_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "notiz";
+
+  const { error } = await supabase.from("customer_activity").insert({ customer_id: customerId, type, text });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function deleteCustomerActivity(activityId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("customer_activity").delete().eq("id", activityId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Verknüpft/löst ein Inserat mit der Kundenakte. Hat der Kunde bereits
+ * einen Portal-Login, wird listings.owner_id gleich mitgesetzt, damit
+ * das Verkaufs-Cockpit (/dashboard) weiterhin funktioniert - das läuft
+ * weiterhin über owner_id, customers.listing_id ist die admin-seitige
+ * Sicht darauf.
+ */
+export async function assignCustomerListing(customerId: string, listingId: string | null) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: customer, error: fetchError } = await supabase
+    .from("customers")
+    .select("portal_user_id, listing_id")
+    .eq("id", customerId)
+    .single();
+  if (fetchError) return { error: fetchError.message };
+
+  const { error } = await supabase.from("customers").update({ listing_id: listingId }).eq("id", customerId);
+  if (error) return { error: error.message };
+
+  if (customer?.portal_user_id) {
+    const previousListingId = customer.listing_id as string | null;
+    if (previousListingId && previousListingId !== listingId) {
+      await supabase.from("listings").update({ owner_id: null }).eq("id", previousListingId);
+    }
+    if (listingId) {
+      await supabase.from("listings").update({ owner_id: customer.portal_user_id }).eq("id", listingId);
+    }
+  }
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Lädt eine bestehende Kundenakte zum Portal-Login ein (Supabase-Einladung
+ * per E-Mail) und verknüpft die neue Auth-User-ID zurück mit der Akte.
+ * Braucht SUPABASE_SERVICE_ROLE_KEY - ohne den Key meldet die Funktion
+ * sauber einen Fehler statt zu crashen.
+ */
+export async function invitePortalAccess(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: customer, error: fetchError } = await supabase
+    .from("customers")
+    .select("full_name, email, listing_id")
+    .eq("id", customerId)
+    .single();
+  if (fetchError || !customer) return { error: fetchError?.message || "Kunde nicht gefunden." };
+  if (!customer.email) return { error: "Diese Kundenakte hat keine E-Mail-Adresse hinterlegt." };
+
+  const adminClient = getServiceRoleClient();
+  if (!adminClient) {
+    return { error: "SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt - Einladungen sind serverseitig noch nicht eingerichtet." };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch";
+  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(customer.email, {
+    data: { full_name: customer.full_name },
+    redirectTo: `${siteUrl}/reset-password`,
+  });
+  if (error) return { error: error.message };
+
+  const newUserId = data.user?.id;
+  if (newUserId) {
+    await supabase.from("customers").update({ portal_user_id: newUserId }).eq("id", customerId);
+    if (customer.listing_id) {
+      await supabase.from("listings").update({ owner_id: newUserId }).eq("id", customer.listing_id);
+    }
+  }
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Für Gregy/Ruedi: legt einen Admin-Login an (nicht im Kundenstamm,
+ * separate Einladung mit role=admin). Braucht SUPABASE_SERVICE_ROLE_KEY.
+ */
+export async function inviteAdmin(formData: FormData) {
   const { error: authError } = await requireAdmin();
   if (authError) return { error: authError, success: false };
 
@@ -407,21 +629,22 @@ export async function inviteCustomer(formData: FormData) {
   const fullName = String(formData.get("full_name") || "").trim();
   if (!email) return { error: "E-Mail-Adresse erforderlich.", success: false };
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) {
+  const adminClient = getServiceRoleClient();
+  if (!adminClient) {
     return { error: "SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt - Einladungen sind serverseitig noch nicht eingerichtet.", success: false };
   }
 
-  const adminClient = createSupabaseClient(url, serviceKey);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch";
-
-  const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
     data: fullName ? { full_name: fullName } : undefined,
     redirectTo: `${siteUrl}/reset-password`,
   });
-
   if (error) return { error: error.message, success: false };
+
+  const newUserId = data.user?.id;
+  if (newUserId) {
+    await adminClient.from("profiles").update({ role: "admin" }).eq("id", newUserId);
+  }
 
   revalidatePath("/admin", "layout");
   return { error: null, success: true };
@@ -429,26 +652,67 @@ export async function inviteCustomer(formData: FormData) {
 
 type ImportRow = { name: string; email: string; phone: string; message: string };
 
-export async function bulkImportLeads(rows: ImportRow[]) {
+export async function bulkImportCustomers(rows: ImportRow[]) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError, count: 0 };
 
   const payload = rows
-    .filter((r) => r.name.trim() && r.email.trim())
+    .filter((r) => r.name.trim())
     .map((r) => ({
-      type: "contact" as const,
-      name: r.name.trim(),
-      email: r.email.trim(),
+      full_name: r.name.trim(),
+      email: r.email.trim() || null,
       phone: r.phone.trim() || null,
-      message: r.message.trim() || null,
-      source: "Excel-Import",
+      notes: r.message.trim() || null,
+      typ: "bestand" as const,
     }));
 
-  if (payload.length === 0) return { error: "Keine gültigen Zeilen (Name und E-Mail sind Pflicht).", count: 0 };
+  if (payload.length === 0) return { error: "Keine gültigen Zeilen (Name ist Pflicht).", count: 0 };
 
-  const { error } = await supabase.from("leads").insert(payload);
+  const { error } = await supabase.from("customers").insert(payload);
   if (error) return { error: error.message, count: 0 };
 
   revalidatePath("/admin", "layout");
   return { error: null, count: payload.length };
+}
+
+/**
+ * Schickt dem Kunden den Exposé-Link des verknüpften Inserats per E-Mail -
+ * Ersatz für "Bankdossier senden" aus der Vorlage, angepasst auf unseren
+ * Verkaufsfall. Braucht RESEND_API_KEY, meldet sonst sauber einen Fehler.
+ */
+export async function sendExposeEmail(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: customer, error: fetchError } = await supabase
+    .from("customers")
+    .select("full_name, email, listing_id, listings(address, city, title)")
+    .eq("id", customerId)
+    .single();
+  if (fetchError || !customer) return { error: fetchError?.message || "Kunde nicht gefunden." };
+  if (!customer.email) return { error: "Diese Kundenakte hat keine E-Mail-Adresse hinterlegt." };
+  if (!customer.listing_id) return { error: "Keine Immobilie verknüpft." };
+
+  const resend = createResendClient();
+  if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const listing = customer.listings as unknown as { address: string; city: string; title: string | null } | null;
+  const name = listing?.title || `${listing?.address ?? ""}, ${listing?.city ?? ""}`;
+  const url = `${siteUrl}/immobilien/${customer.listing_id}/expose`;
+  const firstName = customer.full_name.split(" ")[0];
+
+  const { error } = await resend.emails.send({
+    from,
+    to: customer.email,
+    subject: `Ihr Exposé — ${name}`,
+    text: `Hallo ${firstName}\n\nHier ist der Link zu Ihrem Exposé:\n\n${url}\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`,
+  });
+  if (error) return { error: error.message };
+
+  await supabase.from("customer_activity").insert({ customer_id: customerId, type: "email", text: "Exposé per E-Mail verschickt" });
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
 }

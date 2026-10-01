@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Phone, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { SaleDeadlineBar } from "@/components/admin/SaleDeadlineBar";
-import { getListingsForAdmin } from "@/lib/admin-data";
+import { getListingsForAdmin, getCrmCustomers } from "@/lib/admin-data";
 import { saleDeadlineProgress } from "@/lib/dates";
 
 export const metadata: Metadata = {
@@ -14,10 +15,12 @@ export default async function AdminFristenPage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const listings = await getListingsForAdmin(supabase);
+  const [listings, customers] = await Promise.all([getListingsForAdmin(supabase), getCrmCustomers(supabase)]);
+  const customerByListing = new Map(customers.filter((c) => c.listing_id).map((c) => [c.listing_id as string, c]));
+
   const relevant = listings
     .filter((l) => l.activated_at && (l.status === "active" || l.status === "reserved"))
-    .map((l) => ({ ...l, progress: saleDeadlineProgress(l.activated_at as string, l.sale_deadline_months) }))
+    .map((l) => ({ ...l, progress: saleDeadlineProgress(l.activated_at as string, l.sale_deadline_months), customer: customerByListing.get(l.id) }))
     .sort((a, b) => a.progress.remainingDays - b.progress.remainingDays);
 
   return (
@@ -43,6 +46,7 @@ export default async function AdminFristenPage() {
               <thead>
                 <tr>
                   <th>Objekt</th>
+                  <th>Kunde</th>
                   <th>Berater</th>
                   <th style={{ minWidth: 220 }}>Frist</th>
                   <th></th>
@@ -51,10 +55,31 @@ export default async function AdminFristenPage() {
               <tbody>
                 {relevant.map((l) => (
                   <tr key={l.id}>
-                    <td className="td-name">
-                      {l.title || `${l.address}, ${l.city}`}
+                    <td className="td-name">{l.title || `${l.address}, ${l.city}`}</td>
+                    <td>
+                      {l.customer ? (
+                        <div>
+                          <div className="td-name" style={{ fontSize: 13 }}>
+                            {l.customer.full_name}
+                          </div>
+                          <div className="flex items-center gap-2" style={{ marginTop: 2 }}>
+                            {l.customer.phone && (
+                              <a href={`tel:${l.customer.phone}`} className="td-light" title="Anrufen">
+                                <Phone className="h-3 w-3" strokeWidth={1.75} />
+                              </a>
+                            )}
+                            {l.customer.email && (
+                              <a href={`mailto:${l.customer.email}`} className="td-light" title="E-Mail">
+                                <Mail className="h-3 w-3" strokeWidth={1.75} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="td-light">—</span>
+                      )}
                     </td>
-                    <td className="td-light">{l.berater || "—"}</td>
+                    <td>{l.berater ? <span className="bchip">{l.berater}</span> : <span className="td-light">—</span>}</td>
                     <td style={{ minWidth: 220 }}>
                       <SaleDeadlineBar activatedAt={l.activated_at} deadlineMonths={l.sale_deadline_months} />
                     </td>

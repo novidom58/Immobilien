@@ -21,10 +21,6 @@ export default async function AdminKundenPage() {
   const beraterOptions = beraterRows.length > 0 ? beraterRows.map((b) => b.name) : [...BERATER_OPTIONS];
 
   return (
-    <CustomerList
-      customers={customers}
-      listings={listings.map((l) => ({ id: l.id, address: l.address, city: l.city, status: l.status }))}
-      beraterOptions={beraterOptions}
-    />
+    <CustomerList customers={customers} listings={listings} beraterOptions={beraterOptions} />
   );
 }

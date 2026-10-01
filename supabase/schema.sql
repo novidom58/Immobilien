@@ -531,6 +531,15 @@ create table if not exists customers (
   created_at timestamptz not null default now()
 );
 
+-- Suchprofil für Käufer (nur relevant, wenn ziel = 'kaufen') - Basis fürs
+-- automatische Matching gegen aktive Inserate.
+alter table customers add column if not exists budget_min integer;
+alter table customers add column if not exists budget_max integer;
+alter table customers add column if not exists wunsch_ort text;
+alter table customers add column if not exists objekt_typ text;
+alter table customers add column if not exists zimmer_min numeric;
+alter table customers add column if not exists wohnflaeche_min integer;
+
 alter table customers enable row level security;
 
 drop policy if exists "customers_admin_all" on customers;

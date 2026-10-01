@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { createCustomer } from "@/app/admin/actions";
+import { formatSwissPhone } from "@/lib/phone";
 
 const initialState = { error: null as string | null };
 
@@ -16,9 +17,17 @@ export function CustomerCreateForm({ beraterOptions }: { beraterOptions: string[
 
   return (
     <form action={formAction} className="grid gap-2.5 sm:grid-cols-2">
-      <input name="full_name" required placeholder="Name *" className="field-input sm:col-span-2" />
+      <input name="vorname" placeholder="Vorname" className="field-input" />
+      <input name="nachname" required placeholder="Nachname *" className="field-input" />
       <input name="email" type="email" placeholder="E-Mail" className="field-input" />
-      <input name="phone" placeholder="Telefon" className="field-input" />
+      <input
+        name="phone"
+        placeholder="Telefon"
+        className="field-input"
+        onBlur={(e) => {
+          e.target.value = formatSwissPhone(e.target.value);
+        }}
+      />
       <input name="address" placeholder="Adresse" className="field-input sm:col-span-2" />
       <select name="ziel" defaultValue="" className="field-select">
         <option value="">Ziel (optional)</option>

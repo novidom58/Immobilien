@@ -97,7 +97,7 @@ export async function getCrmCustomers(supabase: Supabase) {
     supabase
       .from("customers")
       .select(
-        "id, full_name, email, phone, address, language, typ, ziel, berater, notes, follow_up_at, listing_id, portal_user_id, created_at, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
+        "id, full_name, email, phone, address, language, typ, ziel, berater, notes, follow_up_at, listing_id, portal_user_id, created_at, budget_min, budget_max, wunsch_ort, objekt_typ, zimmer_min, wohnflaeche_min, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
       )
       .order("created_at", { ascending: false }),
     supabase.from("customer_activity").select("id, customer_id, type, text, created_at").order("created_at", { ascending: false }),
@@ -125,6 +125,12 @@ export async function getCrmCustomers(supabase: Supabase) {
     listing_id: (c.listing_id as string | null) ?? null,
     portal_user_id: (c.portal_user_id as string | null) ?? null,
     created_at: c.created_at as string,
+    budget_min: (c.budget_min as number | null) ?? null,
+    budget_max: (c.budget_max as number | null) ?? null,
+    wunsch_ort: (c.wunsch_ort as string | null) ?? null,
+    objekt_typ: (c.objekt_typ as string | null) ?? null,
+    zimmer_min: (c.zimmer_min as number | null) ?? null,
+    wohnflaeche_min: (c.wohnflaeche_min as number | null) ?? null,
     listing: (c.listings as unknown as LinkedListing | null) ?? null,
     activity: activityByCustomer.get(c.id as string) ?? [],
   }));

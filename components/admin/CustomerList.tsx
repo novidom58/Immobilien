@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Download, Plus } from "lucide-react";
 import { CustomerDetailModal } from "./CustomerDetailModal";
 import { saleDeadlineProgress } from "@/lib/dates";
-import type { CrmCustomer } from "@/lib/admin-data";
+import { formatSwissPhone } from "@/lib/phone";
+import type { CrmCustomer, AdminListing } from "@/lib/admin-data";
 
 const TYPE_BADGE: Record<string, string> = {
   bestand: "badge-blue",
@@ -39,7 +40,7 @@ export function CustomerList({
   beraterOptions,
 }: {
   customers: CrmCustomer[];
-  listings: { id: string; address: string; city: string; status: string }[];
+  listings: AdminListing[];
   beraterOptions: string[];
 }) {
   const [query, setQuery] = useState("");
@@ -153,7 +154,7 @@ export function CustomerList({
                       <div className="td-name">{c.full_name}</div>
                       <div className="td-light" style={{ fontSize: 11 }}>
                         {c.email}
-                        {c.phone ? ` · ${c.phone}` : ""}
+                        {c.phone ? ` · ${formatSwissPhone(c.phone)}` : ""}
                       </div>
                     </td>
                     <td>

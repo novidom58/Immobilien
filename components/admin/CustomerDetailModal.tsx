@@ -11,14 +11,15 @@ import {
   assignCustomerListing,
   invitePortalAccess,
   sendExposeEmail,
-  sendFollowUpEmail,
-  sendDocumentRequestEmail,
   addCustomerActivity,
   deleteCustomerActivity,
 } from "@/app/admin/actions";
 import { AcquisitionTool } from "./AcquisitionTool";
+import { EmailTemplateTool } from "./EmailTemplateTool";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
-import type { CrmCustomer } from "@/lib/admin-data";
+import { formatSwissPhone } from "@/lib/phone";
+import { matchListings } from "@/lib/matching";
+import type { CrmCustomer, AdminListing } from "@/lib/admin-data";
 
 const TYPE_OPTIONS = [
   { value: "neukunde", label: "Neukunde" },
@@ -27,6 +28,7 @@ const TYPE_OPTIONS = [
 ];
 
 const LANGUAGE_OPTIONS = ["Deutsch", "Französisch", "Italienisch", "Englisch"];
+const OBJEKT_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"];
 
 const TYPE_ICON: Record<string, typeof Phone> = {
   email: Mail,
@@ -41,6 +43,33 @@ const TYPE_TONE: Record<string, string> = {
   notiz: "",
 };
 
+const REQUIRED_DOCUMENTS = [
+  "Grundbuchauszug",
+  "Grundrisspläne",
+  "Gebäudeversicherungsausweis (GVB/GVZ)",
+  "Energieausweis (GEAK), falls vorhanden",
+  "Ausweiskopie",
+];
+
+function buildFollowUpTemplate(customer: CrmCustomer) {
+  const firstName = customer.full_name.split(" ")[0];
+  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+  return {
+    subject: "Kurzes Update zu Ihrem Anliegen",
+    body: `Hallo ${firstName}\n\nWir wollten kurz nachfragen, ob sich bei Ihnen in der Zwischenzeit etwas getan hat oder ob noch Fragen offen sind. Gerne melden wir uns auch telefonisch, wenn Ihnen das lieber ist.\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+  };
+}
+
+function buildDocumentRequestTemplate(customer: CrmCustomer) {
+  const firstName = customer.full_name.split(" ")[0];
+  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+  const docList = REQUIRED_DOCUMENTS.map((d) => `• ${d}`).join("\n");
+  return {
+    subject: "Unterlagen für den Verkauf",
+    body: `Hallo ${firstName}\n\nDamit wir mit dem Verkauf weiterkommen, benötigen wir noch folgende Unterlagen von Ihnen:\n\n${docList}\n\nSie können uns diese einfach per E-Mail zurücksenden. Vielen Dank!\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+  };
+}
+
 export function CustomerDetailModal({
   customer,
   listings,
@@ -48,15 +77,16 @@ export function CustomerDetailModal({
   onClose,
 }: {
   customer: CrmCustomer;
-  listings: { id: string; address: string; city: string; status: string }[];
+  listings: AdminListing[];
   beraterOptions: string[];
   onClose: () => void;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [akquiseOpen, setAkquiseOpen] = useState(false);
+  const [openPanel, setOpenPanel] = useState<"akquise" | "nachfassen" | "unterlagen" | null>(null);
   const [assigning, setAssigning] = useState(false);
+  const [ziel, setZiel] = useState(customer.ziel ?? "");
 
   async function run(key: string, fn: () => Promise<{ error: string | null }>) {
     setBusy(key);
@@ -92,6 +122,10 @@ export function CustomerDetailModal({
       <SaleDeadlineBar activatedAt={customer.listing.activated_at} deadlineMonths={customer.listing.sale_deadline_months} />
     ) : null;
 
+  const matches = matchListings(customer, listings).filter((l) => l.id !== customer.listing_id);
+  const followUpTemplate = buildFollowUpTemplate(customer);
+  const docRequestTemplate = buildDocumentRequestTemplate(customer);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -102,7 +136,7 @@ export function CustomerDetailModal({
               {customer.phone && (
                 <a href={`tel:${customer.phone}`} className="btn btn-primary btn-sm">
                   <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  Anrufen
+                  Anrufen ({formatSwissPhone(customer.phone)})
                 </a>
               )}
               <select
@@ -126,9 +160,33 @@ export function CustomerDetailModal({
                 style={{ width: "auto" }}
                 title="Wiedervorlage"
               />
-              <button type="button" onClick={() => setAkquiseOpen((v) => !v)} className="btn btn-ghost btn-sm">
+              <button
+                type="button"
+                onClick={() => setOpenPanel((v) => (v === "akquise" ? null : "akquise"))}
+                className={`btn btn-sm ${openPanel === "akquise" ? "btn-primary" : "btn-ghost"}`}
+              >
                 <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
                 Akquise-Mail
+              </button>
+              <button
+                type="button"
+                disabled={!customer.email}
+                onClick={() => setOpenPanel((v) => (v === "nachfassen" ? null : "nachfassen"))}
+                className={`btn btn-sm ${openPanel === "nachfassen" ? "btn-primary" : "btn-gold"}`}
+                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
+              >
+                <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Nachfassen
+              </button>
+              <button
+                type="button"
+                disabled={!customer.email}
+                onClick={() => setOpenPanel((v) => (v === "unterlagen" ? null : "unterlagen"))}
+                className={`btn btn-sm ${openPanel === "unterlagen" ? "btn-primary" : "btn-ghost"}`}
+                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
+              >
+                <Inbox className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Unterlagen anfordern
               </button>
             </div>
           </div>
@@ -138,17 +196,16 @@ export function CustomerDetailModal({
         </div>
 
         <div className="modal-body">
-          {error && (
-            <p style={{ fontSize: 13, color: "var(--red)", marginBottom: 16 }}>{error}</p>
-          )}
+          {error && <p style={{ fontSize: 13, color: "var(--red)", marginBottom: 16 }}>{error}</p>}
 
-          {akquiseOpen && (
+          {openPanel === "akquise" && (
             <div className="modal-section">
               <div className="detail-label" style={{ marginBottom: 8 }}>
                 Akquise-E-Mail
               </div>
               <AcquisitionTool
                 beraterOptions={beraterOptions}
+                customerId={customer.id}
                 initial={{
                   name: customer.full_name,
                   address: customer.listing?.address ?? customer.address ?? "",
@@ -156,6 +213,36 @@ export function CustomerDetailModal({
                   recipientEmail: customer.email ?? "",
                   berater: customer.berater ?? "",
                 }}
+              />
+            </div>
+          )}
+
+          {openPanel === "nachfassen" && customer.email && (
+            <div className="modal-section">
+              <div className="detail-label" style={{ marginBottom: 8 }}>
+                Nachfass-Mail
+              </div>
+              <EmailTemplateTool
+                subject={followUpTemplate.subject}
+                body={followUpTemplate.body}
+                recipientEmail={customer.email}
+                customerId={customer.id}
+                logLabel="Nachfass-Mail verschickt"
+              />
+            </div>
+          )}
+
+          {openPanel === "unterlagen" && customer.email && (
+            <div className="modal-section">
+              <div className="detail-label" style={{ marginBottom: 8 }}>
+                Unterlagen anfordern
+              </div>
+              <EmailTemplateTool
+                subject={docRequestTemplate.subject}
+                body={docRequestTemplate.body}
+                recipientEmail={customer.email}
+                customerId={customer.id}
+                logLabel="Unterlagen angefordert"
               />
             </div>
           )}
@@ -226,6 +313,58 @@ export function CustomerDetailModal({
             </div>
           </div>
 
+          {ziel === "kaufen" && (
+            <div className="modal-section">
+              <div className="detail-label" style={{ marginBottom: 8 }}>
+                Suchprofil
+              </div>
+              <div className="card" style={{ margin: 0, padding: 16 }}>
+                <div className="grid gap-2.5 sm:grid-cols-2" style={{ fontSize: 13 }}>
+                  <div>
+                    <span className="td-light">Budget: </span>
+                    {customer.budget_min || customer.budget_max
+                      ? `CHF ${(customer.budget_min ?? 0).toLocaleString("en-US").replace(/,/g, "'")} – ${
+                          customer.budget_max ? customer.budget_max.toLocaleString("en-US").replace(/,/g, "'") : "offen"
+                        }`
+                      : "—"}
+                  </div>
+                  <div>
+                    <span className="td-light">Wunschort: </span>
+                    {customer.wunsch_ort || "—"}
+                  </div>
+                  <div>
+                    <span className="td-light">Objekttyp: </span>
+                    {customer.objekt_typ || "—"}
+                  </div>
+                  <div>
+                    <span className="td-light">Min. Zimmer / Fläche: </span>
+                    {customer.zimmer_min || "—"} Zi. / {customer.wohnflaeche_min || "—"} m²
+                  </div>
+                </div>
+
+                {matches.length > 0 ? (
+                  <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+                    <div className="field-label" style={{ marginBottom: 8 }}>
+                      🎯 Passende Inserate ({matches.length})
+                    </div>
+                    {matches.map((m) => (
+                      <div key={m.id} className="flex items-center justify-between" style={{ padding: "6px 0", fontSize: 13 }}>
+                        <span className="td-name">
+                          {m.address}, {m.city}
+                        </span>
+                        <span className="td-light">{m.price_chf ? `CHF ${m.price_chf.toLocaleString("en-US").replace(/,/g, "'")}` : "—"}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="td-light" style={{ fontSize: 12, marginTop: 14 }}>
+                    Noch kein passendes aktives Inserat.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="modal-section">
             <div className="detail-label" style={{ marginBottom: 8 }}>
               Kunde identifizieren
@@ -241,9 +380,17 @@ export function CustomerDetailModal({
                   ))}
                 </select>
                 <input name="address" defaultValue={customer.address ?? ""} placeholder="Adresse" className="field-input sm:col-span-2" />
-                <input name="phone" defaultValue={customer.phone ?? ""} placeholder="Mobile" className="field-input" />
+                <input
+                  name="phone"
+                  defaultValue={customer.phone ? formatSwissPhone(customer.phone) : ""}
+                  placeholder="Mobile"
+                  className="field-input"
+                  onBlur={(e) => {
+                    e.target.value = formatSwissPhone(e.target.value);
+                  }}
+                />
                 <input name="email" type="email" defaultValue={customer.email ?? ""} placeholder="E-Mail" className="field-input" />
-                <select name="ziel" defaultValue={customer.ziel ?? ""} className="field-select">
+                <select name="ziel" value={ziel} onChange={(e) => setZiel(e.target.value)} className="field-select">
                   <option value="">Ziel (optional)</option>
                   <option value="verkaufen">Verkaufen</option>
                   <option value="kaufen">Kaufen</option>
@@ -256,6 +403,56 @@ export function CustomerDetailModal({
                     </option>
                   ))}
                 </select>
+
+                {ziel === "kaufen" && (
+                  <>
+                    <input
+                      name="budget_min"
+                      inputMode="numeric"
+                      defaultValue={customer.budget_min ?? ""}
+                      placeholder="Budget von (CHF)"
+                      className="field-input"
+                    />
+                    <input
+                      name="budget_max"
+                      inputMode="numeric"
+                      defaultValue={customer.budget_max ?? ""}
+                      placeholder="Budget bis (CHF)"
+                      className="field-input"
+                    />
+                    <input
+                      name="wunsch_ort"
+                      defaultValue={customer.wunsch_ort ?? ""}
+                      placeholder="Wunschort(e), kommagetrennt"
+                      className="field-input sm:col-span-2"
+                    />
+                    <select name="objekt_typ" defaultValue={customer.objekt_typ ?? ""} className="field-select">
+                      <option value="">Objekttyp (egal)</option>
+                      {OBJEKT_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <input
+                        name="zimmer_min"
+                        inputMode="decimal"
+                        defaultValue={customer.zimmer_min ?? ""}
+                        placeholder="Min. Zimmer"
+                        className="field-input"
+                      />
+                      <input
+                        name="wohnflaeche_min"
+                        inputMode="numeric"
+                        defaultValue={customer.wohnflaeche_min ?? ""}
+                        placeholder="Min. Fläche m²"
+                        className="field-input"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <textarea name="notes" rows={3} defaultValue={customer.notes ?? ""} placeholder="Notizen" className="field-textarea sm:col-span-2" />
               </div>
               <button type="submit" disabled={busy === "save"} className="btn btn-primary btn-sm" style={{ marginTop: 12 }}>
@@ -293,26 +490,6 @@ export function CustomerDetailModal({
                   Exposé senden
                 </button>
               )}
-              <button
-                type="button"
-                disabled={busy === "followup-mail" || !customer.email}
-                onClick={() => run("followup-mail", () => sendFollowUpEmail(customer.id))}
-                className="btn btn-gold btn-sm"
-                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
-              >
-                <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
-                Nachfassen
-              </button>
-              <button
-                type="button"
-                disabled={busy === "docs" || !customer.email}
-                onClick={() => run("docs", () => sendDocumentRequestEmail(customer.id))}
-                className="btn btn-ghost btn-sm"
-                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
-              >
-                <Inbox className="h-3.5 w-3.5" strokeWidth={1.75} />
-                Unterlagen anfordern
-              </button>
             </div>
           </div>
 
@@ -320,17 +497,20 @@ export function CustomerDetailModal({
             <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
               <div className="detail-label">Kontakthistorie</div>
             </div>
-            <form action={handleAddActivity} className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <select name="type" defaultValue="notiz" className="field-select" style={{ width: "auto" }}>
-                <option value="notiz">Notiz</option>
-                <option value="anruf">Anruf</option>
-                <option value="email">E-Mail</option>
-                <option value="besuch">Besuch</option>
-              </select>
-              <input name="text" required placeholder="z.B. Unterlagen angefordert" className="field-input" style={{ flex: 1 }} />
-              <button type="submit" disabled={busy === "activity"} className="btn btn-primary btn-sm">
-                Eintragen
-              </button>
+            <form action={handleAddActivity} className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <select name="type" defaultValue="notiz" className="field-select" style={{ width: "auto" }}>
+                  <option value="notiz">Notiz</option>
+                  <option value="anruf">Anruf</option>
+                  <option value="email">E-Mail</option>
+                  <option value="besuch">Besuch</option>
+                </select>
+                <input name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="field-input" style={{ width: "auto" }} title="Datum (auch in der Zukunft möglich)" />
+                <input name="text" required placeholder="z.B. Unterlagen angefordert" className="field-input" style={{ flex: 1 }} />
+                <button type="submit" disabled={busy === "activity"} className="btn btn-primary btn-sm">
+                  Eintragen
+                </button>
+              </div>
             </form>
 
             {customer.activity.length === 0 ? (

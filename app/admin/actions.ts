@@ -409,7 +409,8 @@ export async function createCustomer(formData: FormData) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };
 
-  const fullName = String(formData.get("full_name") || "").trim();
+  const vorname = String(formData.get("vorname") || "").trim();
+  const nachname = String(formData.get("nachname") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const address = String(formData.get("address") || "").trim();
@@ -417,7 +418,8 @@ export async function createCustomer(formData: FormData) {
   const berater = String(formData.get("berater") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
 
-  if (!fullName) return { error: "Name ist Pflichtfeld." };
+  if (!nachname) return { error: "Nachname ist Pflichtfeld." };
+  const fullName = [vorname, nachname].filter(Boolean).join(" ");
 
   const { error } = await supabase.from("customers").insert({
     full_name: fullName,
@@ -447,6 +449,12 @@ export async function updateCustomer(customerId: string, formData: FormData) {
   const ziel = String(formData.get("ziel") || "").trim();
   const berater = String(formData.get("berater") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const budgetMinRaw = String(formData.get("budget_min") || "").replace(/[^\d]/g, "");
+  const budgetMaxRaw = String(formData.get("budget_max") || "").replace(/[^\d]/g, "");
+  const wunschOrt = String(formData.get("wunsch_ort") || "").trim();
+  const objektTyp = String(formData.get("objekt_typ") || "").trim();
+  const zimmerMinRaw = String(formData.get("zimmer_min") || "").trim().replace(",", ".");
+  const wohnflaecheMinRaw = String(formData.get("wohnflaeche_min") || "").replace(/[^\d]/g, "");
 
   if (!fullName) return { error: "Name ist Pflichtfeld." };
 
@@ -461,6 +469,12 @@ export async function updateCustomer(customerId: string, formData: FormData) {
       ziel: ziel || null,
       berater: berater || null,
       notes: notes || null,
+      budget_min: budgetMinRaw ? Number(budgetMinRaw) : null,
+      budget_max: budgetMaxRaw ? Number(budgetMaxRaw) : null,
+      wunsch_ort: wunschOrt || null,
+      objekt_typ: objektTyp || null,
+      zimmer_min: zimmerMinRaw ? Number(zimmerMinRaw) : null,
+      wohnflaeche_min: wohnflaecheMinRaw ? Number(wohnflaecheMinRaw) : null,
     })
     .eq("id", customerId);
 
@@ -518,11 +532,32 @@ export async function addCustomerActivity(customerId: string, formData: FormData
 
   const text = String(formData.get("text") || "").trim();
   const typeRaw = String(formData.get("type") || "notiz");
+  const dateRaw = String(formData.get("date") || "").trim();
   if (!text) return { error: "Text darf nicht leer sein." };
 
   const type = (VALID_ACTIVITY_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "notiz";
+  const createdAt = dateRaw ? new Date(dateRaw).toISOString() : undefined;
 
-  const { error } = await supabase.from("customer_activity").insert({ customer_id: customerId, type, text });
+  const { error } = await supabase
+    .from("customer_activity")
+    .insert({ customer_id: customerId, type, text, ...(createdAt ? { created_at: createdAt } : {}) });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Leichtgewichtiger Logger für die Mailvorlagen-Tools (Akquise, Nachfassen,
+ * Unterlagen anfordern) - wird aufgerufen, sobald der Text kopiert oder im
+ * E-Mail-Programm geöffnet wird, nicht erst beim tatsächlichen Versand
+ * (den sehen wir ja nicht, da die Mail extern verschickt wird).
+ */
+export async function logCustomerEmailActivity(customerId: string, text: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("customer_activity").insert({ customer_id: customerId, type: "email", text });
   if (error) return { error: error.message };
 
   revalidatePath("/admin", "layout");

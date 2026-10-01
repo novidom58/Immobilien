@@ -552,6 +552,29 @@ create policy "customer_activity_admin_all" on customer_activity
   for all using (public.is_admin());
 
 -- ---------------------------------------------------------------------
+-- termine: eigene Termine (Erstgespräch, Besichtigung, Notartermin...),
+-- getrennt vom extern eingebetteten Google-Kalender - erscheinen in
+-- Heute, Dashboard und auf der Kalender-Seite.
+-- ---------------------------------------------------------------------
+create table if not exists termine (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  type text not null default 'besichtigung' check (type in ('erstgespraech', 'besichtigung', 'notartermin', 'sonstiges')),
+  starts_at timestamptz not null,
+  customer_id uuid references customers (id) on delete set null,
+  listing_id uuid references listings (id) on delete set null,
+  berater text,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+alter table termine enable row level security;
+
+drop policy if exists "termine_admin_all" on termine;
+create policy "termine_admin_all" on termine
+  for all using (public.is_admin());
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

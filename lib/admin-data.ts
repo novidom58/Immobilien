@@ -166,3 +166,33 @@ export function dueTodayCustomers(customers: CrmCustomer[]) {
   const todayStr = new Date().toISOString().slice(0, 10);
   return customers.filter((c) => c.follow_up_at && c.follow_up_at <= todayStr && c.typ !== "ex");
 }
+
+const TERMIN_TYPE_LABEL: Record<string, string> = {
+  erstgespraech: "Erstgespräch",
+  besichtigung: "Besichtigung",
+  notartermin: "Notartermin",
+  sonstiges: "Termin",
+};
+
+export async function getUpcomingTermine(supabase: Supabase) {
+  const { data } = await supabase
+    .from("termine")
+    .select("id, title, type, starts_at, berater, notes, customer_id, listing_id, customers(full_name), listings(address, city)")
+    .gte("starts_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    .order("starts_at", { ascending: true });
+
+  return (data ?? []).map((t) => ({
+    id: t.id as string,
+    title: t.title as string,
+    typeLabel: TERMIN_TYPE_LABEL[t.type as string] ?? "Termin",
+    starts_at: t.starts_at as string,
+    berater: (t.berater as string | null) ?? null,
+    notes: (t.notes as string | null) ?? null,
+    customerId: (t.customer_id as string | null) ?? null,
+    customerName: (t.customers as unknown as { full_name: string } | null)?.full_name ?? null,
+    listingId: (t.listing_id as string | null) ?? null,
+    listingAddress: (t.listings as unknown as { address: string; city: string } | null) ?? null,
+  }));
+}
+
+export type UpcomingTermin = Awaited<ReturnType<typeof getUpcomingTermine>>[number];

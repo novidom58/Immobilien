@@ -5,6 +5,7 @@ import { KalenderEmbed } from "@/components/admin/KalenderEmbed";
 import {
   getLeadsWithActivity,
   getCrmCustomers,
+  getUpcomingTermine,
   dueTodayLeads,
   overdueLeads,
   viewingRequestLeads,
@@ -21,7 +22,11 @@ export default async function AdminHeutePage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const [leads, customers] = await Promise.all([getLeadsWithActivity(supabase), getCrmCustomers(supabase)]);
+  const [leads, customers, termine] = await Promise.all([
+    getLeadsWithActivity(supabase),
+    getCrmCustomers(supabase),
+    getUpcomingTermine(supabase),
+  ]);
 
   const dueTodayL = dueTodayLeads(leads);
   const overdueL = overdueLeads(leads);
@@ -31,6 +36,7 @@ export default async function AdminHeutePage() {
   const finanzierungen = financingRequestLeads(leads);
   const neukunden = customers.filter((c) => c.typ === "neukunde");
   const todayStr = new Date().toISOString().slice(0, 10);
+  const termineHeute = termine.filter((t) => t.starts_at.slice(0, 10) === todayStr);
 
   return (
     <div>
@@ -114,6 +120,31 @@ export default async function AdminHeutePage() {
           </div>
         )}
       </div>
+
+      {termineHeute.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">📅 Termine heute</div>
+          </div>
+          <div>
+            {termineHeute.map((t) => (
+              <div key={t.id} className="tl-entry" style={{ padding: "12px 20px" }}>
+                <div className="tl-icon tl-blue">📅</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="tl-title">{t.title}</div>
+                  <div className="tl-meta">
+                    {new Date(t.starts_at).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} · {t.typeLabel}
+                    {t.customerName ? ` · ${t.customerName}` : ""}
+                  </div>
+                </div>
+                <Link href="/admin/kalender" className="btn btn-ghost btn-sm">
+                  Zum Kalender →
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card-header" style={{ border: "none", padding: "0 0 10px" }}>
         <div className="card-title" style={{ fontSize: 16 }}>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
@@ -434,7 +435,7 @@ export async function createCustomer(formData: FormData) {
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
   revalidatePath("/admin", "layout");
-  return { error: null };
+  redirect("/admin/kunden");
 }
 
 export async function updateCustomer(customerId: string, formData: FormData) {

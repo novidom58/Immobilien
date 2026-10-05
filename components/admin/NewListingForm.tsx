@@ -47,8 +47,18 @@ export function NewListingForm({ beraterOptions }: { beraterOptions: string[] })
       />
       <input name="tour_url" type="url" placeholder="360°-Rundgang-Link (z.B. von Giraffe360)" className="field-input sm:col-span-2" />
       {state.error && (
-        <p className="sm:col-span-2" style={{ fontSize: 13, color: "var(--red)" }}>
-          {state.error}
+        <p
+          className="sm:col-span-2"
+          style={{
+            fontSize: 13,
+            color: "var(--red)",
+            border: "1px solid var(--red)",
+            borderRadius: "var(--r)",
+            padding: "10px 14px",
+            background: "color-mix(in srgb, var(--red) 10%, transparent)",
+          }}
+        >
+          ⚠ {state.error}
         </p>
       )}
       <button type="submit" disabled={pending} className="btn btn-primary sm:col-span-2" style={{ width: "fit-content" }}>

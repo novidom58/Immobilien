@@ -1,19 +1,16 @@
 "use client";
 
 import { useActionState } from "react";
-import { useRouter } from "next/navigation";
 import { createCustomer } from "@/app/admin/actions";
 import { formatSwissPhone } from "@/lib/phone";
 
 const initialState = { error: null as string | null };
 
 export function CustomerCreateForm({ beraterOptions }: { beraterOptions: string[] }) {
-  const router = useRouter();
-  const [state, formAction, pending] = useActionState(async (_prev: typeof initialState, formData: FormData) => {
-    const res = await createCustomer(formData);
-    if (!res.error) router.push("/admin/kunden");
-    return res;
-  }, initialState);
+  const [state, formAction, pending] = useActionState(
+    async (_prev: typeof initialState, formData: FormData) => createCustomer(formData),
+    initialState
+  );
 
   return (
     <form action={formAction} className="grid gap-2.5 sm:grid-cols-2">
@@ -44,8 +41,18 @@ export function CustomerCreateForm({ beraterOptions }: { beraterOptions: string[
       </select>
       <textarea name="notes" rows={3} placeholder="Notizen" className="field-textarea sm:col-span-2" />
       {state.error && (
-        <p className="sm:col-span-2" style={{ fontSize: 13, color: "var(--red)" }}>
-          {state.error}
+        <p
+          className="sm:col-span-2"
+          style={{
+            fontSize: 13,
+            color: "var(--red)",
+            border: "1px solid var(--red)",
+            borderRadius: "var(--r)",
+            padding: "10px 14px",
+            background: "color-mix(in srgb, var(--red) 10%, transparent)",
+          }}
+        >
+          ⚠ {state.error}
         </p>
       )}
       <button type="submit" disabled={pending} className="btn btn-primary sm:col-span-2" style={{ width: "fit-content" }}>

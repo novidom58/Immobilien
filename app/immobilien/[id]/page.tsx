@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
+import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -119,9 +120,22 @@ export default async function ListingDetailPage({
 
         {/* 3D-Rundgang */}
         {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
+      </main>
 
+      {/* Cinematic Scroll-Rundgang */}
+      <ListingFlythrough
+        listing={{
+          title: listing.title,
+          address: listing.address,
+          city: listing.city,
+          price_chf: listing.price_chf,
+          photos: listing.photos,
+        }}
+      />
+
+      <main className="mx-auto max-w-6xl px-6 pb-28 pt-16 lg:px-10">
         {/* Kopf */}
-        <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
+        <div id="anfragen" className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
           <div>
             <div className="flex items-center gap-2 text-sm text-ivory-dim">
               <MapPin className="h-4 w-4 text-amber" strokeWidth={1.5} />

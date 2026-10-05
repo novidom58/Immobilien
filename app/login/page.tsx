@@ -39,6 +39,13 @@ export default function LoginPage() {
         >
           ← Zurück zur Startseite
         </Link>
+
+        <Link
+          href="/admin/login"
+          className="mt-3 block text-center font-mono text-xs uppercase tracking-wide text-ivory-dim/40 hover:text-amber"
+        >
+          Admin-Login →
+        </Link>
       </div>
     </main>
   );

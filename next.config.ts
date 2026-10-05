@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Verhindert "This page couldn't load"-Fehler nach einem Redeploy: ein
+  // Browser-Tab, der noch die vorherige Version geladen hat, erkennt die
+  // Abweichung anhand der Vercel-Commit-SHA und lädt dann hart neu statt
+  // mit veralteten Chunks client-seitig zu navigieren.
+  deploymentId: process.env.VERCEL_GIT_COMMIT_SHA,
   images: {
     remotePatterns: [
       {

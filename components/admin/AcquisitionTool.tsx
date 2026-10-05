@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Copy, Mail, Check } from "lucide-react";
+import { logCustomerEmailActivity } from "@/app/admin/actions";
 
 const OBJEKT_TYPES = ["Einfamilienhaus", "Eigentumswohnung", "Mehrfamilienhaus", "Renditeobjekt"];
 
@@ -51,9 +52,11 @@ function buildEmail({
 export function AcquisitionTool({
   beraterOptions,
   initial,
+  customerId,
 }: {
   beraterOptions: string[];
   initial?: { name?: string; address?: string; city?: string; recipientEmail?: string; berater?: string };
+  customerId?: string;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
@@ -69,9 +72,14 @@ export function AcquisitionTool({
     [name, address, city, objektTyp, berater, note]
   );
 
+  function logActivity() {
+    if (customerId) void logCustomerEmailActivity(customerId, "Akquise-E-Mail versendet");
+  }
+
   async function handleCopy() {
     await navigator.clipboard.writeText(body);
     setCopied(true);
+    logActivity();
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -125,7 +133,7 @@ export function AcquisitionTool({
               {copied ? <Check className="h-3.5 w-3.5" strokeWidth={1.75} /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />}
               {copied ? "Kopiert" : "Text kopieren"}
             </button>
-            <a href={mailtoHref} className="btn btn-primary btn-sm">
+            <a href={mailtoHref} onClick={logActivity} className="btn btn-primary btn-sm">
               <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
               In E-Mail-Programm öffnen
             </a>

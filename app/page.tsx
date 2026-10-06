@@ -3,7 +3,6 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/hero/Hero";
 import { UspMarquee } from "@/components/sections/UspMarquee";
 import { TrustBar } from "@/components/sections/TrustBar";
-import { HouseJourney } from "@/components/sections/HouseJourney";
 import { SolutionsHub } from "@/components/sections/SolutionsHub";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProblemSolution } from "@/components/sections/ProblemSolution";
@@ -30,7 +29,6 @@ export default function Home() {
         <Hero />
         <UspMarquee />
         <TrustBar />
-        <HouseJourney />
         <SolutionsHub />
         <FeaturedListings />
         <ProblemSolution />

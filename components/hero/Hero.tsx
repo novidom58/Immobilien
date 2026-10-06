@@ -1,26 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { HeroKeyUnlock } from "./HeroKeyUnlock";
 import { LOADER_DURATION_MS } from "@/components/Loader";
-import { BlueprintHouse } from "@/components/novidom360/BlueprintHouse";
 
 const HUD_CORNERS = [
-  "left-3 top-3 border-l border-t",
-  "right-3 top-3 border-r border-t",
-  "left-3 bottom-3 border-l border-b",
-  "right-3 bottom-3 border-r border-b",
+  "left-6 top-20 border-l border-t lg:left-10 lg:top-24",
+  "right-6 top-20 border-r border-t lg:right-10 lg:top-24",
+  "left-6 bottom-6 border-l border-b lg:left-10 lg:bottom-10",
+  "right-6 bottom-6 border-r border-b lg:right-10 lg:bottom-10",
 ];
-
-// Stufen 1-5 des Bauplan-Hauses, im Hero als Endlosschleife.
-const CYCLE = ["Ihre Immobilie", "Bewerten", "Verkaufen", "Umbauen", "Finanzieren", "Absichern"];
 
 export function Hero() {
   const [showIntro, setShowIntro] = useState(true);
   const [introStart, setIntroStart] = useState(false);
-  const [stage, setStage] = useState(0);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -34,35 +30,39 @@ export function Hero() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let timer: ReturnType<typeof setTimeout>;
-    function next() {
-      setStage((s) => (s % 5) + 1);
-      timer = setTimeout(next, 2600);
-    }
-    timer = setTimeout(next, LOADER_DURATION_MS + 2400);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden bg-ink">
       {showIntro && <HeroKeyUnlock start={introStart} onDone={() => setShowIntro(false)} />}
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(95,184,232,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(95,184,232,0.4) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(26,33,48,0.9),transparent_60%)]" />
-      <div className="grain absolute inset-0" />
+      {/* Nach dem Schlüssel-Intro: das Zuhause selbst. Ruhiger Ken-Burns-Zoom,
+          läuft unabhängig vom Scroll. */}
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.04 }}
+        animate={{ scale: 1.12 }}
+        transition={{ duration: 24, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
+      >
+        <Image
+          src="/images/novidom-holzhaus.webp"
+          alt="Modernes Holzhaus in der Abenddämmerung, im Hintergrund das Basler Münster"
+          fill
+          sizes="100vw"
+          preload
+          className="object-cover object-[60%_center]"
+        />
+      </motion.div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-6 py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-10 lg:py-36">
-        <div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-ink)_0%,rgba(10,13,18,0.75)_22%,rgba(10,13,18,0.25)_55%,rgba(10,13,18,0.35)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/40 to-transparent" />
+      <div className="grain absolute inset-0" />
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        {HUD_CORNERS.map((pos) => (
+          <div key={pos} className={`absolute h-9 w-9 border-blueprint/50 lg:h-12 lg:w-12 ${pos}`} />
+        ))}
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-32 lg:px-10 lg:py-40">
+        <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -73,7 +73,7 @@ export function Hero() {
             NoviDom Immo · Basel &amp; Zug
           </motion.div>
 
-          <HeroHeadline text="Ihre Immobilie." accent="Unsere Expertise." />
+          <HeroHeadline text="Ihr Zuhause verdient" accent="den besten Preis." />
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -81,8 +81,7 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
           >
-            Von der ersten Idee bis zum fertigen Zuhause. Verkaufen, umbauen, finanzieren,
-            versichern. Aus einer Hand.
+            Verkaufen, finanzieren, umbauen, absichern. Persönlich begleitet, aus einer Hand, zu fairen Kosten.
           </motion.p>
 
           <motion.div
@@ -92,14 +91,14 @@ export function Hero() {
             className="mt-8 flex flex-wrap gap-3"
           >
             <a
-              href="#journey"
+              href="#leistungen"
               className="rounded-full bg-amber px-7 py-4 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:bg-amber-soft"
             >
-              Immobilie entdecken →
+              NoviDom 360° entdecken →
             </a>
             <a
               href="#bewertung"
-              className="rounded-full border border-amber/50 px-7 py-4 font-mono text-xs uppercase tracking-wider text-amber transition-colors hover:bg-amber hover:text-ink"
+              className="rounded-full border border-amber/50 bg-ink/30 px-7 py-4 font-mono text-xs uppercase tracking-wider text-amber backdrop-blur-sm transition-colors hover:bg-amber hover:text-ink"
             >
               Kostenlose Bewertung
             </a>
@@ -110,9 +109,9 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.1 }}
-            className="mt-9 inline-flex items-center gap-4 rounded-2xl border border-amber/25 bg-amber/5 px-5 py-3.5 transition-colors hover:border-amber/50"
+            className="mt-9 inline-flex items-center gap-4 rounded-2xl border border-amber/30 bg-ink/50 px-5 py-3.5 backdrop-blur-sm transition-colors hover:border-amber/60"
           >
-            <span className="font-display text-3xl font-semibold text-amber">ab 0.95%</span>
+            <span className="whitespace-nowrap font-display text-3xl font-semibold text-amber">ab 0.95%</span>
             <span className="text-xs leading-snug text-ivory-dim">
               Provision statt 3%.
               <br />
@@ -120,24 +119,6 @@ export function Hero() {
             </span>
           </motion.a>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="relative aspect-[5/4] rounded-3xl border border-line bg-[radial-gradient(circle_at_50%_40%,#151b27,var(--color-ink))] p-5"
-        >
-          {HUD_CORNERS.map((pos) => (
-            <span key={pos} aria-hidden className={`absolute h-6 w-6 border-blueprint/50 ${pos}`} />
-          ))}
-          <BlueprintHouse stage={stage} label="Haus als Bauplan, wechselt durch Bewerten, Verkaufen, Umbauen, Finanzieren und Absichern" />
-          <span
-            aria-hidden
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-line bg-ink/80 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft"
-          >
-            {CYCLE[stage]}
-          </span>
-        </motion.div>
       </div>
     </section>
   );

@@ -29,10 +29,20 @@ function dirAt(angle: number): Dir {
 export function Compass({ onSelect }: { onSelect: (id: AreaId) => void }) {
   const [open, setOpen] = useState(false);
   const [armed, setArmed] = useState<Dir | null>(null);
+  const [visible, setVisible] = useState(false);
   const dialRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<SVGLineElement>(null);
   const drag = useRef({ active: false, cx: 0, cy: 0, half: 0, maxR: 0, armed: null as Dir | null });
+
+  useEffect(() => {
+    function onScroll() {
+      setVisible(window.scrollY > window.innerHeight * 0.6);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -100,7 +110,7 @@ export function Compass({ onSelect }: { onSelect: (id: AreaId) => void }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="NoviDom 360° öffnen"
-        className="group fixed bottom-28 left-6 z-[55] flex h-14 w-14 items-center justify-center rounded-full border border-line bg-ink-2 text-amber-soft shadow-[0_8px_28px_-8px_rgba(0,0,0,0.6)] transition-colors hover:border-amber/50 motion-safe:animate-[nd-bob_5s_ease-in-out_infinite] sm:bottom-8"
+        className={`group fixed bottom-28 left-6 z-[55] flex h-14 w-14 items-center justify-center rounded-full border border-line bg-ink-2 text-amber-soft shadow-[0_8px_28px_-8px_rgba(0,0,0,0.6)] transition-all duration-300 hover:border-amber/50 sm:bottom-8 ${visible ? "opacity-100 motion-safe:animate-[nd-bob_5s_ease-in-out_infinite]" : "pointer-events-none translate-y-4 opacity-0"}`}
       >
         <CompassIcon className="h-6 w-6" strokeWidth={1.5} />
         <span className="pointer-events-none absolute left-[68px] whitespace-nowrap rounded-full border border-line bg-ink-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ivory-dim opacity-0 transition-opacity group-hover:opacity-100">

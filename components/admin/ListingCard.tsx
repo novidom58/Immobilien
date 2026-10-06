@@ -139,7 +139,10 @@ export function ListingCard({
     setBusy("upload");
     setError(null);
 
-    for (const file of Array.from(files)) {
+    // Nach Dateiname sortiert, damit "01-…", "02-…" die Reihenfolge im
+    // Flythrough bestimmt; jedes Foto bekommt seine eigene Position.
+    const sorted = Array.from(files).sort((a, b) => a.name.localeCompare(b.name, "de", { numeric: true }));
+    for (const [index, file] of sorted.entries()) {
       const path = `${listing.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error: uploadError } = await supabase.storage
         .from("listing-photos")
@@ -153,7 +156,7 @@ export function ListingCard({
       const { error: insertError } = await supabase.from("listing_photos").insert({
         listing_id: listing.id,
         url: urlData.publicUrl,
-        sort_order: listing.photoCount,
+        sort_order: listing.photoCount + index,
       });
       if (insertError) {
         setError(`Foto gespeichert, aber Verknüpfung fehlgeschlagen: ${insertError.message}`);

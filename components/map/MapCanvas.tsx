@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { OFFICES, officeAddress } from "@/lib/offices";
 
 export type MapListing = {
   id: string;
@@ -16,12 +17,6 @@ export type MapListing = {
   price_chf?: number | null;
 };
 
-const OFFICE = {
-  label: "Basel · Büro",
-  lat: 47.5596,
-  lng: 7.5886,
-  address: "Güterstrasse 14, 4053 Basel (vorläufig — definitive Adresse folgt)",
-};
 
 const listingIcon = L.divIcon({
   className: "",
@@ -52,20 +47,22 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
         url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
         attribution='&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS'
       />
-      <Marker position={[OFFICE.lat, OFFICE.lng]} icon={officeIcon}>
-        <Tooltip permanent direction="top" offset={[0, -10]} className="coverage-map-label">
-          {OFFICE.label}
-        </Tooltip>
-        <Popup>
-          <div className="min-w-[180px]">
-            <div className="font-medium">{OFFICE.label}</div>
-            <p className="mt-1 text-xs opacity-70">{OFFICE.address}</p>
-            <Link href="/#kontakt" className="mt-2 inline-block text-xs font-medium underline underline-offset-2">
-              Kontakt aufnehmen →
-            </Link>
-          </div>
-        </Popup>
-      </Marker>
+      {OFFICES.map((office) => (
+        <Marker key={office.city} position={[office.lat, office.lng]} icon={officeIcon}>
+          <Tooltip permanent direction="top" offset={[0, -10]} className="coverage-map-label">
+            {office.label}
+          </Tooltip>
+          <Popup>
+            <div className="min-w-[180px]">
+              <div className="font-medium">{office.label}</div>
+              <p className="mt-1 text-xs opacity-70">{officeAddress(office)}</p>
+              <Link href="/#kontakt" className="mt-2 inline-block text-xs font-medium underline underline-offset-2">
+                Kontakt aufnehmen →
+              </Link>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
       {listings.map((listing) => (
         <Marker key={listing.id} position={[listing.lat, listing.lng]} icon={listingIcon}>
           <Popup>

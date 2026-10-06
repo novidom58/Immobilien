@@ -1,18 +1,12 @@
 "use client";
 
 import { MapContainer, TileLayer, Marker, Tooltip, Popup, ZoomControl, AttributionControl } from "react-leaflet";
+import Link from "next/link";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { OFFICES, officeAddress } from "@/lib/offices";
 
-const BASEL = {
-  label: "Basel · Büro",
-  lat: 47.5596,
-  lng: 7.5886,
-  address: "Güterstrasse 14, 4053 Basel (vorläufig — definitive Adresse folgt)",
-  popupText: "Unser Büro in Basel — persönliche Beratung vor Ort.",
-  ctaHref: "/#kontakt",
-  ctaLabel: "Kontakt aufnehmen →",
-};
+const MAP_CENTER = { lat: 47.5596, lng: 7.5886 };
 
 const markerIcon = L.divIcon({
   className: "",
@@ -27,7 +21,7 @@ const markerIcon = L.divIcon({
 export default function CoverageMap() {
   return (
     <MapContainer
-      center={[BASEL.lat, BASEL.lng]}
+      center={[MAP_CENTER.lat, MAP_CENTER.lng]}
       zoom={13}
       scrollWheelZoom={false}
       zoomControl={false}
@@ -40,21 +34,23 @@ export default function CoverageMap() {
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
-      <Marker position={[BASEL.lat, BASEL.lng]} icon={markerIcon}>
-        <Tooltip permanent direction="top" offset={[0, -10]} className="coverage-map-label">
-          {BASEL.label}
-        </Tooltip>
-        <Popup className="coverage-map-popup">
-          <div className="min-w-[180px]">
-            <div className="font-medium">{BASEL.label}</div>
-            <p className="mt-1 text-xs opacity-70">{BASEL.address}</p>
-            <p className="mt-1 text-xs opacity-80">{BASEL.popupText}</p>
-            <a href={BASEL.ctaHref} className="mt-2 inline-block text-xs font-medium underline underline-offset-2">
-              {BASEL.ctaLabel}
-            </a>
-          </div>
-        </Popup>
-      </Marker>
+      {OFFICES.map((office) => (
+        <Marker key={office.city} position={[office.lat, office.lng]} icon={markerIcon}>
+          <Tooltip permanent direction="top" offset={[0, -10]} className="coverage-map-label">
+            {office.label}
+          </Tooltip>
+          <Popup className="coverage-map-popup">
+            <div className="min-w-[180px]">
+              <div className="font-medium">{office.label}</div>
+              <p className="mt-1 text-xs opacity-70">{officeAddress(office)}</p>
+              <p className="mt-1 text-xs opacity-80">Unser Büro in {office.city}: persönliche Beratung vor Ort.</p>
+              <Link href="/#kontakt" className="mt-2 inline-block text-xs font-medium underline underline-offset-2">
+                Kontakt aufnehmen →
+              </Link>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }

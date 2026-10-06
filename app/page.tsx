@@ -4,6 +4,7 @@ import { Hero } from "@/components/hero/Hero";
 import { UspMarquee } from "@/components/sections/UspMarquee";
 import { TrustBar } from "@/components/sections/TrustBar";
 import { SolutionsHub } from "@/components/sections/SolutionsHub";
+import { BuyerRadar } from "@/components/sections/BuyerRadar";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProblemSolution } from "@/components/sections/ProblemSolution";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
@@ -30,6 +31,7 @@ export default function Home() {
         <UspMarquee />
         <TrustBar />
         <SolutionsHub />
+        <BuyerRadar />
         <FeaturedListings />
         <ProblemSolution />
         <WhyNoviDom />

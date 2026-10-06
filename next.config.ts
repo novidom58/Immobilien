@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // Browser-Tab, der noch die vorherige Version geladen hat, erkennt die
   // Abweichung anhand der Vercel-Commit-SHA und lädt dann hart neu statt
   // mit veralteten Chunks client-seitig zu navigieren.
-  deploymentId: process.env.VERCEL_GIT_COMMIT_SHA,
+  deploymentId: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 32),
   images: {
     remotePatterns: [
       {

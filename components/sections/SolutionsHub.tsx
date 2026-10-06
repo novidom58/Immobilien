@@ -7,6 +7,7 @@ import { Reveal } from "@/lib/reveal";
 import { AREAS, type AreaId } from "@/components/novidom360/areas";
 import { AreaPanel } from "@/components/novidom360/AreaPanels";
 import { Compass } from "@/components/novidom360/Compass";
+import { PuzzleHub } from "@/components/novidom360/PuzzleHub";
 
 export function SolutionsHub() {
   const [openId, setOpenId] = useState<AreaId | null>(null);
@@ -34,25 +35,26 @@ export function SolutionsHub() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {AREAS.map((a, i) => (
-            <Reveal key={a.id} delay={i * 0.06}>
-              <button
-                type="button"
-                onClick={() => setOpenId(a.id)}
-                className="group flex h-full w-full flex-col items-start gap-3 rounded-2xl border border-line bg-ink p-6 text-left transition-all hover:-translate-y-1 hover:border-amber/40"
-              >
-                <span className="font-mono text-[10px] tracking-[0.2em] text-blueprint">{a.num}</span>
-                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-ink-2 text-amber-soft">
-                  <a.icon className="h-5 w-5" strokeWidth={1.5} />
-                </span>
-                <span className="font-display text-lg font-semibold text-ivory">{a.title}</span>
-                <span className="text-sm text-ivory-dim">{a.short}</span>
-                <span className="mt-auto pt-2 font-mono text-xs uppercase tracking-wider text-amber transition-transform group-hover:translate-x-1">
-                  Ansehen →
-                </span>
-              </button>
-            </Reveal>
+        <div className="mt-12">
+          <PuzzleHub onSelect={setOpenId} />
+          <p className="mt-6 hidden text-center font-mono text-[11px] uppercase tracking-[0.18em] text-ivory-dim/60 sm:block">
+            Ein Teil wählen, um mehr zu erfahren
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-2 sm:hidden">
+          {AREAS.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setOpenId(a.id)}
+              className="flex items-center gap-3 rounded-xl border border-line bg-ink px-4 py-3 text-left"
+            >
+              <span className="font-mono text-[10px] tracking-[0.2em] text-blueprint">{a.num}</span>
+              <a.icon className="h-4 w-4 text-amber-soft" strokeWidth={1.5} />
+              <span className="font-display font-semibold text-ivory">{a.title}</span>
+              <span className="ml-auto text-amber">→</span>
+            </button>
           ))}
         </div>
 

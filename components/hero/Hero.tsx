@@ -1,32 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { HeroKeyUnlock } from "./HeroKeyUnlock";
 import { LOADER_DURATION_MS } from "@/components/Loader";
-import { createClient } from "@/lib/supabase/client";
-
-// Generisches KI-Bild als Fallback, solange noch kein echtes Objekt online ist.
-// Sobald ein aktives Inserat mit Foto existiert, ersetzt useEffect unten dieses
-// Bild automatisch durch ein echtes Objektfoto - das ist der eigentliche Fix
-// gegen den "Architekturbüro statt Maklerei"-Eindruck: reale Objekte statt
-// KI-Renderings, sobald welche erfasst sind.
-const FALLBACK_IMAGE =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png";
+import { BlueprintHouse } from "@/components/novidom360/BlueprintHouse";
 
 const HUD_CORNERS = [
-  "left-6 top-20 border-l border-t lg:left-10 lg:top-24",
-  "right-6 top-20 border-r border-t lg:right-10 lg:top-24",
-  "left-6 bottom-6 border-l border-b lg:left-10 lg:bottom-10",
-  "right-6 bottom-6 border-r border-b lg:right-10 lg:bottom-10",
+  "left-3 top-3 border-l border-t",
+  "right-3 top-3 border-r border-t",
+  "left-3 bottom-3 border-l border-b",
+  "right-3 bottom-3 border-r border-b",
 ];
 
+// Stufen 1-5 des Bauplan-Hauses, im Hero als Endlosschleife.
+const CYCLE = ["Ihre Immobilie", "Bewerten", "Verkaufen", "Umbauen", "Finanzieren", "Absichern"];
+
 export function Hero() {
-  const [heroImage, setHeroImage] = useState(FALLBACK_IMAGE);
   const [showIntro, setShowIntro] = useState(true);
   const [introStart, setIntroStart] = useState(false);
+  const [stage, setStage] = useState(0);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -41,76 +35,45 @@ export function Hero() {
   }, []);
 
   useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) return;
-
-    async function loadLatestListingPhoto() {
-      const { data } = await supabase!
-        .from("listings")
-        .select("listing_photos(url, sort_order)")
-        .in("status", ["active", "reserved", "sold"])
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const photos = (data?.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
-      if (photos.length > 0) {
-        const cover = [...photos].sort((a, b) => a.sort_order - b.sort_order)[0];
-        setHeroImage(cover.url);
-      }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer: ReturnType<typeof setTimeout>;
+    function next() {
+      setStage((s) => (s % 5) + 1);
+      timer = setTimeout(next, 2600);
     }
-
-    loadLatestListingPhoto();
+    timer = setTimeout(next, LOADER_DURATION_MS + 2400);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden bg-ink">
       {showIntro && <HeroKeyUnlock start={introStart} onDone={() => setShowIntro(false)} />}
 
-      {/* Ruhiger Ken-Burns-Zoom auf dem Hintergrundfoto - läuft unabhängig vom Scroll,
-          wirkt dadurch immer flüssig statt wie eingefrorene Zwischenbilder. */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ scale: 1 }}
-        animate={{ scale: 1.08 }}
-        transition={{ duration: 22, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
-      >
-        <Image
-          src={heroImage}
-          alt=""
-          aria-hidden
-          fill
-          sizes="100vw"
-          preload
-          unoptimized
-          className="object-cover"
-        />
-      </motion.div>
-
-      {/* Blueprint-Raster + HUD-Ecken: rein dekorativ, kein Fortschritts-Narrativ mehr. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.18]"
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(95,184,232,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(95,184,232,0.4) 1px, transparent 1px)",
           backgroundSize: "44px 44px",
         }}
       />
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        {HUD_CORNERS.map((pos) => (
-          <div key={pos} className={`absolute h-9 w-9 border-blueprint/50 lg:h-12 lg:w-12 ${pos}`} />
-        ))}
-      </div>
-
-      {/* Lesbarkeit + Stimmung */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-ink)_0%,rgba(10,13,18,0.9)_22%,rgba(10,13,18,0.55)_50%,rgba(10,13,18,0.25)_75%)]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/20 to-ink/50" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(26,33,48,0.9),transparent_60%)]" />
       <div className="grain absolute inset-0" />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-6 py-32 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16 lg:px-10 lg:py-40">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-6 py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-10 lg:py-36">
         <div>
-          <HeroHeadline text="Ihr Zuhause verdient den besten Preis." />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.28em] text-blueprint"
+          >
+            <span aria-hidden className="h-px w-7 bg-blueprint/60" />
+            NoviDom Immo · Basel &amp; Zug
+          </motion.div>
+
+          <HeroHeadline text="Ihre Immobilie." accent="Unsere Expertise." />
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -118,69 +81,62 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 max-w-xl text-balance text-lg text-ivory-dim lg:text-xl"
           >
-            Professioneller Immobilienverkauf zum fairen Preis. Persönliche
-            Betreuung, fundierte Immobilienbewertung, moderne Vermarktung und
-            Begleitung bis zum erfolgreichen Abschluss.
-            Ab <span className="font-mono text-amber-soft">0.95%</span> Provision statt 3%.
+            Von der ersten Idee bis zum fertigen Zuhause. Verkaufen, umbauen, finanzieren,
+            versichern. Aus einer Hand.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="mt-8"
+            className="mt-8 flex flex-wrap gap-3"
           >
             <a
-              href="#leistungen"
-              className="font-mono text-sm uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+              href="#journey"
+              className="rounded-full bg-amber px-7 py-4 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:bg-amber-soft"
             >
-              Unsere Leistungen →
+              Immobilie entdecken →
+            </a>
+            <a
+              href="#bewertung"
+              className="rounded-full border border-amber/50 px-7 py-4 font-mono text-xs uppercase tracking-wider text-amber transition-colors hover:bg-amber hover:text-ink"
+            >
+              Kostenlose Bewertung
             </a>
           </motion.div>
+
+          <motion.a
+            href="#kommission"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            className="mt-9 inline-flex items-center gap-4 rounded-2xl border border-amber/25 bg-amber/5 px-5 py-3.5 transition-colors hover:border-amber/50"
+          >
+            <span className="font-display text-3xl font-semibold text-amber">ab 0.95%</span>
+            <span className="text-xs leading-snug text-ivory-dim">
+              Provision statt 3%.
+              <br />
+              Voller Service, nur im Erfolgsfall.
+            </span>
+          </motion.a>
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex flex-col gap-5"
+          className="relative aspect-[5/4] rounded-3xl border border-line bg-[radial-gradient(circle_at_50%_40%,#151b27,var(--color-ink))] p-5"
         >
-          <motion.a
-            href="#kontakt"
-            animate={{
-              boxShadow: [
-                "0 0 0px 0px rgba(232,168,85,0.5)",
-                "0 0 0px 10px rgba(232,168,85,0)",
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            className="inline-flex items-center gap-5 rounded-3xl bg-amber px-8 py-5 transition-transform hover:-translate-y-0.5"
+          {HUD_CORNERS.map((pos) => (
+            <span key={pos} aria-hidden className={`absolute h-6 w-6 border-blueprint/50 ${pos}`} />
+          ))}
+          <BlueprintHouse stage={stage} label="Haus als Bauplan, wechselt durch Bewerten, Verkaufen, Umbauen, Finanzieren und Absichern" />
+          <span
+            aria-hidden
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-line bg-ink/80 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft"
           >
-            <span className="font-display text-4xl font-semibold leading-none tracking-tight text-ink">
-              ab 0.95%
-            </span>
-            <span className="h-11 w-px bg-ink/20" aria-hidden />
-            <span className="flex flex-col">
-              <span className="font-display text-sm font-semibold text-ink">
-                Provision — statt 3%
-              </span>
-              <span className="text-xs text-ink/60">Voller Service, faire Kosten</span>
-            </span>
-          </motion.a>
-
-          <motion.a
-            href="#bewertung"
-            animate={{
-              boxShadow: [
-                "0 0 0px 0px rgba(232,168,85,0.5)",
-                "0 0 0px 10px rgba(232,168,85,0)",
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-amber px-7 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink"
-          >
-            Kostenlose Bewertung anfragen
-          </motion.a>
+            {CYCLE[stage]}
+          </span>
         </motion.div>
       </div>
     </section>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Phone, Mail, Users, StickyNote, Trash2 } from "lucide-react";
 import { updateLeadStatus, updateLeadFollowUp, addLeadActivity, deleteLeadActivity } from "@/app/admin/actions";
 import { LEAD_STATUS_OPTIONS } from "@/lib/constants";
+import { TemplateMailer } from "./TemplateMailer";
 
 type Activity = { id: string; type: string; text: string; created_at: string };
 
@@ -24,12 +25,16 @@ const TYPE_TONE: Record<string, string> = {
 
 export function LeadActivityPanel({
   leadId,
+  name,
+  email,
   status,
   phone,
   followUpAt,
   activity,
 }: {
   leadId: string;
+  name: string;
+  email: string;
   status: string;
   phone: string | null;
   followUpAt: string | null;
@@ -37,6 +42,7 @@ export function LeadActivityPanel({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [mailOpen, setMailOpen] = useState(false);
 
   async function handleStatus(newStatus: string) {
     setBusy(true);
@@ -75,6 +81,17 @@ export function LeadActivityPanel({
             Anrufen ({phone})
           </a>
         )}
+        {email && (
+          <button
+            type="button"
+            onClick={() => setMailOpen((v) => !v)}
+            className={`btn btn-sm ${mailOpen ? "btn-primary" : "btn-gold"}`}
+            style={{ justifyContent: "center" }}
+          >
+            <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
+            Mail aus Vorlage
+          </button>
+        )}
         <label className="field-group">
           <span className="field-label">Status</span>
           <select value={status} disabled={busy} onChange={(e) => handleStatus(e.target.value)} className="field-select">
@@ -98,6 +115,11 @@ export function LeadActivityPanel({
       </div>
 
       <div>
+        {mailOpen && email && (
+          <div style={{ marginBottom: 16 }}>
+            <TemplateMailer target={{ kind: "lead", id: leadId }} email={email} context={{ name }} />
+          </div>
+        )}
         <div className="detail-label">Kontakthistorie</div>
         <form action={handleAddActivity} className="mt-2 flex flex-col gap-2 sm:flex-row">
           <select name="type" defaultValue="notiz" className="field-select" style={{ width: "auto" }}>

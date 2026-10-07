@@ -107,7 +107,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
       {open && (
         <tr>
           <td colSpan={8} style={{ background: "var(--bg)", padding: "16px 20px" }}>
-            <LeadActivityPanel leadId={lead.id} status={lead.status} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+            <LeadActivityPanel leadId={lead.id} name={lead.name} email={lead.email} status={lead.status} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
           </td>
         </tr>
       )}

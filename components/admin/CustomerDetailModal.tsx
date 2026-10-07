@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText, Inbox } from "lucide-react";
+import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText } from "lucide-react";
 import {
   updateCustomer,
   setCustomerTyp,
@@ -15,7 +15,7 @@ import {
   deleteCustomerActivity,
 } from "@/app/admin/actions";
 import { AcquisitionTool } from "./AcquisitionTool";
-import { EmailTemplateTool } from "./EmailTemplateTool";
+import { TemplateMailer } from "./TemplateMailer";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
 import { formatSwissPhone } from "@/lib/phone";
 import { matchListings } from "@/lib/matching";
@@ -43,33 +43,6 @@ const TYPE_TONE: Record<string, string> = {
   notiz: "",
 };
 
-const REQUIRED_DOCUMENTS = [
-  "Grundbuchauszug",
-  "Grundrisspläne",
-  "Gebäudeversicherungsausweis (GVB/GVZ)",
-  "Energieausweis (GEAK), falls vorhanden",
-  "Ausweiskopie",
-];
-
-function buildFollowUpTemplate(customer: CrmCustomer) {
-  const firstName = customer.full_name.split(" ")[0];
-  const berater = customer.berater || "Ihr Team von NoviDom Immo";
-  return {
-    subject: "Kurzes Update zu Ihrem Anliegen",
-    body: `Hallo ${firstName}\n\nWir wollten kurz nachfragen, ob sich bei Ihnen in der Zwischenzeit etwas getan hat oder ob noch Fragen offen sind. Gerne melden wir uns auch telefonisch, wenn Ihnen das lieber ist.\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
-  };
-}
-
-function buildDocumentRequestTemplate(customer: CrmCustomer) {
-  const firstName = customer.full_name.split(" ")[0];
-  const berater = customer.berater || "Ihr Team von NoviDom Immo";
-  const docList = REQUIRED_DOCUMENTS.map((d) => `• ${d}`).join("\n");
-  return {
-    subject: "Unterlagen für den Verkauf",
-    body: `Hallo ${firstName}\n\nDamit wir mit dem Verkauf weiterkommen, benötigen wir noch folgende Unterlagen von Ihnen:\n\n${docList}\n\nSie können uns diese einfach per E-Mail zurücksenden. Vielen Dank!\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
-  };
-}
-
 export function CustomerDetailModal({
   customer,
   listings,
@@ -84,7 +57,7 @@ export function CustomerDetailModal({
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [openPanel, setOpenPanel] = useState<"akquise" | "nachfassen" | "unterlagen" | null>(null);
+  const [openPanel, setOpenPanel] = useState<"akquise" | "mail" | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [ziel, setZiel] = useState(customer.ziel ?? "");
 
@@ -123,8 +96,6 @@ export function CustomerDetailModal({
     ) : null;
 
   const matches = matchListings(customer, listings).filter((l) => l.id !== customer.listing_id);
-  const followUpTemplate = buildFollowUpTemplate(customer);
-  const docRequestTemplate = buildDocumentRequestTemplate(customer);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -171,22 +142,12 @@ export function CustomerDetailModal({
               <button
                 type="button"
                 disabled={!customer.email}
-                onClick={() => setOpenPanel((v) => (v === "nachfassen" ? null : "nachfassen"))}
-                className={`btn btn-sm ${openPanel === "nachfassen" ? "btn-primary" : "btn-gold"}`}
+                onClick={() => setOpenPanel((v) => (v === "mail" ? null : "mail"))}
+                className={`btn btn-sm ${openPanel === "mail" ? "btn-primary" : "btn-gold"}`}
                 title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
               >
-                <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
-                Nachfassen
-              </button>
-              <button
-                type="button"
-                disabled={!customer.email}
-                onClick={() => setOpenPanel((v) => (v === "unterlagen" ? null : "unterlagen"))}
-                className={`btn btn-sm ${openPanel === "unterlagen" ? "btn-primary" : "btn-ghost"}`}
-                title={!customer.email ? "E-Mail-Adresse erforderlich" : undefined}
-              >
-                <Inbox className="h-3.5 w-3.5" strokeWidth={1.75} />
-                Unterlagen anfordern
+                <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Mail aus Vorlage
               </button>
             </div>
           </div>
@@ -217,32 +178,20 @@ export function CustomerDetailModal({
             </div>
           )}
 
-          {openPanel === "nachfassen" && customer.email && (
+          {openPanel === "mail" && customer.email && (
             <div className="modal-section">
               <div className="detail-label" style={{ marginBottom: 8 }}>
-                Nachfass-Mail
+                Mail aus Vorlage
               </div>
-              <EmailTemplateTool
-                subject={followUpTemplate.subject}
-                body={followUpTemplate.body}
-                recipientEmail={customer.email}
-                customerId={customer.id}
-                logLabel="Nachfass-Mail verschickt"
-              />
-            </div>
-          )}
-
-          {openPanel === "unterlagen" && customer.email && (
-            <div className="modal-section">
-              <div className="detail-label" style={{ marginBottom: 8 }}>
-                Unterlagen anfordern
-              </div>
-              <EmailTemplateTool
-                subject={docRequestTemplate.subject}
-                body={docRequestTemplate.body}
-                recipientEmail={customer.email}
-                customerId={customer.id}
-                logLabel="Unterlagen angefordert"
+              <TemplateMailer
+                target={{ kind: "customer", id: customer.id }}
+                email={customer.email}
+                context={{
+                  name: customer.full_name,
+                  berater: customer.berater,
+                  objekt: customer.listing?.address ?? customer.address,
+                  ort: customer.listing?.city ?? null,
+                }}
               />
             </div>
           )}

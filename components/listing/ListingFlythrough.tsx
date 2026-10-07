@@ -14,6 +14,7 @@ type Slide = {
   title: string;
   text: string;
   image: string;
+  video?: string;
   cta?: boolean;
 };
 
@@ -28,17 +29,23 @@ function formatChf(value: number) {
   return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
 }
 
-function buildSlides(listing: { title: string | null; address: string; city: string; price_chf: number | null }, photos: Photo[]): Slide[] {
+function buildSlides(
+  listing: { title: string | null; address: string; city: string; price_chf: number | null },
+  photos: Photo[],
+  clips: string[]
+): Slide[] {
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order).slice(0, 6);
   const total = sorted.length;
 
+  // Clip n gehört zu Foto n; das Foto dient als Standbild, bis der Clip läuft.
   return sorted.map((photo, i) => {
+    const media = { image: photo.url, video: clips[i] };
     if (i === 0) {
       return {
         tag: "Erster Eindruck",
         title: listing.title || listing.address,
         text: `${listing.address}, ${listing.city}`,
-        image: photo.url,
+        ...media,
       };
     }
     if (i === total - 1) {
@@ -46,12 +53,12 @@ function buildSlides(listing: { title: string | null; address: string; city: str
         tag: "Ihr neues Zuhause",
         title: "Stellen Sie sich vor, hier zu leben",
         text: listing.price_chf ? `${formatChf(listing.price_chf)} — jetzt Besichtigung anfragen.` : "Jetzt Besichtigung anfragen.",
-        image: photo.url,
+        ...media,
         cta: true,
       };
     }
     const caption = MIDDLE_CAPTIONS[(i - 1) % MIDDLE_CAPTIONS.length];
-    return { ...caption, image: photo.url };
+    return { ...caption, ...media };
   });
 }
 
@@ -64,13 +71,25 @@ export function ListingFlythrough({
     city: string;
     price_chf: number | null;
     photos: Photo[];
+    clips?: string[];
   };
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
-  const [slides] = useState(() => buildSlides(listing, listing.photos));
+  const [slides] = useState(() => buildSlides(listing, listing.photos, listing.clips ?? []));
+
+  // Nur der sichtbare Clip läuft, die anderen bleiben auf ihrem Standbild.
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    videoRefs.current.forEach((video, i) => {
+      if (!video) return;
+      if (i === active && !reduced) video.play().catch(() => {});
+      else video.pause();
+    });
+  }, [active]);
 
   useEffect(() => {
     if (slides.length < 3) return;
@@ -117,6 +136,21 @@ export function ListingFlythrough({
           {slides.map((slide, i) => (
             <div key={`${slide.image}-${i}`} className="relative h-full w-screen shrink-0 overflow-hidden">
               <Image src={slide.image} alt="" aria-hidden fill sizes="100vw" unoptimized className="object-cover" />
+              {slide.video && (
+                <video
+                  ref={(el) => {
+                    videoRefs.current[i] = el;
+                  }}
+                  src={slide.video}
+                  poster={slide.image}
+                  muted
+                  loop
+                  playsInline
+                  preload={i === 0 ? "auto" : "metadata"}
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" />
               <div className="grain absolute inset-0" />
               <span className="absolute left-6 top-6 z-10 font-mono text-xs uppercase tracking-[0.24em] text-ivory-dim/60 lg:left-10 lg:top-10">

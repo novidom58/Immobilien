@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX, FileText, FileUp } from "lucide-react";
+import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX, FileText, FileUp, Clapperboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   updateListingStatus,
@@ -14,6 +14,7 @@ import {
 } from "@/app/admin/actions";
 import { PORTAL_OPTIONS } from "@/lib/constants";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
+import { CLIP_BUCKET, clipFolder, isClipFile } from "@/lib/listingClips";
 
 type AdminListing = {
   id: string;
@@ -73,11 +74,77 @@ export function ListingCard({
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const docFileRef = useRef<HTMLInputElement>(null);
+  const clipFileRef = useRef<HTMLInputElement>(null);
+  const [clipNames, setClipNames] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [assignEmail, setAssignEmail] = useState("");
   const [assigning, setAssigning] = useState(false);
+
+  async function loadClips() {
+    if (!supabase) return [];
+    const { data } = await supabase.storage
+      .from(CLIP_BUCKET)
+      .list(clipFolder(listing.id), { sortBy: { column: "name", order: "asc" } });
+    const names = (data ?? []).map((f) => f.name).filter(isClipFile);
+    setClipNames(names);
+    return names;
+  }
+
+  useEffect(() => {
+    if (!supabase) return;
+    let cancelled = false;
+    supabase.storage
+      .from(CLIP_BUCKET)
+      .list(clipFolder(listing.id), { sortBy: { column: "name", order: "asc" } })
+      .then(({ data }) => {
+        if (!cancelled) setClipNames((data ?? []).map((f) => f.name).filter(isClipFile));
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- supabase-Client ist pro Render neu, einmal pro Inserat laden
+  }, [listing.id]);
+
+  async function handleClipUpload(files: FileList | null) {
+    if (!files || files.length === 0 || !supabase) return;
+    setBusy("clip-upload");
+    setError(null);
+
+    // Clips werden durchnummeriert: Clip 01 gehört zu Foto 01 usw. Mehrere
+    // auf einmal werden nach Dateiname sortiert.
+    const existing = await loadClips();
+    const sorted = Array.from(files).sort((a, b) => a.name.localeCompare(b.name, "de", { numeric: true }));
+    for (const [index, file] of sorted.entries()) {
+      const num = String(existing.length + index + 1).padStart(2, "0");
+      const path = `${clipFolder(listing.id)}/${num}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from(CLIP_BUCKET)
+        .upload(path, file, { cacheControl: "3600", contentType: file.type || "video/mp4" });
+      if (uploadError) {
+        setError(`Clip-Upload fehlgeschlagen: ${uploadError.message}`);
+        break;
+      }
+    }
+
+    await loadClips();
+    setBusy(null);
+    if (clipFileRef.current) clipFileRef.current.value = "";
+  }
+
+  async function handleClipsDelete() {
+    if (!supabase || clipNames.length === 0) return;
+    if (!window.confirm(`Alle ${clipNames.length} Flythrough-Clips löschen?`)) return;
+    setBusy("clip-delete");
+    setError(null);
+    const { error: removeError } = await supabase.storage
+      .from(CLIP_BUCKET)
+      .remove(clipNames.map((name) => `${clipFolder(listing.id)}/${name}`));
+    if (removeError) setError(`Löschen fehlgeschlagen: ${removeError.message}`);
+    await loadClips();
+    setBusy(null);
+  }
 
   async function handleAssign() {
     if (!assignEmail.trim()) return;
@@ -245,6 +312,19 @@ export function ListingCard({
           </button>
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
 
+          <button type="button" disabled={busy === "clip-upload"} onClick={() => clipFileRef.current?.click()} className="btn btn-ghost btn-sm">
+            <Clapperboard className="h-3.5 w-3.5" strokeWidth={1.75} />
+            {busy === "clip-upload" ? "Lädt…" : "Clips"}
+          </button>
+          <input
+            ref={clipFileRef}
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            multiple
+            className="hidden"
+            onChange={(e) => handleClipUpload(e.target.files)}
+          />
+
           <button type="button" disabled={busy === "doc-upload"} onClick={() => docFileRef.current?.click()} className="btn btn-ghost btn-sm">
             <FileUp className="h-3.5 w-3.5" strokeWidth={1.75} />
             {busy === "doc-upload" ? "Lädt…" : "Dokumente"}
@@ -271,6 +351,20 @@ export function ListingCard({
           </span>
           <span className="td-light">
             {listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}
+          </span>
+          <span className="flex items-center gap-1.5 td-light">
+            {clipNames.length} Flythrough-Clip{clipNames.length === 1 ? "" : "s"}
+            {clipNames.length > 0 && (
+              <button
+                type="button"
+                disabled={busy === "clip-delete"}
+                onClick={handleClipsDelete}
+                aria-label="Alle Clips löschen"
+                style={{ background: "none", border: "none", color: "var(--ink-light)", cursor: "pointer" }}
+              >
+                <Trash2 className="h-3 w-3" strokeWidth={1.75} />
+              </button>
+            )}
           </span>
           {listing.berater && <span className="bchip">{listing.berater}</span>}
           <span className="td-light">

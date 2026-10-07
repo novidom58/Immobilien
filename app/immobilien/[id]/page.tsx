@@ -9,6 +9,7 @@ import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
 import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
 import { createClient } from "@/lib/supabase/server";
+import { CLIP_BUCKET, clipFolder, isClipFile } from "@/lib/listingClips";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,14 @@ async function getListing(id: string) {
     (a, b) => a.sort_order - b.sort_order
   );
 
-  return { ...data, photos } as typeof data & { photos: typeof photos };
+  const { data: clipFiles } = await supabase.storage
+    .from(CLIP_BUCKET)
+    .list(clipFolder(id), { sortBy: { column: "name", order: "asc" } });
+  const clips = (clipFiles ?? [])
+    .filter((f) => isClipFile(f.name))
+    .map((f) => supabase.storage.from(CLIP_BUCKET).getPublicUrl(`${clipFolder(id)}/${f.name}`).data.publicUrl);
+
+  return { ...data, photos, clips } as typeof data & { photos: typeof photos; clips: string[] };
 }
 
 export async function generateMetadata({
@@ -130,6 +138,7 @@ export default async function ListingDetailPage({
           city: listing.city,
           price_chf: listing.price_chf,
           photos: listing.photos,
+          clips: listing.clips,
         }}
       />
 

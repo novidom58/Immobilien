@@ -6,10 +6,10 @@ import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
 
 const links = [
-  { href: "/#warum", label: "Warum NoviDom" },
-  { href: "/#prozess", label: "Prozess" },
-  { href: "/#kommission", label: "Provision" },
+  { href: "/#leistungen", label: "NoviDom 360°" },
+  { href: "/leistungen/kaufen-verkaufen", label: "Verkaufen" },
   { href: "/immobilien", label: "Immobilien" },
+  { href: "/#kaeufer-radar", label: "Käufer-Radar" },
   { href: "/#ueber-uns", label: "Über uns" },
 ];
 

@@ -8,7 +8,7 @@ import { HeroKeyUnlock } from "./HeroKeyUnlock";
 import { LOADER_DURATION_MS } from "@/components/Loader";
 
 const TRUST = [
-  { value: "ab 0.95%", label: "Provision statt 3%", href: "#kommission" },
+  { value: "ab 0.95%", label: "Provision statt 3%", href: "/leistungen/kaufen-verkaufen#kommission" },
   { value: "4 in 1", label: "Verkauf, Finanzierung, Umbau, Versicherung", href: "#leistungen" },
   { value: "Basel & Zug", label: "Persönlich vor Ort", href: "#einzugsgebiet" },
 ];

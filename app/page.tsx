@@ -6,15 +6,8 @@ import { TrustBar } from "@/components/sections/TrustBar";
 import { SolutionsHub } from "@/components/sections/SolutionsHub";
 import { BuyerRadar } from "@/components/sections/BuyerRadar";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
-import { ProblemSolution } from "@/components/sections/ProblemSolution";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
-import { Process } from "@/components/sections/Process";
-import { Preparation } from "@/components/sections/Preparation";
 import { PropertyValuationLead } from "@/components/sections/PropertyValuationLead";
-import { SalesCockpit } from "@/components/sections/SalesCockpit";
-import { ProvisionsRechner } from "@/components/sections/ProvisionsRechner";
-import { Situations } from "@/components/sections/Situations";
-import { StatsAndArea } from "@/components/sections/StatsAndArea";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
 import { RatgeberTeaser } from "@/components/sections/RatgeberTeaser";
@@ -33,18 +26,11 @@ export default function Home() {
         <SolutionsHub />
         <BuyerRadar />
         <FeaturedListings />
-        <ProblemSolution />
         <WhyNoviDom />
-        <Process />
-        <Preparation />
         <PropertyValuationLead />
-        <ProvisionsRechner />
-        <Situations />
-        <StatsAndArea />
         <ServiceMap />
         <AboutJana />
         <RatgeberTeaser />
-        <SalesCockpit />
         <Faq />
         <BookingSection />
         <FinalCta />

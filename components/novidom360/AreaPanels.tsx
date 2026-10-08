@@ -244,7 +244,7 @@ function FinanzierungPanel() {
           </div>
           <span
             className={`mt-4 inline-flex rounded-full border px-3 py-1.5 font-mono text-[11px] ${
-              ok ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-amber/30 bg-amber/10 text-amber-soft"
+              ok ? "border-emerald-600/30 bg-emerald-600/10 text-emerald-800" : "border-amber/30 bg-amber/10 text-amber-soft"
             }`}
           >
             {ok ? "✓ Tragbarkeit im Rahmen" : "⚠ Mind. 20% Eigenmittel empfohlen"}

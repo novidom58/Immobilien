@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -136,12 +137,12 @@ export function ProvisionsRechner() {
               <p className="text-lg text-ivory-dim">
                 Sie möchten wissen, was Ihre Immobilie wert ist?
               </p>
-              <a
-                href="#bewertung"
+              <Link
+                href="/#bewertung"
                 className="mt-4 inline-block rounded-full bg-amber px-8 py-4 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-transform hover:-translate-y-0.5"
               >
                 Kostenlose Bewertung anfragen →
-              </a>
+              </Link>
             </div>
           </div>
         </Reveal>

@@ -164,7 +164,7 @@ export function BuyerRadar() {
                   className={inputClass}
                 />
               </label>
-              {error && <p className="text-sm text-red-300 sm:col-span-2">{error}</p>}
+              {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
               <button
                 type="submit"
                 disabled={phase === "scanning"}
@@ -197,7 +197,7 @@ export function BuyerRadar() {
                 <input name="email" type="email" required placeholder="E-Mail" autoComplete="email" className={inputClass} />
                 <input name="phone" type="tel" placeholder="Telefon (optional)" autoComplete="tel" className={inputClass} />
                 <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-                {error && <p className="text-sm text-red-300 sm:col-span-2">{error}</p>}
+                {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
                 <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
                   <button
                     type="submit"
@@ -217,7 +217,7 @@ export function BuyerRadar() {
               </form>
             </div>
           ) : (
-            <p className="mt-8 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-5 text-emerald-200">
+            <p className="mt-8 rounded-2xl border border-emerald-600/30 bg-emerald-600/10 p-5 text-emerald-800">
               Danke! Wir melden uns persönlich bei Ihnen, in der Regel am selben Werktag.
             </p>
           )}

@@ -54,6 +54,7 @@ export function AdminShell({
       title: "Kunden",
       items: [
         { href: "/admin/kunden", label: "Alle Kunden", icon: "👤" },
+        { href: "/admin/nachfassen", label: "Nachfassen", icon: "📌" },
         { href: "/admin/fristen", label: "Ablaufende Fristen", icon: "⏰", badge: counts.fristen, badgeTone: "gold" },
         { href: "/admin/inserate", label: "Alle Inserate", icon: "🏠" },
       ],
@@ -70,6 +71,7 @@ export function AdminShell({
       items: [
         { href: "/admin/kalender", label: "Kalender", icon: "🗓️" },
         { href: "/admin/berater", label: "Berater", icon: "🧑‍💼" },
+        { href: "/admin/mailvorlagen", label: "Mailvorlagen", icon: "✉️" },
       ],
     },
     {

@@ -6,6 +6,7 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { StickyContact } from "@/components/StickyContact";
 import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
+import { OFFICES } from "@/lib/offices";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -89,6 +90,14 @@ const jsonLd = {
     { "@type": "Place", name: "Kanton Luzern" },
   ],
   priceRange: "ab 0.95% Provision",
+  email: "beratung@novidom-immo.ch",
+  address: OFFICES.map((office) => ({
+    "@type": "PostalAddress",
+    streetAddress: office.street,
+    postalCode: office.postalCode,
+    addressLocality: office.city,
+    addressCountry: "CH",
+  })),
 };
 
 export default function RootLayout({

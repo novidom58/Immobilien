@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { OFFICES } from "@/lib/offices";
 
 export function Footer() {
   return (
@@ -8,7 +9,16 @@ export function Footer() {
         <span className="font-display text-base font-semibold text-ivory">
           Novi<span className="text-amber">Dom</span> Immo
         </span>
-        <span>Basel &amp; Zug · CH</span>
+        <div className="flex flex-col gap-3 text-center sm:flex-row sm:gap-8 sm:text-left">
+          {OFFICES.map((office) => (
+            <address key={office.city} className="not-italic leading-snug">
+              <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-blueprint">{office.city}</span>
+              {office.street}
+              <br />
+              {office.postalCode} {office.city}
+            </address>
+          ))}
+        </div>
         <NewsletterSignup />
       </div>
       <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">

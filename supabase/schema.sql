@@ -584,6 +584,28 @@ create policy "termine_admin_all" on termine
   for all using (public.is_admin());
 
 -- ---------------------------------------------------------------------
+-- email_templates: eigene Mailvorlagen (Nachfassen, Unterlagen,
+-- Hypotheken-Analyse ...) mit Platzhaltern wie {vorname} oder {objekt}.
+-- follow_up_days setzt beim Versand automatisch die Wiedervorlage.
+-- ---------------------------------------------------------------------
+create table if not exists email_templates (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category text not null default 'Allgemein',
+  subject text not null,
+  body text not null,
+  follow_up_days integer check (follow_up_days is null or follow_up_days between 1 and 365),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table email_templates enable row level security;
+
+drop policy if exists "email_templates_admin_all" on email_templates;
+create policy "email_templates_admin_all" on email_templates
+  for all using (public.is_admin());
+
+-- ---------------------------------------------------------------------
 -- Um dich selbst zum Admin zu machen: nach dem ersten Signup unter
 -- /admin/login (der Signup legt automatisch ein Kundenprofil an) hier
 -- deine E-Mail eintragen und ausführen:

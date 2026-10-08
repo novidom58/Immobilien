@@ -3,10 +3,11 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/hero/Hero";
 import { UspMarquee } from "@/components/sections/UspMarquee";
 import { TrustBar } from "@/components/sections/TrustBar";
+import { SolutionsHub } from "@/components/sections/SolutionsHub";
+import { BuyerRadar } from "@/components/sections/BuyerRadar";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProblemSolution } from "@/components/sections/ProblemSolution";
 import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
-import { Services } from "@/components/sections/Services";
 import { Process } from "@/components/sections/Process";
 import { Preparation } from "@/components/sections/Preparation";
 import { PropertyValuationLead } from "@/components/sections/PropertyValuationLead";
@@ -16,7 +17,6 @@ import { Situations } from "@/components/sections/Situations";
 import { StatsAndArea } from "@/components/sections/StatsAndArea";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
-import { FinancingPartner } from "@/components/sections/FinancingPartner";
 import { RatgeberTeaser } from "@/components/sections/RatgeberTeaser";
 import { Faq } from "@/components/sections/Faq";
 import { BookingSection } from "@/components/sections/BookingSection";
@@ -30,10 +30,11 @@ export default function Home() {
         <Hero />
         <UspMarquee />
         <TrustBar />
+        <SolutionsHub />
+        <BuyerRadar />
         <FeaturedListings />
         <ProblemSolution />
         <WhyNoviDom />
-        <Services />
         <Process />
         <Preparation />
         <PropertyValuationLead />
@@ -42,7 +43,6 @@ export default function Home() {
         <StatsAndArea />
         <ServiceMap />
         <AboutJana />
-        <FinancingPartner />
         <RatgeberTeaser />
         <SalesCockpit />
         <Faq />

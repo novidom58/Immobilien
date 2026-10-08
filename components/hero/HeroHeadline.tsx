@@ -18,22 +18,31 @@ const word = {
   },
 };
 
-export function HeroHeadline({ text }: { text: string }) {
-  const words = text.split(" ");
+function Words({ text, className = "" }: { text: string; className?: string }) {
+  return text.split(" ").map((w, i) => (
+    <span key={i} className="mr-[0.25em] inline-block overflow-hidden pb-1 align-bottom">
+      <motion.span variants={word} className={`inline-block ${className}`}>
+        {w}
+      </motion.span>
+    </span>
+  ));
+}
+
+export function HeroHeadline({ text, accent }: { text: string; accent?: string }) {
   return (
     <motion.h1
       variants={container}
       initial="hidden"
       animate="visible"
-      className="text-balance font-display text-[clamp(2.75rem,7.5vw,6.75rem)] font-bold leading-[0.98] tracking-tighter text-ivory"
+      className="text-balance font-display text-[clamp(2.6rem,6.4vw,5.5rem)] font-bold leading-[0.98] tracking-tighter text-ivory"
     >
-      {words.map((w, i) => (
-        <span key={i} className="mr-[0.25em] inline-block overflow-hidden pb-1 align-bottom">
-          <motion.span variants={word} className="inline-block">
-            {w}
-          </motion.span>
-        </span>
-      ))}
+      <Words text={text} />
+      {accent && (
+        <>
+          <br />
+          <Words text={accent} className="text-amber-soft" />
+        </>
+      )}
     </motion.h1>
   );
 }

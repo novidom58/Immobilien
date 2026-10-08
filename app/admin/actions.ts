@@ -6,6 +6,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
 import { createResendClient } from "@/lib/resend";
+import { STARTER_TEMPLATES } from "@/lib/emailTemplates";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
@@ -876,6 +877,164 @@ export async function deleteTermin(terminId: string) {
 
   const { error } = await supabase.from("termine").delete().eq("id", terminId);
   if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+// ---------------------------------------------------------------------
+// Mailvorlagen
+// ---------------------------------------------------------------------
+
+function readTemplateForm(formData: FormData) {
+  const name = String(formData.get("name") || "").trim();
+  const category = String(formData.get("category") || "Allgemein").trim() || "Allgemein";
+  const subject = String(formData.get("subject") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  const daysRaw = Number(formData.get("follow_up_days"));
+  const followUpDays = Number.isInteger(daysRaw) && daysRaw >= 1 && daysRaw <= 365 ? daysRaw : null;
+  return { name, category, subject, body, follow_up_days: followUpDays };
+}
+
+export async function createEmailTemplate(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const template = readTemplateForm(formData);
+  if (!template.name || !template.subject || !template.body) return { error: "Name, Betreff und Text sind Pflichtfelder." };
+
+  const { error } = await supabase.from("email_templates").insert(template);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function updateEmailTemplate(templateId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const template = readTemplateForm(formData);
+  if (!template.name || !template.subject || !template.body) return { error: "Name, Betreff und Text sind Pflichtfelder." };
+
+  const { error } = await supabase
+    .from("email_templates")
+    .update({ ...template, updated_at: new Date().toISOString() })
+    .eq("id", templateId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function deleteEmailTemplate(templateId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("email_templates").delete().eq("id", templateId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function seedStarterTemplates() {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: existing, error: readError } = await supabase.from("email_templates").select("name");
+  if (readError) return { error: readError.message };
+  const names = new Set((existing ?? []).map((t) => t.name));
+  const missing = STARTER_TEMPLATES.filter((t) => !names.has(t.name));
+  if (missing.length === 0) return { error: null };
+
+  const { error } = await supabase.from("email_templates").insert(missing);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+type MailTarget = { kind: "customer" | "lead"; id: string };
+
+/**
+ * Hält fest, dass eine Vorlagen-Mail rausging: Eintrag in der
+ * Kontakthistorie, optional neue Wiedervorlage, und ein neuer Lead
+ * rückt auf "kontaktiert".
+ */
+async function recordMail(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  target: MailTarget,
+  label: string,
+  followUpAt: string | null
+) {
+  if (target.kind === "customer") {
+    const { error } = await supabase.from("customer_activity").insert({ customer_id: target.id, type: "email", text: label });
+    if (error) return error.message;
+    if (followUpAt) {
+      const { error: fuError } = await supabase.from("customers").update({ follow_up_at: followUpAt }).eq("id", target.id);
+      if (fuError) return fuError.message;
+    }
+  } else {
+    const { error } = await supabase.from("lead_activity").insert({ lead_id: target.id, type: "email", text: label });
+    if (error) return error.message;
+    const update: Record<string, string> = {};
+    if (followUpAt) update.follow_up_at = followUpAt;
+    const { data: lead } = await supabase.from("leads").select("status").eq("id", target.id).single();
+    if (lead?.status === "neu") update.status = "kontaktiert";
+    if (Object.keys(update).length > 0) {
+      const { error: updError } = await supabase.from("leads").update(update).eq("id", target.id);
+      if (updError) return updError.message;
+    }
+  }
+  return null;
+}
+
+function isValidDate(value: string | null): value is string {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+}
+
+export async function logTemplateMail(target: MailTarget, label: string, followUpAt: string | null) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const error = await recordMail(supabase, target, label.slice(0, 200), isValidDate(followUpAt) ? followUpAt : null);
+  if (error) return { error };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function sendTemplateMail(
+  target: MailTarget,
+  mail: { to: string; subject: string; body: string; label: string },
+  followUpAt: string | null
+) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const to = mail.to.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return { error: "Ungültige E-Mail-Adresse." };
+  if (!mail.subject.trim() || !mail.body.trim()) return { error: "Betreff und Text dürfen nicht leer sein." };
+
+  const resend = createResendClient();
+  if (!resend) {
+    return { error: "Direktversand ist noch nicht eingerichtet (RESEND_API_KEY fehlt). Bitte über das E-Mail-Programm senden." };
+  }
+
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const replyTo = process.env.LEADS_EMAIL_TO || undefined;
+  const { error: sendError } = await resend.emails.send({
+    from,
+    to,
+    subject: mail.subject.trim(),
+    text: mail.body,
+    ...(replyTo ? { replyTo } : {}),
+  });
+  if (sendError) return { error: sendError.message };
+
+  const error = await recordMail(supabase, target, mail.label.slice(0, 200), isValidDate(followUpAt) ? followUpAt : null);
+  if (error) return { error: `Mail verschickt, aber nicht protokolliert: ${error}` };
 
   revalidatePath("/admin", "layout");
   return { error: null };

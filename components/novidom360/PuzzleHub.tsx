@@ -119,7 +119,7 @@ export function PuzzleHub({ onSelect }: { onSelect: (id: AreaId) => void }) {
           stroke="var(--color-amber)"
           strokeWidth={3}
           opacity={0}
-          style={{ filter: "drop-shadow(0 0 18px rgba(232,168,85,0.8))" }}
+          style={{ filter: "drop-shadow(0 0 18px rgba(143,106,57,0.28))" }}
         />
 
         {PIECES.map((p, i) => {
@@ -150,8 +150,8 @@ export function PuzzleHub({ onSelect }: { onSelect: (id: AreaId) => void }) {
               >
                 <path
                   d={p.d}
-                  fill={isHover ? "#1b2230" : "var(--color-ink-2)"}
-                  stroke={isHover ? "var(--color-amber)" : "rgba(255,255,255,0.12)"}
+                  fill={isHover ? "#efe5d3" : "#ffffff"}
+                  stroke={isHover ? "var(--color-amber)" : "rgba(31,29,26,0.12)"}
                   strokeWidth={isHover ? 2 : 1.5}
                   style={{ transition: "fill .3s, stroke .3s" }}
                 />
@@ -176,7 +176,7 @@ export function PuzzleHub({ onSelect }: { onSelect: (id: AreaId) => void }) {
 
       <div
         ref={centerRef}
-        className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[42%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-[6px] border-ink-3 shadow-[0_0_0_1px_rgba(232,168,85,0.35),0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+        className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[42%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-[6px] border-ink-3 shadow-[0_0_0_1px_rgba(143,106,57,0.28),0_30px_80px_-20px_rgba(41,37,27,0.35)]"
       >
         <Image
           src="/images/novidom-holzhaus.webp"

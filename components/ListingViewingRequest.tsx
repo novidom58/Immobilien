@@ -90,7 +90,7 @@ export function ListingViewingRequest({ listingId, address }: { listingId: strin
       <button
         type="submit"
         disabled={status === "sending"}
-        className="mt-1 w-full rounded-lg bg-amber px-4 py-3 font-display text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-60"
+        className="mt-1 w-full rounded-lg bg-amber px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-60"
       >
         {status === "sending" ? "Wird gesendet…" : "Besichtigung anfragen"}
       </button>

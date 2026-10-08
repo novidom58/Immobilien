@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { SmoothScroll } from "@/lib/providers/smooth-scroll";
 import { Loader } from "@/components/Loader";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -8,10 +8,10 @@ import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
 import { OFFICES } from "@/lib/offices";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const serif = Fraunces({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0d12",
+  themeColor: "#faf9f6",
   colorScheme: "dark",
 };
 
@@ -108,7 +108,7 @@ export default function RootLayout({
   return (
     <html
       lang="de-CH"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${mono.variable} h-full`}
+      className={`${serif.variable} ${inter.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full bg-ink text-ivory antialiased selection:bg-amber selection:text-ink">
         <script

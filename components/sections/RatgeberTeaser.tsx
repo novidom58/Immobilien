@@ -104,7 +104,7 @@ export function RatgeberTeaser() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="mt-1 rounded-full bg-amber px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60"
+                  className="mt-1 rounded-full bg-amber px-6 py-3.5 font-sans text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60"
                 >
                   {status === "sending" ? "Wird gesendet…" : "Kostenlos als PDF erhalten →"}
                 </button>

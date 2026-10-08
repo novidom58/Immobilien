@@ -89,7 +89,7 @@ export function AdminLoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-2 rounded-full bg-amber px-6 py-3 font-display text-sm font-semibold uppercase tracking-wide text-ink transition-shadow hover:shadow-[0_0_40px_-8px_rgba(232,168,85,0.65)] disabled:opacity-60"
+        className="mt-2 rounded-full bg-amber px-6 py-3 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-shadow hover:shadow-[0_0_40px_-8px_rgba(143,106,57,0.28)] disabled:opacity-60"
       >
         {loading ? "Einen Moment…" : "Anmelden"}
       </button>

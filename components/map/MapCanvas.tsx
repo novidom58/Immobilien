@@ -20,7 +20,7 @@ export type MapListing = {
 
 const listingIcon = L.divIcon({
   className: "",
-  html: `<span class="block h-3.5 w-3.5 rounded-full border-2 border-ink bg-amber shadow-[0_0_14px_2px_rgba(232,168,85,0.7)]"></span>`,
+  html: `<span class="block h-3.5 w-3.5 rounded-full border-2 border-ink bg-amber shadow-[0_0_14px_2px_rgba(143,106,57,0.28)]"></span>`,
   iconSize: [14, 14],
   iconAnchor: [7, 7],
 });
@@ -29,7 +29,7 @@ const officeIcon = L.divIcon({
   className: "",
   html: `<span class="relative flex h-4 w-4">
            <span class="absolute inline-flex h-full w-full animate-pulse-slow rounded-full bg-blueprint/40"></span>
-           <span class="relative block h-4 w-4 rounded-full border-2 border-ink bg-blueprint shadow-[0_0_16px_3px_rgba(95,184,232,0.6)]"></span>
+           <span class="relative block h-4 w-4 rounded-full border-2 border-ink bg-blueprint shadow-[0_0_16px_3px_rgba(79,107,132,0.45)]"></span>
          </span>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
@@ -44,7 +44,7 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
       className="h-full w-full"
     >
       <TileLayer
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
         attribution='&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS'
       />
       {OFFICES.map((office) => (

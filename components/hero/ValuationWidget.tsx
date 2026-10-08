@@ -115,7 +115,7 @@ export function ValuationWidget() {
             <button
               type="submit"
               disabled={!area}
-              className="mt-1 w-full rounded-lg bg-amber px-4 py-2.5 font-display text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-40"
+              className="mt-1 w-full rounded-lg bg-amber px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-40"
             >
               Richtwert berechnen
             </button>
@@ -172,7 +172,7 @@ export function ValuationWidget() {
                     <button
                       type="submit"
                       disabled={sendStatus === "sending"}
-                      className="flex-1 rounded-lg bg-amber px-4 py-2.5 font-display text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-60"
+                      className="flex-1 rounded-lg bg-amber px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-wide text-ink transition-opacity disabled:opacity-60"
                     >
                       {sendStatus === "sending" ? "Wird gesendet…" : "Per E-Mail & Gespräch anfragen"}
                     </button>

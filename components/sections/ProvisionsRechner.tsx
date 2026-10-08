@@ -105,7 +105,7 @@ export function ProvisionsRechner() {
 
             <a
               href="#kontakt"
-              className="mt-8 inline-block rounded-full bg-amber px-8 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink transition-transform hover:-translate-y-0.5"
+              className="mt-8 inline-block rounded-full bg-amber px-8 py-4 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-transform hover:-translate-y-0.5"
             >
               Jetzt Mandat anfragen →
             </a>
@@ -138,7 +138,7 @@ export function ProvisionsRechner() {
               </p>
               <a
                 href="#bewertung"
-                className="mt-4 inline-block rounded-full bg-amber px-8 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink transition-transform hover:-translate-y-0.5"
+                className="mt-4 inline-block rounded-full bg-amber px-8 py-4 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-transform hover:-translate-y-0.5"
               >
                 Kostenlose Bewertung anfragen →
               </a>

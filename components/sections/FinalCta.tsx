@@ -78,7 +78,7 @@ export function FinalCta() {
             {CAL_LINK && (
               <a
                 href="#termin"
-                className="mt-8 inline-block rounded-full bg-amber px-7 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink"
+                className="mt-8 inline-block rounded-full bg-amber px-7 py-3.5 font-sans text-sm font-semibold uppercase tracking-wide text-ink"
               >
                 Oder direkt Termin wählen ↑
               </a>

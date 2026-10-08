@@ -226,16 +226,16 @@ export function BuyerRadar() {
         <div className="relative mx-auto aspect-square w-full max-w-[460px]" aria-live="polite">
           <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full" aria-hidden>
             {[96, 72, 48, 24].map((r) => (
-              <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="rgba(95,184,232,0.25)" strokeWidth="0.6" />
+              <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="rgba(79,107,132,0.25)" strokeWidth="0.6" />
             ))}
-            <path d="M100 4V196M4 100H196" stroke="rgba(95,184,232,0.18)" strokeWidth="0.5" />
+            <path d="M100 4V196M4 100H196" stroke="rgba(79,107,132,0.18)" strokeWidth="0.5" />
             {BLIPS.slice(0, shownBlips).map(([deg, r], i) => {
               const rad = ((deg - 90) * Math.PI) / 180;
               const x = 100 + Math.cos(rad) * (r * 0.96);
               const y = 100 + Math.sin(rad) * (r * 0.96);
               return (
                 <g key={i} style={{ animation: `nd-blip .5s ease-out ${i * 0.12}s both` }}>
-                  <circle cx={x} cy={y} r="5" fill="rgba(232,168,85,0.18)" />
+                  <circle cx={x} cy={y} r="5" fill="rgba(143,106,57,0.28)" />
                   <circle cx={x} cy={y} r="2.2" fill="var(--color-amber)" />
                 </g>
               );
@@ -244,7 +244,7 @@ export function BuyerRadar() {
 
           <div
             aria-hidden
-            className={`absolute inset-[2%] rounded-full bg-[conic-gradient(from_0deg,rgba(95,184,232,0.35),rgba(95,184,232,0)_25%)] ${
+            className={`absolute inset-[2%] rounded-full bg-[conic-gradient(from_0deg,rgba(143,106,57,0.22),rgba(143,106,57,0)_25%)] ${
               phase === "scanning" ? "motion-safe:animate-[nd-spin_1.2s_linear_infinite]" : "motion-safe:animate-[nd-spin_6s_linear_infinite] opacity-50"
             }`}
           />

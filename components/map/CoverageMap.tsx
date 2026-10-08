@@ -12,7 +12,7 @@ const markerIcon = L.divIcon({
   className: "",
   html: `<span class="relative flex h-4 w-4">
            <span class="absolute inline-flex h-full w-full animate-pulse-slow rounded-full bg-amber/40"></span>
-           <span class="relative block h-4 w-4 rounded-full border-2 border-ink bg-amber shadow-[0_0_16px_3px_rgba(232,168,85,0.6)]"></span>
+           <span class="relative block h-4 w-4 rounded-full border-2 border-ink bg-amber shadow-[0_0_16px_3px_rgba(143,106,57,0.28)]"></span>
          </span>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],

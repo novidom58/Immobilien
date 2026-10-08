@@ -19,7 +19,7 @@ export async function ServiceMap() {
   }
 
   return (
-    <section className="relative bg-ink py-28 lg:py-36">
+    <section id="einzugsgebiet" className="relative bg-ink py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionLabel>Einzugsgebiet</SectionLabel>
 

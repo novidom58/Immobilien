@@ -300,7 +300,7 @@ export function PropertyValuationLead() {
                       <button
                         type="button"
                         onClick={handleNext}
-                        className="mt-5 w-full rounded-full bg-amber px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink"
+                        className="mt-5 w-full rounded-full bg-amber px-6 py-3.5 font-sans text-sm font-semibold uppercase tracking-wide text-ink"
                       >
                         Weiter →
                       </button>
@@ -309,7 +309,7 @@ export function PropertyValuationLead() {
                     <button
                       type="submit"
                       disabled={status === "sending"}
-                      className="mt-5 w-full rounded-full bg-amber px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60"
+                      className="mt-5 w-full rounded-full bg-amber px-6 py-3.5 font-sans text-sm font-semibold uppercase tracking-wide text-ink disabled:opacity-60"
                     >
                       {status === "sending" ? "Wird gesendet…" : "Kostenlose Bewertung anfragen →"}
                     </button>

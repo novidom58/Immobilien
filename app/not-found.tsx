@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 export default function NotFound() {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center bg-ink px-6 text-center">
-      <Link href="/" className="mb-8 font-display text-lg font-semibold tracking-tight text-ivory">
-        Novi<span className="text-amber">Dom</span>
+      <Link href="/" className="mb-8">
+        <Logo className="h-12 w-auto" />
       </Link>
       <span className="font-mono text-xs uppercase tracking-[0.3em] text-blueprint">404</span>
       <h1 className="mt-4 font-display text-3xl font-semibold text-ivory">Seite nicht gefunden.</h1>

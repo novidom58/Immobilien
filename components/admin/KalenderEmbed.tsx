@@ -33,12 +33,12 @@ export function KalenderEmbed() {
     <div className="card" style={{ padding: 16 }}>
       <form onSubmit={handleSave} style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 14, flexWrap: "wrap" }}>
         <div className="field-group" style={{ flex: 1, minWidth: 300, margin: 0 }}>
-          <div className="field-label">Einbettungsadresse aus Google Kalender</div>
+          <div className="field-label">Kalender-Adresse (Google oder Outlook)</div>
           <input
             className="field-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="https://calendar.google.com/calendar/embed?src=…"
+            placeholder="https://outlook.live.com/owa/calendar/…/calendar.html oder https://calendar.google.com/calendar/embed?src=…"
           />
         </div>
         <button type="submit" className="btn btn-primary">
@@ -47,7 +47,7 @@ export function KalenderEmbed() {
       </form>
 
       {url ? (
-        <iframe src={url} style={{ width: "100%", height: 600, border: "1px solid var(--border)", borderRadius: "var(--r)" }} title="Google Kalender" />
+        <iframe src={url} style={{ width: "100%", height: 600, border: "1px solid var(--border)", borderRadius: "var(--r)" }} title="Kalender" />
       ) : (
         <div className="empty">
           <div className="empty-icon">🗓️</div>
@@ -56,9 +56,14 @@ export function KalenderEmbed() {
       )}
 
       <div className="td-light" style={{ marginTop: 12, fontSize: 12.5, lineHeight: 1.65 }}>
-        So kommst du an die Adresse: Google Kalender öffnen → beim Kalender links auf die drei Punkte → <b>Einstellungen und Freigabe</b> → ganz
-        unten <b>Kalender integrieren</b> → die Adresse aus <b>Einbettungscode</b> zwischen <code>src=&quot;…&quot;</code> herauskopieren. Die
-        Adresse bleibt in diesem Browser gespeichert und wird nirgends hochgeladen.
+        <b>Outlook:</b> outlook.com öffnen → Einstellungen (Zahnrad) → <b>Kalender</b> → <b>Freigegebene Kalender</b> → unter{" "}
+        <b>Kalender veröffentlichen</b> den Kalender und «Kann alle Details anzeigen» wählen → <b>Veröffentlichen</b> → den{" "}
+        <b>HTML</b>-Link kopieren und hier einfügen.
+        <br />
+        <b>Google:</b> Kalender öffnen → beim Kalender links auf die drei Punkte → <b>Einstellungen und Freigabe</b> → ganz unten{" "}
+        <b>Kalender integrieren</b> → die Adresse aus <b>Einbettungscode</b> zwischen <code>src=&quot;…&quot;</code> herauskopieren.
+        <br />
+        Die Adresse bleibt nur in diesem Browser gespeichert und wird nirgends hochgeladen.
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 const links = [
   { href: "/#leistungen", label: "NoviDom 360°" },
@@ -42,8 +43,8 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
-        <Link href="/#top" className="font-display text-lg font-semibold tracking-tight text-ivory">
-          Novi<span className="text-amber">Dom</span>
+        <Link href="/#top" aria-label="NoviDom Startseite">
+          <Logo className="h-9 w-auto lg:h-10" priority />
         </Link>
         <nav className="hidden items-center gap-8 font-sans text-sm text-ivory-dim md:flex">
           {links.map((link) => (

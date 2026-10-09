@@ -14,13 +14,16 @@ import { RatgeberTeaser } from "@/components/sections/RatgeberTeaser";
 import { Faq } from "@/components/sections/Faq";
 import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
+import { getShowcase } from "@/lib/showcase";
 
-export default function Home() {
+export default async function Home() {
+  const showcase = await getShowcase();
+
   return (
     <>
       <Header />
       <main>
-        <Hero />
+        <Hero showcase={showcase} />
         <UspMarquee />
         <TrustBar />
         <SolutionsHub />

@@ -8,6 +8,7 @@ import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { MyDocuments } from "@/components/MyDocuments";
 import { SaleStepper } from "@/components/SaleStepper";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Verkaufs-Cockpit",
@@ -90,8 +91,8 @@ export default async function DashboardPage() {
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-display text-lg font-semibold tracking-tight text-ivory">
-            Novi<span className="text-amber">Dom</span>
+          <Link href="/" aria-label="NoviDom Startseite">
+            <Logo className="h-9 w-auto" />
           </Link>
           <div className="flex items-center gap-6">
             <span className="hidden font-sans text-sm text-ivory-dim sm:inline">{user.email}</span>

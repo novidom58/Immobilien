@@ -34,13 +34,13 @@ export function HeroHeadline({ text, accent }: { text: string; accent?: string }
       variants={container}
       initial="hidden"
       animate="visible"
-      className="text-balance font-display text-[clamp(2.6rem,6.4vw,5.5rem)] font-bold leading-[0.98] tracking-tighter text-ivory"
+      className="text-balance font-display text-[clamp(2.6rem,6vw,5.4rem)] font-normal leading-[1.04] tracking-[-0.035em] text-ivory"
     >
       <Words text={text} />
       {accent && (
         <>
           <br />
-          <Words text={accent} className="text-amber-soft" />
+          <Words text={accent} className="italic" />
         </>
       )}
     </motion.h1>

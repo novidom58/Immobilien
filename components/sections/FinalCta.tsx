@@ -13,7 +13,16 @@ const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK;
 const fieldClasses =
   "w-full rounded-xl border border-line bg-ink px-5 py-4 font-sans text-ivory placeholder:text-ivory-dim/50 focus:border-amber focus:outline-none";
 
-export function FinalCta() {
+export function FinalCta({
+  title = "Starten wir Ihren Verkauf.",
+  text = "Ein persönliches Bewertungsgespräch mit unserem Team — unverbindlich und kostenlos.",
+  topic,
+}: {
+  title?: string;
+  text?: string;
+  /** Bereich, aus dem die Anfrage kommt (z.B. "Finanzieren"); landet im Lead. */
+  topic?: string;
+} = {}) {
   const [step, setStep] = useState<1 | 2>(1);
   const [propertyType, setPropertyType] = useState<(typeof PROPERTY_TYPES)[number] | null>(null);
   const [address, setAddress] = useState("");
@@ -45,7 +54,7 @@ export function FinalCta() {
           name,
           email,
           phone,
-          message: `Objekttyp: ${propertyType}\nAdresse: ${address}\nZeithorizont: ${timeframe || "keine Angabe"}`,
+          message: `${topic ? `Bereich: ${topic}\n` : ""}Objekttyp: ${propertyType}\nAdresse: ${address}\nZeithorizont: ${timeframe || "keine Angabe"}`,
           wantsFinancing,
           newsletterOptIn,
           source: source || undefined,
@@ -78,7 +87,7 @@ export function FinalCta() {
             {CAL_LINK && (
               <a
                 href="#termin"
-                className="mt-8 inline-block rounded-full bg-amber px-7 py-3.5 font-display text-sm font-semibold uppercase tracking-wide text-ink"
+                className="mt-8 inline-block rounded-full bg-amber px-7 py-3.5 font-sans text-sm font-semibold uppercase tracking-wide text-ink"
               >
                 Oder direkt Termin wählen ↑
               </a>
@@ -99,11 +108,10 @@ export function FinalCta() {
             Unverbindlich &amp; kostenlos
           </span>
           <h2 className="mx-auto mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-tight text-ivory lg:text-6xl">
-            Starten wir Ihren Verkauf.
+            {title}
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-ivory-dim">
-            Ein persönliches Bewertungsgespräch mit unserem Team —
-            unverbindlich und kostenlos.
+            {text}
           </p>
           <p className="mx-auto mt-4 max-w-xl text-balance text-sm text-ivory-dim/60">
             Wir betreuen bewusst nur eine begrenzte Anzahl Mandate

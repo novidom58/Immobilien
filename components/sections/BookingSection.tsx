@@ -24,7 +24,7 @@ export function BookingSection() {
         <Reveal delay={0.1}>
           <div className="mt-10 overflow-hidden rounded-2xl border border-line bg-ink-2">
             <iframe
-              src={`https://cal.com/${CAL_LINK}?theme=dark&hide_landing_page_details=1`}
+              src={`https://cal.com/${CAL_LINK}?theme=light&hide_landing_page_details=1`}
               title="Termin buchen"
               className="h-[680px] w-full"
               loading="lazy"

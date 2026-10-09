@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { OFFICES } from "@/lib/offices";
+import { AREAS, areaHref } from "@/components/novidom360/areas";
 
 export function Footer() {
   return (
@@ -21,6 +22,13 @@ export function Footer() {
         </div>
         <NewsletterSignup />
       </div>
+      <nav aria-label="Leistungen" className="mx-auto mt-8 flex max-w-7xl flex-wrap justify-center gap-x-6 gap-y-2 px-6 text-sm lg:px-10">
+        {AREAS.map((a) => (
+          <Link key={a.id} href={areaHref(a.id)} className="text-ivory-dim hover:text-ivory">
+            {a.title}
+          </Link>
+        ))}
+      </nav>
       <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">
         &copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.
       </div>

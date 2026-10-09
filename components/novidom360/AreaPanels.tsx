@@ -37,7 +37,7 @@ function Stepper({ steps }: { steps: string[] }) {
             aria-hidden
             className={`absolute left-1/2 top-0 z-10 h-3 w-3 -translate-x-1/2 rounded-full border-2 transition-all duration-300 ${
               i === active
-                ? "border-amber bg-amber shadow-[0_0_0_5px_rgba(232,168,85,0.18)]"
+                ? "border-amber bg-amber shadow-[0_0_0_5px_rgba(143,106,57,0.28)]"
                 : i < active
                   ? "border-blueprint bg-blueprint"
                   : "border-line bg-ink-3"
@@ -166,10 +166,10 @@ function UmbauPanel({ onNavigate }: { onNavigate: () => void }) {
             <span className="absolute right-3 top-3 rounded-full border border-line bg-ink/80 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em]">Nachher</span>
             <div
               aria-hidden
-              className="absolute inset-y-0 w-0.5 bg-amber shadow-[0_0_14px_2px_rgba(232,168,85,0.6)]"
+              className="absolute inset-y-0 w-0.5 bg-amber shadow-[0_0_14px_2px_rgba(143,106,57,0.28)]"
               style={{ left: `${split}%` }}
             >
-              <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber text-xs text-ink shadow-[0_0_0_6px_rgba(232,168,85,0.18)]">
+              <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber text-xs text-ink shadow-[0_0_0_6px_rgba(143,106,57,0.28)]">
                 ↔
               </span>
             </div>
@@ -244,7 +244,7 @@ function FinanzierungPanel() {
           </div>
           <span
             className={`mt-4 inline-flex rounded-full border px-3 py-1.5 font-mono text-[11px] ${
-              ok ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-amber/30 bg-amber/10 text-amber-soft"
+              ok ? "border-emerald-600/30 bg-emerald-600/10 text-emerald-800" : "border-amber/30 bg-amber/10 text-amber-soft"
             }`}
           >
             {ok ? "✓ Tragbarkeit im Rahmen" : "⚠ Mind. 20% Eigenmittel empfohlen"}
@@ -279,7 +279,7 @@ function VersicherungPanel({ onNavigate }: { onNavigate: () => void }) {
       <Question>Jetzt ist Ihr Zuhause komplett.</Question>
       <Lede>Beim Kauf, Umbau oder Besitz entstehen neue Risiken. Wir prüfen, was Ihr Zuhause wirklich braucht.</Lede>
       <div className="mt-6 flex flex-col items-center">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full border border-amber bg-[radial-gradient(circle_at_40%_30%,var(--color-ink-2),var(--color-ink))] text-amber-soft shadow-[0_0_30px_-6px_rgba(232,168,85,0.5)]">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full border border-amber bg-[radial-gradient(circle_at_40%_30%,var(--color-ink-2),var(--color-ink))] text-amber-soft shadow-[0_0_30px_-6px_rgba(143,106,57,0.28)]">
           <ShieldCheck className="h-10 w-10" strokeWidth={1.5} />
         </div>
         <div className="mt-6 flex flex-wrap justify-center gap-2">

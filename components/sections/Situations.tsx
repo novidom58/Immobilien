@@ -62,7 +62,7 @@ export function Situations() {
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {situations.map((situation, i) => (
             <Reveal key={situation.name} delay={i * 0.05}>
-              <div className="group h-full rounded-2xl border border-line bg-ink-2 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-amber/40 hover:shadow-[0_20px_50px_-25px_rgba(232,168,85,0.4)]">
+              <div className="group h-full rounded-2xl border border-line bg-ink-2 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-amber/40 hover:shadow-[0_20px_50px_-25px_rgba(143,106,57,0.28)]">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber/10 transition-colors duration-300 group-hover:bg-amber/15">
                   <situation.icon className="h-5 w-5 text-amber" strokeWidth={1.5} />
                 </div>

@@ -4,7 +4,7 @@ import { motion, useMotionValue, useSpring } from "motion/react";
 import type { ReactNode, MouseEvent } from "react";
 
 const buttonClasses =
-  "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-amber px-8 py-4 font-display text-sm font-semibold uppercase tracking-wide text-ink shadow-[0_0_40px_-8px_rgba(232,168,85,0.65)] transition-shadow hover:shadow-[0_0_60px_-6px_rgba(232,168,85,0.85)]";
+  "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-amber px-8 py-4 font-sans text-sm font-semibold uppercase tracking-wide text-ink shadow-[0_0_40px_-8px_rgba(143,106,57,0.28)] transition-shadow hover:shadow-[0_0_60px_-6px_rgba(143,106,57,0.28)]";
 
 function useMagneticHandlers() {
   const x = useMotionValue(0);

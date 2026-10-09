@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
+/* Helles Editorial-Thema: Creme-Grund, fast schwarze Schrift, Bronze-Akzent.
+   Die Token-Namen stammen aus dem früheren dunklen Thema: "ink" ist der
+   Hintergrund, "ivory" die Schrift. */
 @theme {
-  --color-ink: #0a0d12;
-  --color-ink-2: #10141c;
-  --color-ink-3: #171d29;
-  --color-ivory: #f4f1ea;
-  --color-ivory-dim: #f4f1ea99;
-  --color-amber: #e8a855;
-  --color-amber-soft: #f2c177;
-  --color-blueprint: #5fb8e8;
-  --color-line: #ffffff1a;
+  --color-ink: #faf9f6;
+  --color-ink-2: #f3f0ea;
+  --color-ink-3: #ebe6dd;
+  --color-ivory: #191b1d;
+  --color-ivory-dim: #5f6b78;
+  --color-amber: #8f6a39;
+  --color-amber-soft: #a57e47;
+  --color-blueprint: #4f6b84;
+  --color-line: #1f1d1a1f;
+  --color-night: #191b1d;
 
   --animate-marquee: marquee 32s linear infinite;
   --animate-pulse-slow: pulse-slow 3.5s ease-in-out infinite;
@@ -18,7 +22,7 @@
 /* next/font generates its own CSS variable names on <html>; alias them to
    our theme's font tokens (not self-referential — different names). */
 @theme inline {
-  --font-display: var(--font-space-grotesk);
+  --font-display: var(--font-serif);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-mono-tech);
 }
@@ -55,7 +59,7 @@
 
 html {
   background: var(--color-ink);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -69,14 +73,24 @@ body {
   color: var(--color-ink);
 }
 
-/* Fine film-grain overlay for a premium, non-flat dark surface */
+/* Serifen-Headlines wie im Editorial-Entwurf: leicht, eng gesetzt. */
+.font-display {
+  letter-spacing: -0.02em;
+}
+h1.font-display,
+h2.font-display {
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+/* Feines Filmkorn; auf dem hellen Grund nur noch angedeutet */
 .grain::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
+  opacity: 0.03;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -95,7 +109,7 @@ body {
   }
 }
 
-/* Dark-theme overrides for the Leaflet service-area map */
+/* Theme overrides for the Leaflet service-area map */
 .leaflet-container {
   background: var(--color-ink-2) !important;
   font-family: var(--font-sans);
@@ -125,7 +139,7 @@ body {
 }
 
 .leaflet-control-attribution {
-  background: rgba(10, 13, 18, 0.7) !important;
+  background: rgba(250, 249, 246, 0.8) !important;
   color: var(--color-ivory-dim) !important;
 }
 
@@ -143,7 +157,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-ivory) !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 4px rgba(250, 249, 246, 0.95), 0 0 2px rgba(250, 249, 246, 0.95);
 }
 
 .coverage-map-label.leaflet-tooltip::before {

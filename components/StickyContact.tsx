@@ -21,7 +21,7 @@ export function StickyContact() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const className = `fixed bottom-28 right-6 z-[55] flex h-14 w-14 items-center justify-center rounded-full bg-amber text-ink shadow-[0_0_30px_-6px_rgba(232,168,85,0.7)] transition-all duration-300 hover:shadow-[0_0_40px_-4px_rgba(232,168,85,0.9)] sm:bottom-8 ${
+  const className = `fixed bottom-28 right-6 z-[55] flex h-14 w-14 items-center justify-center rounded-full bg-amber text-ink shadow-[0_0_30px_-6px_rgba(143,106,57,0.28)] transition-all duration-300 hover:shadow-[0_0_40px_-4px_rgba(143,106,57,0.28)] sm:bottom-8 ${
     visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
   }`;
 

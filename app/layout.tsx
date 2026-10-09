@@ -90,7 +90,7 @@ const jsonLd = {
     { "@type": "Place", name: "Kanton Luzern" },
   ],
   priceRange: "ab 0.95% Provision",
-  email: "beratung@novidom-immo.ch",
+  email: "verkaufen@novidom-immo.ch",
   address: OFFICES.map((office) => ({
     "@type": "PostalAddress",
     streetAddress: office.street,

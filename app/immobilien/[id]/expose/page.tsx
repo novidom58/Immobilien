@@ -155,7 +155,7 @@ export default async function ListingExposePage({
         <div className="mt-10 flex items-center justify-between border-t border-[#e3ded2] px-10 py-6 text-sm">
           <div>
             <div className="font-bold">NoviDom Immo</div>
-            <div className="text-[#6b675c]">Basel &amp; Zug · beratung@novidom-immo.ch</div>
+            <div className="text-[#6b675c]">Basel &amp; Zug · verkaufen@novidom-immo.ch</div>
           </div>
           <div className="text-right text-[#6b675c]">
             <div>3D-Rundgang &amp; weitere Bilder:</div>

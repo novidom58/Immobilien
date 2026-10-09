@@ -14,10 +14,10 @@ export type AreaContact = {
 };
 
 export const AREA_CONTACTS: Record<AreaId, AreaContact> = {
-  kv: { name: "", role: "Kauf & Verkauf", email: "beratung@novidom-immo.ch" },
-  fin: { name: "", role: "Finanzierung", email: "beratung@novidom-immo.ch" },
-  umbau: { name: "", role: "Umbau & Renovation", email: "beratung@novidom-immo.ch" },
-  vers: { name: "", role: "Versicherung", email: "beratung@novidom-immo.ch" },
+  kv: { name: "", role: "Kauf & Verkauf", email: "verkaufen@novidom-immo.ch" },
+  fin: { name: "", role: "Finanzierung", email: "verkaufen@novidom-immo.ch" },
+  umbau: { name: "", role: "Umbau & Renovation", email: "verkaufen@novidom-immo.ch" },
+  vers: { name: "", role: "Versicherung", email: "verkaufen@novidom-immo.ch" },
 };
 
 export type AreaContent = {
@@ -28,6 +28,10 @@ export type AreaContent = {
   benefits: { title: string; text: string }[];
   faq: { q: string; a: string }[];
   cta: string;
+  /** Kurze Vertrauenspunkte unter den Buttons */
+  badges?: string[];
+  /** Eigene Akzentfarbe für die Bereichsseite (z.B. HypoCasa-Rot) */
+  accentColor?: string;
   /** Abschluss-Formular am Seitenende */
   closing: { title: string; text: string };
 };
@@ -54,10 +58,12 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     closing: { title: "Starten wir Ihren Verkauf.", text: "Ein persönliches Bewertungsgespräch mit unserem Team — unverbindlich und kostenlos." },
   },
   fin: {
-    headline: "Die richtige Hypothek.",
-    accent: "Direkt beim Kauf geklärt.",
+    headline: "Ihre beste Hypothek.",
+    accent: "Persönlich.",
     intro:
-      "Mit unserem Finanzierungspartner Hypocasa vergleichen wir Hypothekarangebote verschiedener Anbieter. Für den Kauf, die Verlängerung oder eine Aufstockung für den Umbau.",
+      "Mit unserem Partner HypoCasa vergleichen wir über 50 Banken, Versicherungen und Pensionskassen und finden die beste Lösung für Sie. Von der ersten Anfrage bis zum Notartermin. Persönlich, neutral und kostenlos.",
+    badges: ["Bestätigung innert 24h", "50+ Anbieter", "Persönliche Beratung", "Kostenlos"],
+    accentColor: "#c0392b",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Viele Anbieter, ein Vergleich", text: "Statt bei jeder Bank einzeln anzufragen, holen wir die Offerten für Sie ein und vergleichen sie verständlich." },
@@ -69,8 +75,12 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
       { q: "Wie viel Eigenkapital brauche ich?", a: "In der Regel mindestens 20% des Kaufpreises. Davon müssen mindestens 10% aus «harten» Eigenmitteln stammen, also nicht aus der Pensionskasse." },
       { q: "Wie wird die Tragbarkeit berechnet?", a: "Banken rechnen mit einem kalkulatorischen Zins von rund 5% plus Nebenkosten und Amortisation. Diese Kosten sollten höchstens etwa einen Drittel des Bruttoeinkommens ausmachen." },
       { q: "Welche Unterlagen braucht es?", a: "Lohnausweis, Steuererklärung, Betreibungsauszug, Pensionskassenausweis, Nachweis der Eigenmittel und die Objektunterlagen. Wir sagen Ihnen genau, was fehlt." },
+      { q: "Was bedeutet die Finanzierungsbestätigung innert 24h?", a: "Nach dem Erstgespräch und mit den nötigen Unterlagen erhalten Sie innert eines Werktages eine verbindliche Finanzierungsbestätigung. So können Sie sofort ein Angebot machen." },
+      { q: "Was kostet die Beratung?", a: "Die Beratung ist für Sie kostenlos. HypoCasa wird von Banken und Versicherungen entschädigt, wenn erfolgreich vermittelt wird. Kein Abschluss, keine Kosten." },
+      { q: "Was ist der SARON Alarm?", a: "Ein kostenloser Service für Kundinnen und Kunden: Wir beobachten den SARON und melden uns, wenn ein Wechsel, zum Beispiel zur Festhypothek, sinnvoll ist." },
+      { q: "Helfen Sie auch bei Pensionskasse und 3. Säule?", a: "Ja. PK-Vorbezug oder Verpfändung, 3a-Optimierung und die steuerliche Planung koordinieren wir von Anfang an mit." },
     ],
-    cta: "Finanzierung besprechen",
+    cta: "Kostenlose Beratung anfragen",
     closing: { title: "Klären wir Ihre Finanzierung.", text: "Ein kurzes Gespräch genügt für eine erste Einschätzung — unverbindlich und kostenlos." },
   },
   umbau: {

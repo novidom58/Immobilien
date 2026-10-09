@@ -6,7 +6,7 @@ import { MagneticSubmitButton } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/lib/reveal";
 import { LEAD_SOURCE_OPTIONS } from "@/lib/constants";
 
-const CONTACT_EMAIL = "beratung@novidom-immo.ch";
+const CONTACT_EMAIL = "verkaufen@novidom-immo.ch";
 const PROPERTY_TYPES = ["Haus", "Wohnung", "Andere"] as const;
 const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK;
 

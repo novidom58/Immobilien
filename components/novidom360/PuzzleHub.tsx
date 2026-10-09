@@ -42,10 +42,10 @@ function piecePath(a0: number, a1: number) {
   ].join(" ");
 }
 
-// Reihenfolge im Uhrzeigersinn ab oben links: 01 oben links, 02 oben rechts,
-// 03 unten rechts, 04 unten links.
+// Reihenfolge wie auf der Uhr ab 12 Uhr: 01 oben rechts, 02 unten rechts,
+// 03 unten links, 04 oben links.
 const PIECES = AREAS.map((area, i) => {
-  const a0 = -90 + i * 90;
+  const a0 = i * 90;
   const a1 = a0 + 90;
   const mid = a0 + 45;
   const rad = ((mid - 90) * Math.PI) / 180;

@@ -8,6 +8,8 @@ import { MessageCircle } from "lucide-react";
 // switch this to a WhatsApp click-to-chat button. Left unset, it links to
 // the contact form instead - never a fabricated number.
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+// Vorausgefüllter Text, damit niemand vor einem leeren Chat sitzt.
+const WHATSAPP_TEXT = "Hallo NoviDom, ich habe eine Frage zu ";
 
 export function StickyContact() {
   const [visible, setVisible] = useState(false);
@@ -28,10 +30,11 @@ export function StickyContact() {
   if (WHATSAPP_NUMBER) {
     return (
       <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+        href={`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}?text=${encodeURIComponent(WHATSAPP_TEXT)}`}
         target="_blank"
         rel="noreferrer"
-        aria-label="Per WhatsApp kontaktieren"
+        aria-label="Fragen per WhatsApp"
+        title="Fragen? Schreiben Sie uns per WhatsApp"
         className={className}
       >
         <MessageCircle className="h-6 w-6" strokeWidth={1.75} />

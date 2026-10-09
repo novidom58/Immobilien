@@ -1,13 +1,17 @@
 // Rechtliche Angaben zur Betreiberin, gemeinsam für Impressum und
-// Datenschutz. NoviDom Immo wird über die Hypocasa KLG betrieben.
+// Datenschutz. Die Firma wurde umbenannt: Angaben hier eintragen, sobald
+// der Handelsregistereintrag vorliegt. Leere Felder werden auf der Seite
+// als «folgt» angezeigt statt mit falschen Daten.
 export const OPERATOR = {
-  name: "Hypocasa KLG",
-  legalForm: "Kollektivgesellschaft",
-  street: "St. Jakobs-Strasse 61",
-  postalCode: "4052",
-  city: "Basel",
-  uid: "CHE-399.039.768",
-  register: "Handelsregister des Kantons Basel-Stadt",
-  phone: "079 541 21 14",
+  name: "",
+  legalForm: "",
+  street: "",
+  postalCode: "",
+  city: "",
+  uid: "",
+  register: "",
+  phone: "",
   email: "verkaufen@novidom-immo.ch",
 };
+
+export const OPERATOR_PENDING = "Angaben folgen nach Eintrag im Handelsregister";

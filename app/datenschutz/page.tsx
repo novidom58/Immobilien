@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { OPERATOR } from "@/lib/legal";
+import { OPERATOR, OPERATOR_PENDING } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung",
@@ -11,7 +11,9 @@ const SECTIONS: { title: string; body: string[] }[] = [
   {
     title: "Verantwortliche Stelle",
     body: [
-      `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCode} ${OPERATOR.city} (Betreiberin von NoviDom Immo). Kontakt: ${OPERATOR.email}`,
+      OPERATOR.name
+        ? `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCode} ${OPERATOR.city} (Betreiberin von NoviDom Immo). Kontakt: ${OPERATOR.email}`
+        : `NoviDom Immo (${OPERATOR_PENDING}). Kontakt: ${OPERATOR.email}`,
     ],
   },
   {

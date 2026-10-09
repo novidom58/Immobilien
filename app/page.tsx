@@ -10,7 +10,6 @@ import { WhyNoviDom } from "@/components/sections/WhyNoviDom";
 import { PropertyValuationLead } from "@/components/sections/PropertyValuationLead";
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
-import { RatgeberTeaser } from "@/components/sections/RatgeberTeaser";
 import { Faq } from "@/components/sections/Faq";
 import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
@@ -33,7 +32,6 @@ export default async function Home() {
         <PropertyValuationLead />
         <ServiceMap />
         <AboutJana />
-        <RatgeberTeaser />
         <Faq />
         <BookingSection />
         <FinalCta />

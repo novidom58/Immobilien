@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OFFICES } from "@/lib/offices";
-import { OPERATOR } from "@/lib/legal";
+import { OPERATOR, OPERATOR_PENDING } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Impressum",
@@ -18,20 +18,26 @@ export default function ImpressumPage() {
         <div className="mt-10 flex flex-col gap-8 text-ivory-dim">
           <section>
             <h2 className="font-display text-xl text-ivory">Betreiberin</h2>
-            <p className="mt-2">
-              NoviDom Immo wird betrieben von:
-              <br />
-              <span className="text-ivory">{OPERATOR.name}</span> ({OPERATOR.legalForm})
-              <br />
-              {OPERATOR.street}
-              <br />
-              {OPERATOR.postalCode} {OPERATOR.city}, Schweiz
-            </p>
-            <p className="mt-3">
-              UID: {OPERATOR.uid}
-              <br />
-              Eingetragen im {OPERATOR.register}
-            </p>
+            {OPERATOR.name ? (
+              <>
+                <p className="mt-2">
+                  <span className="text-ivory">{OPERATOR.name}</span>
+                  {OPERATOR.legalForm && ` (${OPERATOR.legalForm})`}
+                  <br />
+                  {OPERATOR.street}
+                  <br />
+                  {OPERATOR.postalCode} {OPERATOR.city}, Schweiz
+                </p>
+                {(OPERATOR.uid || OPERATOR.register) && (
+                  <p className="mt-3">
+                    {OPERATOR.uid && <>UID: {OPERATOR.uid}<br /></>}
+                    {OPERATOR.register && <>Eingetragen im {OPERATOR.register}</>}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="mt-2">NoviDom Immo · {OPERATOR_PENDING}</p>
+            )}
           </section>
 
           <section>
@@ -52,8 +58,15 @@ export default function ImpressumPage() {
           <section>
             <h2 className="font-display text-xl text-ivory">Kontakt</h2>
             <p className="mt-2">
-              Telefon: <a href={`tel:+41${OPERATOR.phone.replace(/\s/g, "").slice(1)}`} className="text-amber-soft underline underline-offset-4">{OPERATOR.phone}</a>
-              <br />
+              {OPERATOR.phone && (
+                <>
+                  Telefon:{" "}
+                  <a href={`tel:+41${OPERATOR.phone.replace(/\s/g, "").slice(1)}`} className="text-amber-soft underline underline-offset-4">
+                    {OPERATOR.phone}
+                  </a>
+                  <br />
+                </>
+              )}
               E-Mail: <a href={`mailto:${OPERATOR.email}`} className="text-amber-soft underline underline-offset-4">{OPERATOR.email}</a>
             </p>
           </section>

@@ -26,7 +26,7 @@ export default async function AdminKalenderPage() {
       <div className="page-header">
         <div>
           <div className="page-title">Kalender</div>
-          <div className="page-sub">Eigene Termine, plus der extern eingebettete Google-Kalender</div>
+          <div className="page-sub">Eigene Termine, plus dein Outlook- oder Google-Kalender</div>
         </div>
       </div>
 
@@ -38,7 +38,7 @@ export default async function AdminKalenderPage() {
 
       <div className="card-header" style={{ border: "none", padding: "0 0 10px" }}>
         <div className="card-title" style={{ fontSize: 16 }}>
-          Google-Kalender-Einbettung
+          Outlook- / Google-Kalender
         </div>
       </div>
       <KalenderEmbed />

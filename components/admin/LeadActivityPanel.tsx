@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, Mail, Users, StickyNote, Trash2 } from "lucide-react";
-import { updateLeadStatus, updateLeadFollowUp, addLeadActivity, deleteLeadActivity } from "@/app/admin/actions";
-import { LEAD_STATUS_OPTIONS } from "@/lib/constants";
+import Link from "next/link";
+import { Phone, Mail, Users, StickyNote, Trash2, UserPlus } from "lucide-react";
+import { updateLeadStatus, updateLeadFollowUp, addLeadActivity, deleteLeadActivity, convertLeadToCustomer } from "@/app/admin/actions";
+import { LEAD_STATUS_OPTIONS, CUSTOMER_ROLES, type CustomerRole } from "@/lib/constants";
 import { TemplateMailer } from "./TemplateMailer";
 
 type Activity = { id: string; type: string; text: string; created_at: string };
@@ -31,6 +32,7 @@ export function LeadActivityPanel({
   phone,
   followUpAt,
   activity,
+  suggestedRoles,
 }: {
   leadId: string;
   name: string;
@@ -39,10 +41,25 @@ export function LeadActivityPanel({
   phone: string | null;
   followUpAt: string | null;
   activity: Activity[];
+  suggestedRoles: CustomerRole[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [mailOpen, setMailOpen] = useState(false);
+  const [roles, setRoles] = useState<CustomerRole[]>(suggestedRoles);
+  const [convert, setConvert] = useState<{ error: string | null; done: boolean }>({ error: null, done: false });
+
+  function toggleRole(role: CustomerRole) {
+    setRoles((current) => (current.includes(role) ? current.filter((r) => r !== role) : [...current, role]));
+  }
+
+  async function handleConvert() {
+    setBusy(true);
+    const result = await convertLeadToCustomer(leadId, roles);
+    setBusy(false);
+    setConvert({ error: result.error, done: !result.error });
+    if (!result.error) router.refresh();
+  }
 
   async function handleStatus(newStatus: string) {
     setBusy(true);
@@ -112,6 +129,47 @@ export function LeadActivityPanel({
             className="field-input"
           />
         </label>
+
+        <div className="field-group" style={{ borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+          <span className="field-label">Als Kunde erfassen</span>
+          <div className="flex flex-wrap gap-1.5">
+            {CUSTOMER_ROLES.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => toggleRole(r.value)}
+                aria-pressed={roles.includes(r.value)}
+                className={`badge ${roles.includes(r.value) ? "badge-gold" : "badge-muted"}`}
+                style={{ cursor: "pointer", border: "none" }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+          {convert.done ? (
+            <Link href="/admin/kunden" className="btn btn-gold btn-sm" style={{ justifyContent: "center", marginTop: 8 }}>
+              Im Kundenstamm ansehen
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={handleConvert}
+              disabled={busy || roles.length === 0}
+              className="btn btn-primary btn-sm"
+              style={{ justifyContent: "center", marginTop: 8 }}
+            >
+              <UserPlus className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Kunde anlegen
+            </button>
+          )}
+          {convert.error && (
+            <p style={{ color: "var(--red, #c0392b)", fontSize: 11, marginTop: 4 }}>
+              {convert.error.includes("rollen") || convert.error.includes("quelle") || convert.error.includes("source_lead_id")
+                ? "Bitte zuerst das neue SQL (Kundenrollen) in Supabase ausführen."
+                : convert.error}
+            </p>
+          )}
+        </div>
       </div>
 
       <div>

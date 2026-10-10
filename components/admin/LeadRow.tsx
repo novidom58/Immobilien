@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { LEAD_STATUS_OPTIONS } from "@/lib/constants";
+import { LEAD_STATUS_OPTIONS, suggestRoles } from "@/lib/constants";
 import { LeadActivityPanel } from "./LeadActivityPanel";
 
 type AdminLead = {
@@ -18,6 +18,7 @@ type AdminLead = {
   daysOpen: number;
   follow_up_at: string | null;
   source: string | null;
+  listing_id?: string | null;
   activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
@@ -107,7 +108,16 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
       {open && (
         <tr>
           <td colSpan={8} style={{ background: "var(--bg)", padding: "16px 20px" }}>
-            <LeadActivityPanel leadId={lead.id} name={lead.name} email={lead.email} status={lead.status} phone={lead.phone} followUpAt={lead.follow_up_at} activity={lead.activity} />
+            <LeadActivityPanel
+              leadId={lead.id}
+              name={lead.name}
+              email={lead.email}
+              status={lead.status}
+              phone={lead.phone}
+              followUpAt={lead.follow_up_at}
+              activity={lead.activity}
+              suggestedRoles={suggestRoles({ ...lead, listing_id: lead.listing_id ?? null })}
+            />
           </td>
         </tr>
       )}

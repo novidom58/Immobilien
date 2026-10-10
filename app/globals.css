@@ -169,6 +169,44 @@ h2.font-display {
     transform: rotate(360deg);
   }
 }
+@keyframes nd-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes nd-wiggle {
+  0%,
+  88%,
+  100% {
+    transform: rotate(0) scale(1);
+  }
+  91% {
+    transform: rotate(-7deg) scale(1.08);
+  }
+  94% {
+    transform: rotate(6deg) scale(1.08);
+  }
+  97% {
+    transform: rotate(-3deg) scale(1.03);
+  }
+}
+
+@keyframes nd-shine {
+  0%,
+  70% {
+    transform: translateX(0) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(400%) skewX(-12deg);
+  }
+}
+
 @keyframes nd-bob {
   0%,
   100% {

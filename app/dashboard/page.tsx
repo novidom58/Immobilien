@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare } from "lucide-react";
+import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare, Users } from "lucide-react";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
@@ -29,7 +30,28 @@ type Listing = {
   tour_views: number;
   expose_downloads: number;
   viewing_requests: number;
+  price_chf: number | null;
+  rooms: number | null;
+  property_type: string | null;
 };
+
+/**
+ * Wie viele vorgemerkte Käufer passen zum Objekt des Verkäufers? Es wird nur
+ * die Anzahl gezeigt, nie wer. Liest mit dem Service-Role-Key, weil
+ * Verkäufer die CRM-Tabelle nicht sehen dürfen.
+ */
+async function countMatchingBuyers(listing: Listing) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  const admin = createSupabaseClient(url, key);
+  const { data } = await admin
+    .from("customers")
+    .select("wunsch_ort, objekt_typ, zimmer_min, budget_max")
+    .eq("ziel", "kaufen")
+    .neq("typ", "ex");
+  return (data ?? []).filter((c) => matchesPlan(c, listing)).length;
+}
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ preis?: string }> }) {
   const { preis } = await searchParams;
@@ -49,7 +71,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const { data: listings } = await supabase
     .from("listings")
-    .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests")
+    .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -58,8 +80,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   let activity: { text: string; created_at: string }[] = [];
   let documents: { name: string; url: string }[] = [];
   let photos: { url: string }[] = [];
+  let matchingBuyers: number | null = null;
 
   if (listing) {
+    matchingBuyers = await countMatchingBuyers(listing);
     const [activityRes, documentsRes, photosRes] = await Promise.all([
       supabase
         .from("listing_activity")
@@ -169,8 +193,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           Mein <em>Immobilienplan</em>
         </h1>
         <p className="mt-3 max-w-2xl text-ivory-dim">
-          Suchprofil, Finanzierung und Versicherung an einem Ort. Sie bekommen sofort eine Antwort und wir melden uns, sobald
-          ein passendes Objekt kommt.
+          {listing
+            ? "Ihr Verkauf auf einen Blick: Schritt für Schritt, mit allen Zahlen und Dokumenten. Darunter planen Sie gleich Ihr nächstes Zuhause."
+            : "Suchprofil, Finanzierung und Versicherung an einem Ort. Sie bekommen sofort eine Antwort und wir melden uns, sobald ein passendes Objekt kommt."}
         </p>
         <nav className="mt-6 flex flex-wrap gap-2 text-sm">
           {[
@@ -186,6 +211,146 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           ))}
         </nav>
 
+        {listing && (
+          <>
+            <section id="verkauf" className={sectionClass}>
+            <h2 className={`${sectionHead} mb-5`}>Mein Verkauf</h2>
+            <div className="rounded-2xl border border-line bg-ink-2 p-5 lg:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 font-mono text-xs text-ivory-dim/60">
+                  {listing.address}, {listing.city}
+                  <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
+                    {listing.status}
+                  </span>
+                </div>
+                {listing.status !== "draft" && (
+                  <Link
+                    href={`/immobilien/${listing.id}`}
+                    target="_blank"
+                    className="font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
+                  >
+                    Öffentliches Inserat ansehen →
+                  </Link>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <SaleStepper
+                  hasPhotos={photos.length > 0}
+                  isOnline={listing.status !== "draft"}
+                  hasViewingRequests={listing.viewing_requests > 0}
+                  isSold={listing.status === "sold"}
+                />
+              </div>
+
+              {photos.length > 0 && (
+                <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {photos.slice(0, 5).map((photo, i) => (
+                    <div key={photo.url} className="relative aspect-square overflow-hidden rounded-lg bg-ink">
+                      <Image src={photo.url} alt="" fill sizes="150px" className="object-cover" />
+                      {i === 4 && photos.length > 5 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-ink/70 font-mono text-xs text-ivory">
+                          +{photos.length - 5}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {matchingBuyers !== null && (
+                <div className="mt-6 flex items-center gap-4 rounded-xl bg-night p-4 text-ink">
+                  <Users className="h-6 w-6 shrink-0 text-amber-soft" strokeWidth={1.5} />
+                  <div>
+                    <div className="font-display text-xl">
+                      {matchingBuyers === 1 ? "1 vorgemerkter Käufer passt" : `${matchingBuyers} vorgemerkte Käufer passen`} zu Ihrem Objekt
+                    </div>
+                    <div className="mt-0.5 text-xs text-ink/70">
+                      Aus unserer Käuferkartei nach Ort, Objektart, Zimmern und Budget. Sie werden bei der Lancierung zuerst informiert.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { icon: Eye, value: listing.views, label: "Inseratsaufrufe" },
+                  { icon: Scan, value: listing.tour_views, label: "3D-Rundgang-Aufrufe" },
+                  { icon: FileDown, value: listing.expose_downloads, label: "Exposé-Downloads" },
+                  { icon: CalendarCheck, value: listing.viewing_requests, label: "Besichtigungsanfragen" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-xl bg-ink p-4">
+                    <stat.icon className="h-4 w-4 text-amber" strokeWidth={1.5} />
+                    <div className="mt-3 font-display text-2xl font-semibold text-ivory">{stat.value}</div>
+                    <div className="mt-1 text-[11px] leading-tight text-ivory-dim">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl bg-ink p-4">
+                  <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+                    <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Aktivitäten
+                  </div>
+                  {activity.length === 0 ? (
+                    <p className="text-xs text-ivory-dim/60">Noch keine Aktivitäten.</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {activity.map((item, i) => (
+                        <li key={i} className="text-xs text-ivory-dim">
+                          <span className="text-ivory">{item.text}</span>
+                          <div className="mt-0.5 text-ivory-dim/50">
+                            {new Date(item.created_at).toLocaleDateString("de-CH")}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="rounded-xl bg-ink p-4">
+                  <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
+                    <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Dokumente
+                  </div>
+                  {documents.length === 0 ? (
+                    <p className="text-xs text-ivory-dim/60">Noch keine Dokumente.</p>
+                  ) : (
+                    <ul className="space-y-2.5">
+                      {documents.map((doc) => (
+                        <li key={doc.name}>
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2 text-xs text-ivory-dim hover:text-amber-soft"
+                          >
+                            <span className="h-1 w-1 rounded-full bg-amber/70" />
+                            {doc.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <MyDocuments />
+              </div>
+            </div>
+            </section>
+
+            <h2 className="mt-16 font-display text-3xl text-ivory lg:text-4xl">
+              Und Ihr <em>nächstes Zuhause?</em>
+            </h2>
+            <p className="mt-2 max-w-2xl text-ivory-dim">
+              Viele Verkäufer kaufen gleich wieder. Hinterlegen Sie Ihr Suchprofil, dann sind Sie bei neuen Objekten zuerst dran.
+            </p>
+          </>
+        )}
+
         <section id="suchprofil" className={sectionClass}>
           <h2 className={sectionHead}>Was suchen Sie?</h2>
           <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
@@ -194,7 +359,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </section>
 
         <section id="objekte" className={sectionClass}>
-          <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
+            <Link href="/dashboard/planer/demo" className="text-sm text-amber underline underline-offset-4">
+              Grundriss-Planer ausprobieren →
+            </Link>
+          </div>
           <div className="mt-5">
             <MatchList listings={portalListings} onCheckPrice="finanzierung" />
           </div>
@@ -217,7 +387,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </section>
 
-        {!listing ? (
+        {!listing && (
           <section className={sectionClass}>
             <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-ink-2 p-6">
               <div>
@@ -236,121 +406,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 </Link>
               </div>
             </div>
-          </section>
-        ) : (
-          <section id="verkauf" className={sectionClass}>
-          <h2 className={`${sectionHead} mb-5`}>Mein Verkauf</h2>
-          <div className="rounded-2xl border border-line bg-ink-2 p-5 lg:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 font-mono text-xs text-ivory-dim/60">
-                {listing.address}, {listing.city}
-                <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
-                  {listing.status}
-                </span>
-              </div>
-              {listing.status !== "draft" && (
-                <Link
-                  href={`/immobilien/${listing.id}`}
-                  target="_blank"
-                  className="font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4"
-                >
-                  Öffentliches Inserat ansehen →
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-6">
-              <SaleStepper
-                hasPhotos={photos.length > 0}
-                isOnline={listing.status !== "draft"}
-                hasViewingRequests={listing.viewing_requests > 0}
-                isSold={listing.status === "sold"}
-              />
-            </div>
-
-            {photos.length > 0 && (
-              <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                {photos.slice(0, 5).map((photo, i) => (
-                  <div key={photo.url} className="relative aspect-square overflow-hidden rounded-lg bg-ink">
-                    <Image src={photo.url} alt="" fill sizes="150px" className="object-cover" />
-                    {i === 4 && photos.length > 5 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-ink/70 font-mono text-xs text-ivory">
-                        +{photos.length - 5}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                { icon: Eye, value: listing.views, label: "Inseratsaufrufe" },
-                { icon: Scan, value: listing.tour_views, label: "3D-Rundgang-Aufrufe" },
-                { icon: FileDown, value: listing.expose_downloads, label: "Exposé-Downloads" },
-                { icon: CalendarCheck, value: listing.viewing_requests, label: "Besichtigungsanfragen" },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-xl bg-ink p-4">
-                  <stat.icon className="h-4 w-4 text-amber" strokeWidth={1.5} />
-                  <div className="mt-3 font-display text-2xl font-semibold text-ivory">{stat.value}</div>
-                  <div className="mt-1 text-[11px] leading-tight text-ivory-dim">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl bg-ink p-4">
-                <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
-                  <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  Aktivitäten
-                </div>
-                {activity.length === 0 ? (
-                  <p className="text-xs text-ivory-dim/60">Noch keine Aktivitäten.</p>
-                ) : (
-                  <ul className="space-y-3">
-                    {activity.map((item, i) => (
-                      <li key={i} className="text-xs text-ivory-dim">
-                        <span className="text-ivory">{item.text}</span>
-                        <div className="mt-0.5 text-ivory-dim/50">
-                          {new Date(item.created_at).toLocaleDateString("de-CH")}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              <div className="rounded-xl bg-ink p-4">
-                <div className="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">
-                  <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  Dokumente
-                </div>
-                {documents.length === 0 ? (
-                  <p className="text-xs text-ivory-dim/60">Noch keine Dokumente.</p>
-                ) : (
-                  <ul className="space-y-2.5">
-                    {documents.map((doc) => (
-                      <li key={doc.name}>
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-2 text-xs text-ivory-dim hover:text-amber-soft"
-                        >
-                          <span className="h-1 w-1 rounded-full bg-amber/70" />
-                          {doc.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <MyDocuments />
-            </div>
-          </div>
           </section>
         )}
       </div>

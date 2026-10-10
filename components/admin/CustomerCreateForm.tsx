@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createCustomer } from "@/app/admin/actions";
 import { formatSwissPhone } from "@/lib/phone";
+import { CUSTOMER_ROLES, LEAD_SOURCE_OPTIONS } from "@/lib/constants";
 
 const initialState = { error: null as string | null };
 
@@ -36,6 +37,25 @@ export function CustomerCreateForm({ beraterOptions }: { beraterOptions: string[
         {beraterOptions.map((b) => (
           <option key={b} value={b}>
             {b}
+          </option>
+        ))}
+      </select>
+      <fieldset className="sm:col-span-2" style={{ border: "none", padding: 0, margin: 0 }}>
+        <legend className="field-label">Rollen</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5" style={{ marginTop: 4 }}>
+          {CUSTOMER_ROLES.map((r) => (
+            <label key={r.value} className="flex items-center gap-1.5" style={{ fontSize: 13 }}>
+              <input type="checkbox" name="rollen" value={r.value} />
+              {r.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <select name="quelle" defaultValue="" className="field-select sm:col-span-2">
+        <option value="">Quelle (optional)</option>
+        {LEAD_SOURCE_OPTIONS.map((q) => (
+          <option key={q} value={q}>
+            {q}
           </option>
         ))}
       </select>

@@ -97,7 +97,7 @@ export async function getCrmCustomers(supabase: Supabase) {
     supabase
       .from("customers")
       .select(
-        "id, full_name, email, phone, address, language, typ, ziel, berater, notes, follow_up_at, listing_id, portal_user_id, created_at, budget_min, budget_max, wunsch_ort, objekt_typ, zimmer_min, wohnflaeche_min, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
+        "*, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
       )
       .order("created_at", { ascending: false }),
     supabase.from("customer_activity").select("id, customer_id, type, text, created_at").order("created_at", { ascending: false }),
@@ -131,6 +131,10 @@ export async function getCrmCustomers(supabase: Supabase) {
     objekt_typ: (c.objekt_typ as string | null) ?? null,
     zimmer_min: (c.zimmer_min as number | null) ?? null,
     wohnflaeche_min: (c.wohnflaeche_min as number | null) ?? null,
+    rollen: ((c.rollen as string[] | null) ?? []) as string[],
+    kauf_zeitpunkt: (c.kauf_zeitpunkt as string | null) ?? null,
+    alarm_opt_in: Boolean(c.alarm_opt_in),
+    quelle: (c.quelle as string | null) ?? null,
     listing: (c.listings as unknown as LinkedListing | null) ?? null,
     activity: activityByCustomer.get(c.id as string) ?? [],
   }));

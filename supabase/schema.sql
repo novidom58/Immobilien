@@ -658,3 +658,12 @@ alter table listing_alerts enable row level security;
 drop policy if exists "listing_alerts_admin_all" on listing_alerts;
 create policy "listing_alerts_admin_all" on listing_alerts
   for all using (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- Kundenrollen (mehrere möglich) und Herkunft aus einem Lead, dazu die
+-- gespeicherten Einrichtungen aus dem Grundriss-Planer.
+-- ---------------------------------------------------------------------
+alter table customers add column if not exists rollen text[] not null default '{}';
+alter table customers add column if not exists source_lead_id uuid references leads (id) on delete set null;
+alter table customers add column if not exists quelle text;
+alter table customer_plans add column if not exists layouts jsonb not null default '{}';

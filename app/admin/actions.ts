@@ -8,6 +8,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { createResendClient } from "@/lib/resend";
 import { STARTER_TEMPLATES } from "@/lib/emailTemplates";
 import { matchesPlan } from "@/lib/planMatching";
+import { CUSTOMER_ROLES } from "@/lib/constants";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
@@ -420,6 +421,8 @@ export async function createCustomer(formData: FormData) {
   const ziel = String(formData.get("ziel") || "").trim();
   const berater = String(formData.get("berater") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const rollen = cleanRoles(formData.getAll("rollen").map(String));
+  const quelle = String(formData.get("quelle") || "").trim().slice(0, 60);
 
   if (!nachname) return { error: "Nachname ist Pflichtfeld." };
   const fullName = [vorname, nachname].filter(Boolean).join(" ");
@@ -432,6 +435,8 @@ export async function createCustomer(formData: FormData) {
     ziel: ziel || null,
     berater: berater || null,
     notes: notes || null,
+    ...(rollen.length ? { rollen } : {}),
+    ...(quelle ? { quelle } : {}),
   });
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
@@ -482,6 +487,85 @@ export async function updateCustomer(customerId: string, formData: FormData) {
     .eq("id", customerId);
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+const VALID_ROLES = CUSTOMER_ROLES.map((r) => r.value) as string[];
+
+function cleanRoles(roles: string[]) {
+  return [...new Set(roles.filter((r) => VALID_ROLES.includes(r)))];
+}
+
+/**
+ * Übernimmt einen Lead in den Kundenstamm. Gibt es die E-Mail schon als
+ * Kunde, werden nur die Rollen ergänzt, damit keine Doppelakte entsteht.
+ * Nachricht und Kontakthistorie des Leads wandern als Notizen mit.
+ */
+export async function convertLeadToCustomer(leadId: string, roles: string[]) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError, customerId: null };
+
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id, type, name, email, phone, message, source, listing_id, wants_financing")
+    .eq("id", leadId)
+    .maybeSingle();
+  if (!lead) return { error: "Lead nicht gefunden.", customerId: null };
+
+  const rollen = cleanRoles(roles);
+  const ziel = rollen.includes("verkaeufer") ? "verkaufen" : rollen.includes("kaeufer") || rollen.includes("interessent") ? "kaufen" : null;
+
+  let customerId: string | null = null;
+  if (lead.email) {
+    const { data: existing } = await supabase.from("customers").select("id, rollen").ilike("email", lead.email).limit(1).maybeSingle();
+    if (existing) {
+      customerId = existing.id;
+      const merged = cleanRoles([...((existing.rollen as string[] | null) ?? []), ...rollen]);
+      const { error } = await supabase.from("customers").update({ rollen: merged }).eq("id", existing.id);
+      if (error) return { error: `Rollen speichern fehlgeschlagen: ${error.message}`, customerId };
+    }
+  }
+
+  if (!customerId) {
+    const { data: created, error } = await supabase
+      .from("customers")
+      .insert({
+        full_name: lead.name,
+        email: lead.email || null,
+        phone: lead.phone || null,
+        ziel,
+        listing_id: lead.listing_id ?? null,
+        notes: lead.message || null,
+        rollen,
+        quelle: lead.source || "Website",
+        source_lead_id: lead.id,
+      })
+      .select("id")
+      .single();
+    if (error || !created) return { error: `Kunde anlegen fehlgeschlagen: ${error?.message ?? "unbekannt"}`, customerId: null };
+    customerId = created.id;
+  }
+
+  const { data: history } = await supabase.from("lead_activity").select("type, text, created_at").eq("lead_id", leadId);
+  const roleLabels = rollen.map((r) => CUSTOMER_ROLES.find((c) => c.value === r)?.label ?? r).join(", ");
+  await supabase.from("customer_activity").insert([
+    { customer_id: customerId, type: "notiz", text: `Aus Lead übernommen (${lead.source || lead.type})${roleLabels ? ` als ${roleLabels}` : ""}` },
+    ...(history ?? []).map((h) => ({ customer_id: customerId, type: h.type, text: h.text, created_at: h.created_at })),
+  ]);
+  await supabase.from("leads").update({ status: "kontaktiert" }).eq("id", leadId).eq("status", "neu");
+
+  revalidatePath("/admin", "layout");
+  return { error: null, customerId };
+}
+
+export async function setCustomerRoles(customerId: string, roles: string[]) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("customers").update({ rollen: cleanRoles(roles) }).eq("id", customerId);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin", "layout");
   return { error: null };

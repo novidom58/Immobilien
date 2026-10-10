@@ -3,6 +3,17 @@ import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { OFFICES } from "@/lib/offices";
 import { AREAS, areaHref } from "@/components/novidom360/areas";
 import { Logo } from "@/components/ui/Logo";
+import { SOCIAL_LINKS } from "@/lib/constants";
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 export function Footer() {
   return (
@@ -28,6 +39,20 @@ export function Footer() {
           </Link>
         ))}
       </nav>
+      <div className="mx-auto mt-6 flex max-w-7xl justify-center gap-4 px-6 lg:px-10">
+        {SOCIAL_LINKS.map((s) => (
+          <a
+            key={s.href}
+            href={s.href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-ivory-dim transition-colors hover:border-amber hover:text-amber"
+          >
+            <InstagramIcon className="h-4 w-4" />
+            {s.handle}
+          </a>
+        ))}
+      </div>
       <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">
         &copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.
       </div>

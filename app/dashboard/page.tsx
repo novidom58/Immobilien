@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
+import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -69,16 +71,70 @@ async function countMatchingBuyers(listing: Listing) {
   return { total: matching.length, withPass: withPass.length };
 }
 
-/** Finanzierungs-Pass-Status aus der CRM-Kundenakte des Portal-Users. */
-async function getFinanzStatus(userId: string) {
+/** Finanzierungs-Pass und Rollen aus der CRM-Kundenakte des Portal-Users. */
+async function getCrmProfile(userId: string, email: string | undefined) {
   const admin = serviceClient();
   if (!admin) return null;
-  const { data } = await admin.from("customers").select("finanz_status").eq("portal_user_id", userId).maybeSingle();
-  return (data?.finanz_status as "vorgeprueft" | "bestaetigt" | null) ?? null;
+  const { data: linked } = await admin.from("customers").select("finanz_status, rollen").eq("portal_user_id", userId).maybeSingle();
+  const data =
+    linked ??
+    (email ? (await admin.from("customers").select("finanz_status, rollen").ilike("email", email).limit(1).maybeSingle()).data : null);
+  if (!data) return null;
+  return {
+    finanz_status: (data.finanz_status as "vorgeprueft" | "bestaetigt" | null) ?? null,
+    rollen: (data.rollen as string[] | null) ?? [],
+  };
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ preis?: string }> }) {
-  const { preis } = await searchParams;
+type PortalSection = "weg" | "suchprofil" | "objekte" | "finanzierung" | "versicherung" | "umbau" | "eigentum" | "verkaufen";
+
+const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
+  verkauf: "Mein Verkauf",
+  weg: "Mein Weg",
+  suchprofil: "Suchprofil",
+  objekte: "Passende Objekte",
+  finanzierung: "Finanzierung",
+  versicherung: "Versicherung",
+  umbau: "Umbau",
+  eigentum: "Mein Eigentum",
+  verkaufen: "Verkaufen",
+};
+
+const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
+  kaufen: ["weg", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
+  verkaufen: ["verkaufen", "eigentum", "weg", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau"],
+  finanzieren: ["finanzierung", "eigentum", "weg", "suchprofil", "objekte", "versicherung", "umbau", "verkaufen"],
+  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "weg", "suchprofil", "objekte", "verkaufen"],
+  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "weg", "suchprofil", "objekte", "verkaufen"],
+  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "weg", "suchprofil", "objekte"],
+};
+
+/**
+ * Das Portal richtet sich nach dem, was die Person will: zuerst nach dem
+ * Link (?fokus=umbauen aus dem Kontaktformular), sonst nach den Rollen in
+ * der Kundenakte. Verkäufer mit Inserat sehen ihr Cockpit ohnehin zuoberst.
+ */
+function sectionOrder(fokus: string | undefined, rollen: string[], hasListing: boolean): PortalSection[] {
+  if (isAnliegen(fokus)) return ORDER[fokus];
+  if (!hasListing && rollen.includes("verkaeufer")) return ORDER.verkaufen;
+  if (rollen.includes("umbau")) return ORDER.umbauen;
+  if (rollen.includes("finanzierung") && !rollen.includes("kaeufer")) return ORDER.finanzieren;
+  if (rollen.includes("versicherung") && !rollen.includes("kaeufer")) return ORDER.versichern;
+  if (rollen.includes("eigentuemer") && !rollen.includes("kaeufer")) return ORDER.eigentum;
+  return ORDER.kaufen;
+}
+
+const INTRO: Record<Anliegen | "eigentum", string> = {
+  kaufen: "Suchprofil, Finanzierung und Versicherung an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
+  verkaufen: "Was ist Ihr Zuhause wert, und wie verkaufen Sie es am besten? Hier starten Sie Ihren Verkauf und behalten alles im Blick.",
+  finanzieren: "Ihre Kaufkraft, Ihr Finanzierungs-Pass und Ihre laufende Hypothek an einem Ort. HypoCasa prüft verbindlich innert 24 Stunden.",
+  umbauen: "Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
+  versichern: "Prüfen Sie in zwei Minuten, ob Ihr Zuhause richtig versichert ist. Wir zeigen Ihnen, wo Lücken sein könnten.",
+  eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
+};
+
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ preis?: string; fokus?: string }> }) {
+  const { preis, fokus } = await searchParams;
   const supabase = await createClient();
 
   if (!supabase) {
@@ -149,7 +205,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }
 
   // «Mein Immobilienplan»: Suchprofil, Finanzierung, Versicherung, Favoriten
-  const [planRes, profileRes, publicRes, finanzStatus] = await Promise.all([
+  const [planRes, profileRes, publicRes, crm] = await Promise.all([
     supabase.from("customer_plans").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
     supabase
@@ -158,7 +214,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       .in("status", ["active", "reserved"])
       .order("created_at", { ascending: false })
       .limit(40),
-    getFinanzStatus(user.id),
+    getCrmProfile(user.id, user.email),
   ]);
   const plan = planRes.data as
     | (SearchProfile & {
@@ -217,7 +273,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     profil: Boolean(plan?.wunsch_ort || plan?.budget_max || plan?.objekt_typ),
     pass: Boolean(plan?.finanz?.max_price),
     objekt: (plan?.favorites ?? []).length > 0,
-    bestaetigt: finanzStatus === "bestaetigt",
+    bestaetigt: crm?.finanz_status === "bestaetigt",
   };
   const feedbackSummary = summarizeFeedback(feedback);
   const eigentum = plan?.eigentum ?? null;
@@ -227,6 +283,156 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const sectionClass = "mt-12 scroll-mt-8";
   const sectionHead = "font-display text-2xl text-ivory lg:text-3xl";
+
+  const portalSections: Record<PortalSection, React.ReactNode> = {
+    weg: (
+        <section className={sectionClass}>
+          <h2 className={sectionHead}>Ihr Weg zum Eigenheim</h2>
+          <div className="mt-5 rounded-2xl border border-line bg-ink-2 p-3">
+            <BuyerJourney done={journey} />
+          </div>
+        </section>
+    ),
+    suchprofil: (
+        <section id="suchprofil" className={sectionClass}>
+          <h2 className={sectionHead}>Was suchen Sie?</h2>
+          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
+            <SearchProfileForm profile={plan} />
+          </div>
+        </section>
+    ),
+    objekte: (
+        <section id="objekte" className={sectionClass}>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
+            <Link href="/dashboard/planer/demo" className="text-sm text-amber underline underline-offset-4">
+              Grundriss-Planer ausprobieren →
+            </Link>
+          </div>
+          <div className="mt-5">
+            <MatchList listings={portalListings} onCheckPrice="finanzierung" />
+          </div>
+        </section>
+    ),
+    finanzierung: (
+        <section id="finanzierung" className={sectionClass}>
+          <h2 className={sectionHead}>Ist die Finanzierung möglich?</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
+            Sofortige Einschätzung nach den Regeln der Schweizer Banken. Die verbindliche Prüfung macht unser Partner HypoCasa.
+          </p>
+          <div className="mt-5">
+            <FinancePass
+              name={portalUser.name}
+              maxPrice={plan?.finanz?.max_price ?? null}
+              status={crm?.finanz_status ?? (plan?.finanz?.max_price ? "vorgeprueft" : null)}
+              savedAt={plan?.finanz?.saved_at ?? null}
+            />
+          </div>
+          <div className="mt-5">
+            <FinanceCheck key={preis ?? "plan"} initial={financeInitial} user={portalUser} priceOptions={priceOptions} />
+          </div>
+        </section>
+    ),
+    versicherung: (
+        <section id="versicherung" className={sectionClass}>
+          <h2 className={sectionHead}>Richtig versichert?</h2>
+          <div className="mt-5">
+            <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+          </div>
+        </section>
+    ),
+    umbau: (
+        <section id="umbau" className={sectionClass}>
+          <h2 className={sectionHead}>Umbauen &amp; einrichten</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen.</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <Link href="/dashboard/planer/demo" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
+              <div className="font-display text-lg text-ivory">Grundriss-Planer</div>
+              <p className="mt-1 text-sm text-ivory-dim">Möbel massstabsgetreu verschieben, am Handy oder Computer.</p>
+            </Link>
+            <Link href="/leistungen/umbauen" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
+              <div className="font-display text-lg text-ivory">Richtpreise &amp; Förderung</div>
+              <p className="mt-1 text-sm text-ivory-dim">Was Küche, Bad oder Wärmepumpe kosten und welche Beiträge es gibt.</p>
+            </Link>
+            <Link href="/leistungen/umbauen#kontakt" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
+              <div className="font-display text-lg text-ivory">Umbau anfragen</div>
+              <p className="mt-1 text-sm text-ivory-dim">Eine erste Einschätzung zu Kosten, Ablauf und Finanzierung.</p>
+            </Link>
+          </div>
+          {portalListings.some((l) => l.favorite) && (
+            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+              <span className="text-ivory-dim">Ihre Favoriten einrichten:</span>
+              {portalListings
+                .filter((l) => l.favorite)
+                .map((l) => (
+                  <Link key={l.id} href={`/dashboard/planer/${l.id}`} className="text-amber underline underline-offset-4">
+                    {l.title}
+                  </Link>
+                ))}
+            </div>
+          )}
+        </section>
+    ),
+    eigentum: (
+        <section id="eigentum" className={sectionClass}>
+          <h2 className={sectionHead}>Mein Eigentum</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
+            Wertmonitor und Hypothekenwächter: Sie sehen jederzeit den Richtwert Ihrer Immobilie und wir erinnern Sie rechtzeitig vor dem Ablauf
+            Ihrer Hypothek.
+          </p>
+          {eigentum && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl bg-night p-5 text-ink">
+                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">Richtwert heute</div>
+                <div className="mt-2 font-display text-3xl">{formatChf(eigentum.wert.mid)}</div>
+                <div className="mt-1 text-xs text-ink/70">
+                  Spanne {formatChf(eigentum.wert.low)} – {formatChf(eigentum.wert.high)} · {eigentum.typ}, {eigentum.flaeche} m²
+                </div>
+              </div>
+              <div className="rounded-2xl border border-line bg-white p-5">
+                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Hypothek</div>
+                {hypoMonths !== null ? (
+                  <>
+                    <div className="mt-2 font-display text-3xl text-ivory">{hypoMonths > 0 ? `noch ${hypoMonths} Monate` : "abgelaufen"}</div>
+                    <div className="mt-1 text-xs text-ivory-dim">
+                      Ablauf {new Date(eigentum.hypo_ablauf!).toLocaleDateString("de-CH")}
+                      {hypoMonths <= 12 && hypoMonths > 0 ? " · jetzt ist der beste Moment zum Vergleichen" : ""}
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-2 text-sm text-ivory-dim">Noch kein Ablaufdatum hinterlegt.</div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
+            <WertmonitorForm portal initial={eigentum} />
+          </div>
+        </section>
+    ),
+    verkaufen: listing ? null : (
+          <section id="verkaufen" className={sectionClass}>
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-ink-2 p-6">
+              <div>
+                <div className="font-display text-xl text-ivory">Sie möchten verkaufen?</div>
+                <p className="mt-1 max-w-md text-sm text-ivory-dim">
+                  Sobald Ihre Immobilie bei NoviDom gelistet ist, sehen Sie hier Ihr Verkaufs-Cockpit mit Aufrufen, Anfragen und
+                  Dokumenten.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/leistungen/kaufen-verkaufen#kontakt" className="rounded-full bg-night px-5 py-3 text-sm font-semibold text-ink hover:bg-amber">
+                  Kostenlose Bewertung
+                </Link>
+                <Link href="/expose-beispiel" className="rounded-full border border-line px-5 py-3 text-sm text-ivory hover:border-ivory">
+                  Beispiel-Exposé
+                </Link>
+              </div>
+            </div>
+          </section>
+    ),
+  };
+  const order = sectionOrder(fokus, crm?.rollen ?? [], Boolean(listing));
 
   return (
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
@@ -251,19 +457,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <p className="mt-3 max-w-2xl text-ivory-dim">
           {listing
             ? "Ihr Verkauf auf einen Blick: Schritt für Schritt, mit allen Zahlen und Dokumenten. Darunter planen Sie gleich Ihr nächstes Zuhause."
-            : "Suchprofil, Finanzierung und Versicherung an einem Ort. Sie bekommen sofort eine Antwort und wir melden uns, sobald ein passendes Objekt kommt."}
+            : INTRO[(Object.keys(ORDER) as (keyof typeof ORDER)[]).find((k) => ORDER[k] === order) ?? "kaufen"]}
         </p>
         <nav className="mt-6 flex flex-wrap gap-2 text-sm">
-          {[
-            ...(listing ? [["#verkauf", "Mein Verkauf"]] : []),
-            ["#suchprofil", "Suchprofil"],
-            ["#objekte", "Passende Objekte"],
-            ["#finanzierung", "Finanzierung"],
-            ["#versicherung", "Versicherung"],
-            ["#eigentum", "Mein Eigentum"],
-          ].map(([href, text]) => (
-            <a key={href} href={href} className="rounded-full border border-line bg-white px-4 py-2 text-ivory hover:border-ivory">
-              {text}
+          {[...(listing ? (["verkauf"] as const) : []), ...order.filter((k) => k !== "weg" && portalSections[k])].map((key) => (
+            <a key={key} href={`#${key}`} className="rounded-full border border-line bg-white px-4 py-2 text-ivory hover:border-ivory">
+              {SECTION_LABEL[key]}
             </a>
           ))}
         </nav>
@@ -430,114 +629,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </>
         )}
 
-        <section className={sectionClass}>
-          <h2 className={sectionHead}>Ihr Weg zum Eigenheim</h2>
-          <div className="mt-5 rounded-2xl border border-line bg-ink-2 p-3">
-            <BuyerJourney done={journey} />
-          </div>
-        </section>
-
-        <section id="suchprofil" className={sectionClass}>
-          <h2 className={sectionHead}>Was suchen Sie?</h2>
-          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
-            <SearchProfileForm profile={plan} />
-          </div>
-        </section>
-
-        <section id="objekte" className={sectionClass}>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
-            <Link href="/dashboard/planer/demo" className="text-sm text-amber underline underline-offset-4">
-              Grundriss-Planer ausprobieren →
-            </Link>
-          </div>
-          <div className="mt-5">
-            <MatchList listings={portalListings} onCheckPrice="finanzierung" />
-          </div>
-        </section>
-
-        <section id="finanzierung" className={sectionClass}>
-          <h2 className={sectionHead}>Ist die Finanzierung möglich?</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
-            Sofortige Einschätzung nach den Regeln der Schweizer Banken. Die verbindliche Prüfung macht unser Partner HypoCasa.
-          </p>
-          <div className="mt-5">
-            <FinancePass
-              name={portalUser.name}
-              maxPrice={plan?.finanz?.max_price ?? null}
-              status={finanzStatus ?? (plan?.finanz?.max_price ? "vorgeprueft" : null)}
-              savedAt={plan?.finanz?.saved_at ?? null}
-            />
-          </div>
-          <div className="mt-5">
-            <FinanceCheck key={preis ?? "plan"} initial={financeInitial} user={portalUser} priceOptions={priceOptions} />
-          </div>
-        </section>
-
-        <section id="versicherung" className={sectionClass}>
-          <h2 className={sectionHead}>Richtig versichert?</h2>
-          <div className="mt-5">
-            <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
-          </div>
-        </section>
-
-        <section id="eigentum" className={sectionClass}>
-          <h2 className={sectionHead}>Mein Eigentum</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
-            Wertmonitor und Hypothekenwächter: Sie sehen jederzeit den Richtwert Ihrer Immobilie und wir erinnern Sie rechtzeitig vor dem Ablauf
-            Ihrer Hypothek.
-          </p>
-          {eigentum && (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl bg-night p-5 text-ink">
-                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">Richtwert heute</div>
-                <div className="mt-2 font-display text-3xl">{formatChf(eigentum.wert.mid)}</div>
-                <div className="mt-1 text-xs text-ink/70">
-                  Spanne {formatChf(eigentum.wert.low)} – {formatChf(eigentum.wert.high)} · {eigentum.typ}, {eigentum.flaeche} m²
-                </div>
-              </div>
-              <div className="rounded-2xl border border-line bg-white p-5">
-                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Hypothek</div>
-                {hypoMonths !== null ? (
-                  <>
-                    <div className="mt-2 font-display text-3xl text-ivory">{hypoMonths > 0 ? `noch ${hypoMonths} Monate` : "abgelaufen"}</div>
-                    <div className="mt-1 text-xs text-ivory-dim">
-                      Ablauf {new Date(eigentum.hypo_ablauf!).toLocaleDateString("de-CH")}
-                      {hypoMonths <= 12 && hypoMonths > 0 ? " · jetzt ist der beste Moment zum Vergleichen" : ""}
-                    </div>
-                  </>
-                ) : (
-                  <div className="mt-2 text-sm text-ivory-dim">Noch kein Ablaufdatum hinterlegt.</div>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
-            <WertmonitorForm portal initial={eigentum} />
-          </div>
-        </section>
-
-        {!listing && (
-          <section className={sectionClass}>
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-ink-2 p-6">
-              <div>
-                <div className="font-display text-xl text-ivory">Sie möchten verkaufen?</div>
-                <p className="mt-1 max-w-md text-sm text-ivory-dim">
-                  Sobald Ihre Immobilie bei NoviDom gelistet ist, sehen Sie hier Ihr Verkaufs-Cockpit mit Aufrufen, Anfragen und
-                  Dokumenten.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/#bewertung" className="rounded-full bg-night px-5 py-3 text-sm font-semibold text-ink hover:bg-amber">
-                  Kostenlose Bewertung
-                </Link>
-                <Link href="/expose-beispiel" className="rounded-full border border-line px-5 py-3 text-sm text-ivory hover:border-ivory">
-                  Beispiel-Exposé
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
+        {order.map((key) => (
+          <Fragment key={key}>{portalSections[key]}</Fragment>
+        ))}
       </div>
     </main>
   );

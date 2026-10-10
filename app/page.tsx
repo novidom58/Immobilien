@@ -14,6 +14,7 @@ import { Faq } from "@/components/sections/Faq";
 import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
 import { getShowcase } from "@/lib/showcase";
+import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 
 export default async function Home() {
   const showcase = await getShowcase();
@@ -28,6 +29,7 @@ export default async function Home() {
         <SolutionsHub />
         <BuyerRadar />
         <FeaturedListings />
+        <Giraffe360Showcase />
         <WhyNoviDom />
         <PropertyValuationLead />
         <ServiceMap />

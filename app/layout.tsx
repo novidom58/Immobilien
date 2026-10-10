@@ -32,6 +32,7 @@ const siteUrl = "https://www.novidom-immo.ch";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  appleWebApp: { capable: true, title: "NoviDom", statusBarStyle: "default" },
   title: {
     default: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
     template: "%s | NoviDom Immo",

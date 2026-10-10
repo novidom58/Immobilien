@@ -16,6 +16,7 @@ import { PORTAL_OPTIONS } from "@/lib/constants";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
 import { clipFolder, flightFolder } from "@/lib/listingClips";
 import { VideoFolderControl } from "./VideoFolderControl";
+import { BuyerAlertButton } from "./BuyerAlertButton";
 
 type AdminListing = {
   id: string;
@@ -276,6 +277,7 @@ export function ListingCard({
           </span>
           <VideoFolderControl folder={clipFolder(listing.id)} label="Clips pro Foto" onError={setError} />
           <VideoFolderControl folder={flightFolder(listing.id)} label="Drohnenflug" onError={setError} />
+          <BuyerAlertButton listingId={listing.id} active={listing.status === "active" || listing.status === "reserved"} />
           {listing.berater && <span className="bchip">{listing.berater}</span>}
           <span className="td-light">
             Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}

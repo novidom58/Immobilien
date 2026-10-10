@@ -613,3 +613,48 @@ create policy "email_templates_admin_all" on email_templates
 -- update profiles set role = 'admin'
 -- where id = (select id from auth.users where email = 'DEINE-EMAIL@example.com');
 -- ---------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------
+-- customer_plans: «Mein Immobilienplan» im Kundenportal. Jede Person
+-- pflegt ihr Suchprofil, den Finanzierungs-Check, Favoriten und den
+-- Versicherungs-Check selbst. Das Suchprofil wird zusätzlich in die
+-- CRM-Kundenakte (customers) übernommen, damit Käufer-Radar, Matching
+-- und Käufer-Alarm es kennen.
+-- ---------------------------------------------------------------------
+create table if not exists customer_plans (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  kauf_zeitpunkt text,
+  wunsch_ort text,
+  objekt_typ text,
+  zimmer_min numeric,
+  budget_max integer,
+  alarm_opt_in boolean not null default false,
+  finanz jsonb,
+  versicherung jsonb,
+  favorites uuid[] not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
+alter table customer_plans enable row level security;
+
+drop policy if exists "customer_plans_own_or_admin" on customer_plans;
+create policy "customer_plans_own_or_admin" on customer_plans
+  for all using (user_id = auth.uid() or public.is_admin())
+  with check (user_id = auth.uid() or public.is_admin());
+
+alter table customers add column if not exists kauf_zeitpunkt text;
+alter table customers add column if not exists alarm_opt_in boolean not null default false;
+
+-- Käufer-Alarm: welches Objekt wurde schon an wen gemeldet (keine Doppel-Mails)
+create table if not exists listing_alerts (
+  listing_id uuid not null references listings (id) on delete cascade,
+  customer_id uuid not null references customers (id) on delete cascade,
+  sent_at timestamptz not null default now(),
+  primary key (listing_id, customer_id)
+);
+
+alter table listing_alerts enable row level security;
+
+drop policy if exists "listing_alerts_admin_all" on listing_alerts;
+create policy "listing_alerts_admin_all" on listing_alerts
+  for all using (public.is_admin());

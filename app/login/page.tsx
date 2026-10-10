@@ -6,7 +6,7 @@ import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Kundenlogin",
-  description: "Login zum persönlichen Verkaufs-Cockpit von NoviDom Immo.",
+  description: "Login zu Ihrem persönlichen Immobilienplan bei NoviDom Immo.",
   robots: { index: false, follow: false },
 };
 
@@ -25,7 +25,7 @@ export default function LoginPage() {
           Kundenlogin
         </h1>
         <p className="mt-2 text-center text-sm text-ivory-dim">
-          Zugang zu Ihrem persönlichen Verkaufs-Cockpit.
+          Ihr Immobilienplan: Suchprofil, Finanzierung, Versicherung und Ihr Verkauf.
         </p>
 
         <div className="mt-8">

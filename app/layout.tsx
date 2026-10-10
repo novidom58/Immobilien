@@ -7,6 +7,7 @@ import { StickyContact } from "@/components/StickyContact";
 import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
 import { OFFICES } from "@/lib/offices";
+import { SOCIAL_LINKS } from "@/lib/constants";
 
 const serif = Fraunces({
   variable: "--font-serif",
@@ -92,6 +93,7 @@ const jsonLd = {
   ],
   priceRange: "ab 0.95% Provision",
   email: "verkaufen@novidom-immo.ch",
+  sameAs: SOCIAL_LINKS.map((s) => s.href),
   address: OFFICES.map((office) => ({
     "@type": "PostalAddress",
     streetAddress: office.street,

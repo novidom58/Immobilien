@@ -17,6 +17,8 @@ import { AREA_CONTACTS, AREA_CONTENT } from "@/components/novidom360/areaContent
 import { AreaContactCard, AreaFaq, AreaInteractive, OtherAreas } from "@/components/leistungen/AreaParts";
 import { FinanzierenContent } from "@/components/leistungen/FinanzierenContent";
 import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
+import { UmbauContent } from "@/components/leistungen/UmbauContent";
+import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
 
 export function generateStaticParams() {
   return AREAS.map((a) => ({ slug: a.slug }));
@@ -118,6 +120,9 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
             </section>
           </>
         )}
+
+        {area.id === "umbau" && <UmbauContent />}
+        {area.id === "vers" && <VersicherungContent />}
 
         {area.id === "kv" && (
           <>

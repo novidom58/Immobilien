@@ -7,6 +7,9 @@ import { CustomerDetailModal } from "./CustomerDetailModal";
 import { saleDeadlineProgress } from "@/lib/dates";
 import { formatSwissPhone } from "@/lib/phone";
 import type { CrmCustomer, AdminListing } from "@/lib/admin-data";
+import { CUSTOMER_ROLES } from "@/lib/constants";
+
+const ROLE_LABEL: Record<string, string> = Object.fromEntries(CUSTOMER_ROLES.map((r) => [r.value, r.label]));
 
 const TYPE_BADGE: Record<string, string> = {
   bestand: "badge-blue",
@@ -46,6 +49,7 @@ export function CustomerList({
   const [query, setQuery] = useState("");
   const [typFilter, setTypFilter] = useState("aktiv");
   const [beraterFilter, setBeraterFilter] = useState("");
+  const [rolleFilter, setRolleFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const exCount = customers.filter((c) => c.typ === "ex").length;
@@ -58,19 +62,30 @@ export function CustomerList({
       if (typFilter === "neukunde" && c.typ !== "neukunde") return false;
       if (typFilter === "ex" && c.typ !== "ex") return false;
       if (beraterFilter && c.berater !== beraterFilter) return false;
+      if (rolleFilter && !c.rollen.includes(rolleFilter)) return false;
       if (q) {
         const haystack = `${c.full_name} ${c.email ?? ""} ${c.phone ?? ""} ${c.address ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [customers, query, typFilter, beraterFilter]);
+  }, [customers, query, typFilter, beraterFilter, rolleFilter]);
 
   const openCustomer = customers.find((c) => c.id === openId) ?? null;
 
   function handleExport() {
-    const header = ["Name", "Typ", "E-Mail", "Telefon", "Adresse", "Zuständig", "Ziel"];
-    const rows = filtered.map((c) => [c.full_name, TYPE_LABEL[c.typ] ?? c.typ, c.email ?? "", c.phone ?? "", c.address ?? "", c.berater ?? "", c.ziel ?? ""]);
+    const header = ["Name", "Typ", "Rollen", "E-Mail", "Telefon", "Adresse", "Zuständig", "Ziel", "Quelle"];
+    const rows = filtered.map((c) => [
+      c.full_name,
+      TYPE_LABEL[c.typ] ?? c.typ,
+      c.rollen.map((r) => ROLE_LABEL[r] ?? r).join(", "),
+      c.email ?? "",
+      c.phone ?? "",
+      c.address ?? "",
+      c.berater ?? "",
+      c.ziel ?? "",
+      c.quelle ?? "",
+    ]);
     const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -123,6 +138,14 @@ export function CustomerList({
               </option>
             ))}
           </select>
+          <select className="filter-select" value={rolleFilter} onChange={(e) => setRolleFilter(e.target.value)} aria-label="Rolle">
+            <option value="">Alle Rollen</option>
+            {CUSTOMER_ROLES.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label} ({customers.filter((c) => c.rollen.includes(r.value)).length})
+              </option>
+            ))}
+          </select>
           <span className="td-light" style={{ fontSize: 12 }}>
             {filtered.length} Kunden · {exCount} im Archiv
           </span>
@@ -156,6 +179,15 @@ export function CustomerList({
                         {c.email}
                         {c.phone ? ` · ${formatSwissPhone(c.phone)}` : ""}
                       </div>
+                      {c.rollen.length > 0 && (
+                        <div className="flex flex-wrap gap-1" style={{ marginTop: 4 }}>
+                          {c.rollen.map((r) => (
+                            <span key={r} className="badge badge-muted">
+                              {ROLE_LABEL[r] ?? r}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <span className={`badge ${TYPE_BADGE[c.typ] ?? "badge-muted"}`}>{TYPE_LABEL[c.typ] ?? c.typ}</span>

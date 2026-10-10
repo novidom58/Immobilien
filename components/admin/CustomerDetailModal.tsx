@@ -13,7 +13,9 @@ import {
   sendExposeEmail,
   addCustomerActivity,
   deleteCustomerActivity,
+  setCustomerRoles,
 } from "@/app/admin/actions";
+import { CUSTOMER_ROLES } from "@/lib/constants";
 import { AcquisitionTool } from "./AcquisitionTool";
 import { TemplateMailer } from "./TemplateMailer";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
@@ -60,6 +62,13 @@ export function CustomerDetailModal({
   const [openPanel, setOpenPanel] = useState<"akquise" | "mail" | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [ziel, setZiel] = useState(customer.ziel ?? "");
+  const [rollen, setRollen] = useState<string[]>(customer.rollen);
+
+  async function toggleRolle(role: string) {
+    const next = rollen.includes(role) ? rollen.filter((r) => r !== role) : [...rollen, role];
+    setRollen(next);
+    await run("rollen", () => setCustomerRoles(customer.id, next));
+  }
 
   async function run(key: string, fn: () => Promise<{ error: string | null }>) {
     setBusy(key);
@@ -195,6 +204,32 @@ export function CustomerDetailModal({
               />
             </div>
           )}
+
+          <div className="modal-section">
+            <div className="detail-label" style={{ marginBottom: 8 }}>
+              Rollen
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {CUSTOMER_ROLES.map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  disabled={busy === "rollen"}
+                  onClick={() => toggleRolle(r.value)}
+                  aria-pressed={rollen.includes(r.value)}
+                  className={`badge ${rollen.includes(r.value) ? "badge-gold" : "badge-muted"}`}
+                  style={{ cursor: "pointer", border: "none" }}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <div className="td-light flex flex-wrap gap-x-4 gap-y-1" style={{ fontSize: 12, marginTop: 8 }}>
+              {customer.quelle && <span>Quelle: {customer.quelle}</span>}
+              {customer.kauf_zeitpunkt && <span>Kaufzeitpunkt: {customer.kauf_zeitpunkt}</span>}
+              {customer.portal_user_id && <span>Käufer-Alarm: {customer.alarm_opt_in ? "aktiv" : "aus"}</span>}
+            </div>
+          </div>
 
           <div className="modal-section">
             <div className="detail-label" style={{ marginBottom: 8 }}>

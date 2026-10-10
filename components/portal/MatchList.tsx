@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, LayoutGrid, Calculator } from "lucide-react";
+import { Heart, LayoutGrid, Calculator, Sofa } from "lucide-react";
 import { toggleFavorite } from "@/app/dashboard/actions";
 
 export type PortalListing = {
@@ -85,6 +85,13 @@ export function MatchList({ listings, onCheckPrice }: { listings: PortalListing[
                   Finanzierung prüfen
                 </Link>
               )}
+              <Link
+                href={`/dashboard/planer/${l.id}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber px-4 py-2 text-xs font-semibold text-amber hover:bg-amber hover:text-white"
+              >
+                <Sofa className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Selbst einrichten
+              </Link>
               {l.tour_url && (
                 <a
                   href={l.tour_url}

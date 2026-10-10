@@ -3,6 +3,17 @@ import { daysSince } from "@/lib/dates";
 
 type Supabase = NonNullable<Awaited<ReturnType<typeof createClient>>>;
 
+export type WertmonitorData = {
+  region: string;
+  typ: string;
+  flaeche: number;
+  zimmer?: number | null;
+  baujahr?: number | null;
+  adresse?: string | null;
+  wert?: { low: number; mid: number; high: number } | null;
+  last_sent_at?: string | null;
+};
+
 export async function getLeadsWithActivity(supabase: Supabase) {
   const [leadsRes, activityRes] = await Promise.all([
     supabase
@@ -38,7 +49,7 @@ export async function getListingsForAdmin(supabase: Supabase) {
   const { data } = await supabase
     .from("listings")
     .select(
-      "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, posted_portals, lat, listing_photos(count), listing_documents(id, name, url)"
+      "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, posted_portals, lat, offmarket_until, listing_photos(count), listing_documents(id, name, url)"
     )
     .order("created_at", { ascending: false });
 
@@ -61,6 +72,7 @@ export async function getListingsForAdmin(supabase: Supabase) {
     posted_portals: (l.posted_portals as string[] | null) ?? [],
     ownerId: (l.owner_id as string | null) ?? null,
     lat: (l.lat as number | null) ?? null,
+    offmarket_until: (l.offmarket_until as string | null) ?? null,
     photoCount: (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0,
     hasOwner: Boolean(l.owner_id),
     documents: (l.listing_documents as { id: string; name: string; url: string }[] | null) ?? [],
@@ -135,6 +147,14 @@ export async function getCrmCustomers(supabase: Supabase) {
     kauf_zeitpunkt: (c.kauf_zeitpunkt as string | null) ?? null,
     alarm_opt_in: Boolean(c.alarm_opt_in),
     quelle: (c.quelle as string | null) ?? null,
+    finanz_status: (c.finanz_status as "vorgeprueft" | "bestaetigt" | null) ?? null,
+    finanz_max: (c.finanz_max as number | null) ?? null,
+    hypo_ablauf: (c.hypo_ablauf as string | null) ?? null,
+    hypo_betrag: (c.hypo_betrag as number | null) ?? null,
+    hypo_zins: (c.hypo_zins as number | null) ?? null,
+    hypo_bank: (c.hypo_bank as string | null) ?? null,
+    hypo_erinnert_at: (c.hypo_erinnert_at as string | null) ?? null,
+    wertmonitor: (c.wertmonitor as WertmonitorData | null) ?? null,
     listing: (c.listings as unknown as LinkedListing | null) ?? null,
     activity: activityByCustomer.get(c.id as string) ?? [],
   }));

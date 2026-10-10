@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { createClient } from "@/lib/supabase/server";
+import { publicListingFilter } from "@/lib/offmarket";
 
 type Listing = {
   id: string;
@@ -37,6 +38,7 @@ export async function FeaturedListings() {
         "id, title, address, city, postal_code, price_chf, status, listing_photos(url, sort_order)"
       )
       .in("status", ["active", "reserved", "sold"])
+      .or(publicListingFilter())
       .order("created_at", { ascending: false })
       .limit(3);
 

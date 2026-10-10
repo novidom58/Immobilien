@@ -5,6 +5,7 @@ import { MapPin, BedDouble, Ruler } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
+import { publicListingFilter } from "@/lib/offmarket";
 
 export const metadata: Metadata = {
   title: "Immobilien",
@@ -50,6 +51,7 @@ export default async function ImmobilienPage() {
         "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, created_at, listing_photos(url, sort_order)"
       )
       .in("status", ["active", "reserved", "sold"])
+      .or(publicListingFilter())
       .order("created_at", { ascending: false });
 
     listings = (data ?? []).map((l) => {

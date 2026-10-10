@@ -11,6 +11,9 @@ import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
 import { createClient } from "@/lib/supabase/server";
 import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
 import { DroneFlight } from "@/components/listing/DroneFlight";
+import { ContactChannels } from "@/components/listing/ContactChannels";
+import { MonthlyCost } from "@/components/listing/MonthlyCost";
+import { offmarketHoursLeft } from "@/lib/offmarket";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +34,17 @@ async function getListing(id: string) {
   const { data } = await supabase
     .from("listings")
     .select(
-      "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, description, tour_url, listing_photos(url, sort_order)"
+      "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, description, tour_url, offmarket_until, listing_photos(url, sort_order)"
     )
     .eq("id", id)
     .in("status", ["active", "reserved", "sold"])
     .maybeSingle();
 
   if (!data) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   await supabase.rpc("log_listing_view", { p_listing_id: id });
 
@@ -62,10 +69,11 @@ async function getListing(id: string) {
       label: flightLabel(f.name),
     }));
 
-  return { ...data, photos, clips, flight } as typeof data & {
+  return { ...data, photos, clips, flight, loggedIn: Boolean(user) } as typeof data & {
     photos: typeof photos;
     clips: string[];
     flight: { url: string; label: string }[];
+    loggedIn: boolean;
   };
 }
 
@@ -94,6 +102,12 @@ export default async function ListingDetailPage({
 
   const status = STATUS_LABEL[listing.status] ?? STATUS_LABEL.active;
   const [main, ...rest] = listing.photos;
+  const offmarketHours = listing.status === "active" ? offmarketHoursLeft(listing.offmarket_until as string | null) : null;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
+
+  if (offmarketHours && !listing.loggedIn) {
+    return <OffMarketTeaser listing={listing} cover={main?.url ?? null} hours={offmarketHours} />;
+  }
 
   return (
     <>
@@ -123,6 +137,11 @@ export default async function ListingDetailPage({
               >
                 {status.label}
               </span>
+              {offmarketHours && (
+                <span className="absolute right-5 top-5 rounded-full bg-night px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-ink">
+                  Off-Market · exklusiv noch {offmarketHours}h
+                </span>
+              )}
             </div>
           ) : (
             <div className="flex aspect-[16/9] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
@@ -212,6 +231,8 @@ export default async function ListingDetailPage({
                 </p>
               </div>
             )}
+
+            {listing.price_chf && listing.status !== "sold" && <MonthlyCost price={listing.price_chf} />}
           </div>
 
           {/* CTA-Karte */}
@@ -226,6 +247,7 @@ export default async function ListingDetailPage({
               Besichtigung anfragen
             </p>
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
+            <ContactChannels title={listing.title || `${listing.address}, ${listing.city}`} url={`${siteUrl}/immobilien/${listing.id}`} />
             <Link
               href={`/immobilien/${listing.id}/expose`}
               target="_blank"
@@ -236,6 +258,54 @@ export default async function ListingDetailPage({
             <p className="mt-4 text-xs text-ivory-dim/60">
               Persönliche Auskunft durch unser Team, NoviDom Immo.
             </p>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function OffMarketTeaser({
+  listing,
+  cover,
+  hours,
+}: {
+  listing: { id: string; title: string | null; city: string; rooms: number | null; living_area: number | null; property_type: string | null };
+  cover: string | null;
+  hours: number;
+}) {
+  const facts = [listing.property_type, listing.rooms ? `${listing.rooms} Zimmer` : null, listing.living_area ? `${listing.living_area} m²` : null]
+    .filter(Boolean)
+    .join(" · ");
+  const redirect = encodeURIComponent(`/immobilien/${listing.id}`);
+  return (
+    <>
+      <Header />
+      <main className="mx-auto max-w-4xl px-6 pb-28 pt-32 lg:px-10">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-ink-2">
+          {cover && <Image src={cover} alt="" fill sizes="(min-width: 1024px) 900px, 100vw" className="scale-110 object-cover blur-xl" />}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-night/40 p-6 text-center text-ink">
+            <span className="rounded-full bg-amber px-4 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-white">
+              Off-Market · noch {hours}h exklusiv
+            </span>
+            <h1 className="mt-5 font-display text-3xl lg:text-5xl">Neues Objekt in {listing.city}</h1>
+            {facts && <p className="mt-2 text-ink/85">{facts}</p>}
+          </div>
+        </div>
+        <div className="mt-8 rounded-2xl border border-line bg-white p-7 text-center">
+          <h2 className="font-display text-2xl text-ivory">Vorgemerkte Käufer sehen es zuerst.</h2>
+          <p className="mx-auto mt-2 max-w-xl text-ivory-dim">
+            Neue Objekte zeigen wir 48 Stunden lang nur Käuferinnen und Käufern mit Kundenkonto, bevor sie auf die Portale gehen. Kostenlos
+            registrieren, Suchprofil anlegen und sofort alles sehen.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link href={`/login?redirect=${redirect}`} className="rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink hover:bg-amber">
+              Kostenlos registrieren
+            </Link>
+            <Link href={`/login?redirect=${redirect}`} className="rounded-full border border-line px-6 py-3.5 text-sm text-ivory hover:border-ivory">
+              Anmelden
+            </Link>
           </div>
         </div>
       </main>

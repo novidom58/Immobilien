@@ -117,6 +117,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
               followUpAt={lead.follow_up_at}
               activity={lead.activity}
               suggestedRoles={suggestRoles({ ...lead, listing_id: lead.listing_id ?? null })}
+              listingId={lead.listing_id ?? null}
             />
           </td>
         </tr>

@@ -32,6 +32,7 @@ export const CUSTOMER_ROLES = [
   { value: "versicherung", label: "Versicherung" },
   { value: "umbau", label: "Umbau" },
   { value: "mieter", label: "Mieter" },
+  { value: "eigentuemer", label: "Eigentümer" },
 ] as const;
 
 export type CustomerRole = (typeof CUSTOMER_ROLES)[number]["value"];
@@ -57,3 +58,4 @@ export function suggestRoles(lead: {
 }
 
 export const SOCIAL_LINKS = [{ label: "Instagram", handle: "@novidom.immo", href: "https://www.instagram.com/novidom.immo/" }] as const;
+

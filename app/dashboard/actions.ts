@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeItems } from "@/lib/floorplan";
+import { maxPrice } from "@/lib/finance";
+import { parseOwnerInput, ownerValue, upsertOwner } from "@/lib/wertmonitor";
 
 const OBJEKT_TYPES = ["Haus", "Wohnung", "Rendite", "Andere"];
 const ZEITPUNKTE = ["sofort", "3-6 Monate", "6-12 Monate", "1-2 Jahre", "nur am Schauen"];
@@ -15,6 +17,25 @@ async function requireUser() {
     data: { user },
   } = await supabase.auth.getUser();
   return { supabase, user };
+}
+
+function serviceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return url && key ? createSupabaseClient(url, key) : null;
+}
+
+/** Kundenakte des Portal-Users (über Login verknüpft oder per E-Mail gefunden). */
+async function findCustomerId(admin: NonNullable<ReturnType<typeof serviceClient>>, userId: string, email: string | undefined) {
+  const { data: linked } = await admin.from("customers").select("id").eq("portal_user_id", userId).maybeSingle();
+  if (linked) return linked.id as string;
+  if (!email) return null;
+  const { data: byEmail } = await admin.from("customers").select("id").ilike("email", email).limit(1).maybeSingle();
+  if (byEmail) {
+    await admin.from("customers").update({ portal_user_id: userId }).eq("id", byEmail.id);
+    return byEmail.id as string;
+  }
+  return null;
 }
 
 function numberOrNull(value: FormDataEntryValue | null) {
@@ -115,12 +136,27 @@ export async function saveFinanceCheck(input: { income: number; savings: number;
   const clean = Object.fromEntries(
     Object.entries(input).map(([k, v]) => [k, Number.isFinite(v) && v >= 0 && v < 1e9 ? Math.round(v) : 0])
   );
+  const max = maxPrice(clean as typeof input);
   const { error } = await supabase
     .from("customer_plans")
-    .upsert({ user_id: user.id, finanz: { ...clean, saved_at: new Date().toISOString() }, updated_at: new Date().toISOString() });
+    .upsert({ user_id: user.id, finanz: { ...clean, max_price: max, saved_at: new Date().toISOString() }, updated_at: new Date().toISOString() });
   if (error) return { error: error.message };
+
+  // Finanzierungs-Pass in der Kundenakte: «vorgeprüft», bis HypoCasa bestätigt.
+  const admin = serviceClient();
+  if (admin && max > 0) {
+    const customerId = await findCustomerId(admin, user.id, user.email);
+    if (customerId) {
+      const { data: row } = await admin.from("customers").select("finanz_status").eq("id", customerId).maybeSingle();
+      await admin
+        .from("customers")
+        .update({ finanz_max: max, ...(row?.finanz_status === "bestaetigt" ? {} : { finanz_status: "vorgeprueft" }) })
+        .eq("id", customerId);
+    }
+  }
+
   revalidatePath("/dashboard");
-  return { error: null };
+  return { error: null, maxPrice: max };
 }
 
 export async function saveInsuranceCheck(answers: Record<string, string | boolean>) {
@@ -189,4 +225,27 @@ export async function saveLayout(listingId: string, items: unknown) {
   }
 
   return { error: null };
+}
+
+/** Wertmonitor und Hypothekenwächter im Portal («Mein Eigentum»). */
+export async function saveEigentum(raw: Record<string, string>) {
+  const { supabase, user } = await requireUser();
+  if (!supabase || !user) return { error: "Bitte melden Sie sich an.", wert: null };
+  const input = parseOwnerInput(raw);
+  if (!input) return { error: "Bitte Region, Objektart und Wohnfläche angeben.", wert: null };
+
+  const wert = ownerValue(input);
+  const { error } = await supabase
+    .from("customer_plans")
+    .upsert({ user_id: user.id, eigentum: { ...input, wert, saved_at: new Date().toISOString() }, updated_at: new Date().toISOString() });
+  if (error) return { error: error.message, wert: null };
+
+  const admin = serviceClient();
+  if (admin && user.email) {
+    const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+    await upsertOwner(admin, { email: user.email, name: profile?.full_name ?? user.email, userId: user.id }, input, "Kundenportal");
+  }
+
+  revalidatePath("/dashboard");
+  return { error: null, wert };
 }

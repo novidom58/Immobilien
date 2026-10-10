@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText } from "lucide-react";
+import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText, MessageCircle } from "lucide-react";
+import { whatsappTo } from "@/lib/social";
 import {
   updateCustomer,
   setCustomerTyp,
@@ -14,6 +15,8 @@ import {
   addCustomerActivity,
   deleteCustomerActivity,
   setCustomerRoles,
+  setCustomerFinanzStatus,
+  updateCustomerHypo,
 } from "@/app/admin/actions";
 import { CUSTOMER_ROLES } from "@/lib/constants";
 import { AcquisitionTool } from "./AcquisitionTool";
@@ -117,6 +120,18 @@ export function CustomerDetailModal({
                 <a href={`tel:${customer.phone}`} className="btn btn-primary btn-sm">
                   <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
                   Anrufen ({formatSwissPhone(customer.phone)})
+                </a>
+              )}
+              {customer.phone && (
+                <a
+                  href={whatsappTo(customer.phone, `Hallo ${customer.full_name.split(" ")[0]}, hier ist NoviDom Immo. `)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-sm"
+                  style={{ background: "#25d366", color: "#fff" }}
+                >
+                  <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  WhatsApp
                 </a>
               )}
               <select
@@ -229,6 +244,55 @@ export function CustomerDetailModal({
               {customer.kauf_zeitpunkt && <span>Kaufzeitpunkt: {customer.kauf_zeitpunkt}</span>}
               {customer.portal_user_id && <span>Käufer-Alarm: {customer.alarm_opt_in ? "aktiv" : "aus"}</span>}
             </div>
+          </div>
+
+          <div className="modal-section">
+            <div className="detail-label" style={{ marginBottom: 8 }}>
+              Finanzierung &amp; Hypothek
+            </div>
+            <div className="flex flex-wrap items-center gap-3" style={{ fontSize: 13 }}>
+              <select
+                value={customer.finanz_status ?? ""}
+                disabled={busy === "finanz"}
+                onChange={(e) => run("finanz", () => setCustomerFinanzStatus(customer.id, e.target.value))}
+                className="filter-select"
+                aria-label="Finanzierungs-Pass"
+              >
+                <option value="">Kein Finanzierungs-Pass</option>
+                <option value="vorgeprueft">Pass: vorgeprüft</option>
+                <option value="bestaetigt">Pass: bestätigt (HypoCasa)</option>
+              </select>
+              {customer.finanz_max && (
+                <span className="td-light">Kaufkraft laut Portal-Check: CHF {customer.finanz_max.toLocaleString("en-US").replace(/,/g, "'")}</span>
+              )}
+            </div>
+            <form action={(fd) => run("hypo", () => updateCustomerHypo(customer.id, fd))} className="mt-3 grid gap-2 sm:grid-cols-4">
+              <label className="field-group">
+                <span className="field-label">Hypothek läuft ab</span>
+                <input name="hypo_ablauf" type="date" defaultValue={customer.hypo_ablauf ?? ""} className="field-input" />
+              </label>
+              <label className="field-group">
+                <span className="field-label">Betrag CHF</span>
+                <input name="hypo_betrag" inputMode="numeric" defaultValue={customer.hypo_betrag ?? ""} className="field-input" />
+              </label>
+              <label className="field-group">
+                <span className="field-label">Zins %</span>
+                <input name="hypo_zins" inputMode="decimal" defaultValue={customer.hypo_zins ?? ""} className="field-input" />
+              </label>
+              <label className="field-group">
+                <span className="field-label">Bank</span>
+                <input name="hypo_bank" defaultValue={customer.hypo_bank ?? ""} className="field-input" />
+              </label>
+              <button type="submit" disabled={busy === "hypo"} className="btn btn-ghost btn-sm sm:col-span-4" style={{ width: "fit-content" }}>
+                Hypothek speichern
+              </button>
+            </form>
+            {customer.wertmonitor?.wert && (
+              <p className="td-light" style={{ fontSize: 12, marginTop: 8 }}>
+                Wertmonitor: {customer.wertmonitor.typ}, {customer.wertmonitor.flaeche} m², {customer.wertmonitor.region} · Richtwert CHF{" "}
+                {customer.wertmonitor.wert.mid.toLocaleString("en-US").replace(/,/g, "'")}
+              </p>
+            )}
           </div>
 
           <div className="modal-section">

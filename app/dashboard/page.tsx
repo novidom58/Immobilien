@@ -15,6 +15,14 @@ import { FinanceCheck } from "@/components/portal/FinanceCheck";
 import { InsuranceCheck } from "@/components/portal/InsuranceCheck";
 import { MatchList, type PortalListing } from "@/components/portal/MatchList";
 import { matchesPlan } from "@/lib/planMatching";
+import { FinancePass } from "@/components/portal/FinancePass";
+import { PriceCheck } from "@/components/portal/PriceCheck";
+import { BuyerJourney } from "@/components/portal/BuyerJourney";
+import { FeedbackSummary } from "@/components/FeedbackSummary";
+import { WertmonitorForm } from "@/components/sections/WertmonitorForm";
+import { summarizeFeedback, type ViewingFeedback } from "@/lib/feedback";
+import { regionFromPostal } from "@/lib/region";
+import { formatChf } from "@/lib/valuation";
 
 export const metadata: Metadata = {
   title: "Mein Immobilienplan",
@@ -33,6 +41,8 @@ type Listing = {
   price_chf: number | null;
   rooms: number | null;
   property_type: string | null;
+  living_area: number | null;
+  postal_code: string | null;
 };
 
 /**
@@ -40,17 +50,31 @@ type Listing = {
  * die Anzahl gezeigt, nie wer. Liest mit dem Service-Role-Key, weil
  * Verkäufer die CRM-Tabelle nicht sehen dürfen.
  */
-async function countMatchingBuyers(listing: Listing) {
+function serviceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  const admin = createSupabaseClient(url, key);
+  return url && key ? createSupabaseClient(url, key) : null;
+}
+
+async function countMatchingBuyers(listing: Listing) {
+  const admin = serviceClient();
+  if (!admin) return null;
   const { data } = await admin
     .from("customers")
-    .select("wunsch_ort, objekt_typ, zimmer_min, budget_max")
+    .select("wunsch_ort, objekt_typ, zimmer_min, budget_max, finanz_status, finanz_max")
     .eq("ziel", "kaufen")
     .neq("typ", "ex");
-  return (data ?? []).filter((c) => matchesPlan(c, listing)).length;
+  const matching = (data ?? []).filter((c) => matchesPlan(c, listing));
+  const withPass = matching.filter((c) => c.finanz_status && (!listing.price_chf || !c.finanz_max || c.finanz_max >= listing.price_chf * 0.95));
+  return { total: matching.length, withPass: withPass.length };
+}
+
+/** Finanzierungs-Pass-Status aus der CRM-Kundenakte des Portal-Users. */
+async function getFinanzStatus(userId: string) {
+  const admin = serviceClient();
+  if (!admin) return null;
+  const { data } = await admin.from("customers").select("finanz_status").eq("portal_user_id", userId).maybeSingle();
+  return (data?.finanz_status as "vorgeprueft" | "bestaetigt" | null) ?? null;
 }
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ preis?: string }> }) {
@@ -71,7 +95,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const { data: listings } = await supabase
     .from("listings")
-    .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type")
+    .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type, living_area, postal_code")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -80,10 +104,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   let activity: { text: string; created_at: string }[] = [];
   let documents: { name: string; url: string }[] = [];
   let photos: { url: string }[] = [];
-  let matchingBuyers: number | null = null;
+  let matchingBuyers: { total: number; withPass: number } | null = null;
+  let feedback: ViewingFeedback[] = [];
 
   if (listing) {
     matchingBuyers = await countMatchingBuyers(listing);
+    const { data: feedbackRows } = await supabase
+      .from("viewing_feedback")
+      .select("*")
+      .eq("listing_id", listing.id)
+      .order("created_at", { ascending: false });
+    feedback = (feedbackRows as ViewingFeedback[] | null) ?? [];
     const [activityRes, documentsRes, photosRes] = await Promise.all([
       supabase
         .from("listing_activity")
@@ -118,19 +149,31 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }
 
   // «Mein Immobilienplan»: Suchprofil, Finanzierung, Versicherung, Favoriten
-  const [planRes, profileRes, publicRes] = await Promise.all([
+  const [planRes, profileRes, publicRes, finanzStatus] = await Promise.all([
     supabase.from("customer_plans").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
     supabase
       .from("listings")
-      .select("id, title, address, city, price_chf, rooms, living_area, property_type, tour_url, status, listing_photos(url, sort_order)")
+      .select("id, title, address, city, price_chf, rooms, living_area, property_type, tour_url, status, offmarket_until, listing_photos(url, sort_order)")
       .in("status", ["active", "reserved"])
       .order("created_at", { ascending: false })
       .limit(40),
+    getFinanzStatus(user.id),
   ]);
   const plan = planRes.data as
     | (SearchProfile & {
-        finanz: { income: number; savings: number; pension: number; price: number } | null;
+        finanz: { income: number; savings: number; pension: number; price: number; max_price?: number; saved_at?: string } | null;
+        eigentum: {
+          region: string;
+          typ: string;
+          flaeche: number;
+          baujahr: number | null;
+          adresse: string | null;
+          hypo_ablauf: string | null;
+          hypo_betrag: number | null;
+          wert: { low: number; mid: number; high: number };
+          saved_at: string;
+        } | null;
         versicherung: Record<string, string | boolean> | null;
         favorites: string[];
       })
@@ -149,6 +192,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         living_area: (l.living_area as number | null) ?? null,
         cover: photos[0]?.url ?? null,
         tour_url: (l.tour_url as string | null) ?? null,
+        offmarket_until: (l.offmarket_until as string | null) ?? null,
         favorite: favorites.has(l.id as string),
         match: matchesPlan(plan, {
           city: l.city as string,
@@ -168,6 +212,18 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     .filter((l) => l.price_chf)
     .slice(0, 4)
     .map((l) => ({ label: `${l.city}: CHF ${l.price_chf!.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`, price: l.price_chf! }));
+
+  const journey = {
+    profil: Boolean(plan?.wunsch_ort || plan?.budget_max || plan?.objekt_typ),
+    pass: Boolean(plan?.finanz?.max_price),
+    objekt: (plan?.favorites ?? []).length > 0,
+    bestaetigt: finanzStatus === "bestaetigt",
+  };
+  const feedbackSummary = summarizeFeedback(feedback);
+  const eigentum = plan?.eigentum ?? null;
+  const hypoMonths = eigentum?.hypo_ablauf
+    ? Math.round((new Date(eigentum.hypo_ablauf).getTime() - new Date().getTime()) / (30.44 * 24 * 3_600_000))
+    : null;
 
   const sectionClass = "mt-12 scroll-mt-8";
   const sectionHead = "font-display text-2xl text-ivory lg:text-3xl";
@@ -204,6 +260,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ["#objekte", "Passende Objekte"],
             ["#finanzierung", "Finanzierung"],
             ["#versicherung", "Versicherung"],
+            ["#eigentum", "Mein Eigentum"],
           ].map(([href, text]) => (
             <a key={href} href={href} className="rounded-full border border-line bg-white px-4 py-2 text-ivory hover:border-ivory">
               {text}
@@ -263,10 +320,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <Users className="h-6 w-6 shrink-0 text-amber-soft" strokeWidth={1.5} />
                   <div>
                     <div className="font-display text-xl">
-                      {matchingBuyers === 1 ? "1 vorgemerkter Käufer passt" : `${matchingBuyers} vorgemerkte Käufer passen`} zu Ihrem Objekt
+                      {matchingBuyers.total === 1 ? "1 vorgemerkter Käufer passt" : `${matchingBuyers.total} vorgemerkte Käufer passen`} zu Ihrem Objekt
                     </div>
                     <div className="mt-0.5 text-xs text-ink/70">
-                      Aus unserer Käuferkartei nach Ort, Objektart, Zimmern und Budget. Sie werden bei der Lancierung zuerst informiert.
+                      {matchingBuyers.withPass > 0 ? `Davon ${matchingBuyers.withPass} mit Finanzierungs-Pass. ` : ""}
+                      Aus unserer Käuferkartei nach Ort, Objektart, Zimmern und Budget. Sie erhalten das Objekt im Off-Market-Vorverkauf zuerst.
                     </div>
                   </div>
                 </div>
@@ -285,6 +343,27 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <div className="mt-1 text-[11px] leading-tight text-ivory-dim">{stat.label}</div>
                   </div>
                 ))}
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <PriceCheck
+                  price={listing.price_chf}
+                  area={listing.living_area}
+                  type={listing.property_type}
+                  region={regionFromPostal(listing.postal_code, listing.city)}
+                  feedback={feedbackSummary.preis}
+                />
+                <div className="rounded-xl bg-ink p-4">
+                  <div className="font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">Besichtigungen</div>
+                  <div className="mt-3 font-display text-3xl text-ivory">{feedbackSummary.total}</div>
+                  <div className="text-[11px] text-ivory-dim">Feedbacks, {feedbackSummary.interesse.ja} mit klarem Interesse</div>
+                  {feedbackSummary.avg && <div className="mt-2 text-sm text-amber">Ø {feedbackSummary.avg.toFixed(1)} von 5 Sternen</div>}
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-xl border border-line p-4">
+                <div className="mb-3 font-mono text-[11px] uppercase tracking-wide text-ivory-dim/60">Feedback nach Besichtigungen</div>
+                <FeedbackSummary items={feedback} />
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -351,6 +430,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </>
         )}
 
+        <section className={sectionClass}>
+          <h2 className={sectionHead}>Ihr Weg zum Eigenheim</h2>
+          <div className="mt-5 rounded-2xl border border-line bg-ink-2 p-3">
+            <BuyerJourney done={journey} />
+          </div>
+        </section>
+
         <section id="suchprofil" className={sectionClass}>
           <h2 className={sectionHead}>Was suchen Sie?</h2>
           <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
@@ -376,6 +462,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             Sofortige Einschätzung nach den Regeln der Schweizer Banken. Die verbindliche Prüfung macht unser Partner HypoCasa.
           </p>
           <div className="mt-5">
+            <FinancePass
+              name={portalUser.name}
+              maxPrice={plan?.finanz?.max_price ?? null}
+              status={finanzStatus ?? (plan?.finanz?.max_price ? "vorgeprueft" : null)}
+              savedAt={plan?.finanz?.saved_at ?? null}
+            />
+          </div>
+          <div className="mt-5">
             <FinanceCheck key={preis ?? "plan"} initial={financeInitial} user={portalUser} priceOptions={priceOptions} />
           </div>
         </section>
@@ -384,6 +478,42 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <h2 className={sectionHead}>Richtig versichert?</h2>
           <div className="mt-5">
             <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+          </div>
+        </section>
+
+        <section id="eigentum" className={sectionClass}>
+          <h2 className={sectionHead}>Mein Eigentum</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
+            Wertmonitor und Hypothekenwächter: Sie sehen jederzeit den Richtwert Ihrer Immobilie und wir erinnern Sie rechtzeitig vor dem Ablauf
+            Ihrer Hypothek.
+          </p>
+          {eigentum && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl bg-night p-5 text-ink">
+                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">Richtwert heute</div>
+                <div className="mt-2 font-display text-3xl">{formatChf(eigentum.wert.mid)}</div>
+                <div className="mt-1 text-xs text-ink/70">
+                  Spanne {formatChf(eigentum.wert.low)} – {formatChf(eigentum.wert.high)} · {eigentum.typ}, {eigentum.flaeche} m²
+                </div>
+              </div>
+              <div className="rounded-2xl border border-line bg-white p-5">
+                <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Hypothek</div>
+                {hypoMonths !== null ? (
+                  <>
+                    <div className="mt-2 font-display text-3xl text-ivory">{hypoMonths > 0 ? `noch ${hypoMonths} Monate` : "abgelaufen"}</div>
+                    <div className="mt-1 text-xs text-ivory-dim">
+                      Ablauf {new Date(eigentum.hypo_ablauf!).toLocaleDateString("de-CH")}
+                      {hypoMonths <= 12 && hypoMonths > 0 ? " · jetzt ist der beste Moment zum Vergleichen" : ""}
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-2 text-sm text-ivory-dim">Noch kein Ablaufdatum hinterlegt.</div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
+            <WertmonitorForm portal initial={eigentum} />
           </div>
         </section>
 

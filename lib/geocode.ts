@@ -11,7 +11,7 @@ export async function geocodeAddress(address: string, city: string) {
       {
         headers: {
           // Nominatim's usage policy requires an identifying User-Agent.
-          "User-Agent": "NoviDom-Immo/1.0 (beratung@novidom-immo.ch)",
+          "User-Agent": "NoviDom-Immo/1.0 (verkaufen@novidom-immo.ch)",
         },
         signal: AbortSignal.timeout(5000),
       }

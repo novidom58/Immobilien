@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ResetPasswordFlow } from "@/components/ResetPasswordFlow";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Neues Passwort setzen",
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
 export default function ResetPasswordPage() {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center bg-ink px-6 py-20">
-      <Link href="/" className="mb-10 font-display text-lg font-semibold tracking-tight text-ivory">
-        Novi<span className="text-amber">Dom</span>
+      <Link href="/" className="mb-10">
+        <Logo className="h-12 w-auto" />
       </Link>
 
       <div className="w-full max-w-sm">

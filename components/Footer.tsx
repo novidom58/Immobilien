@@ -2,14 +2,13 @@ import Link from "next/link";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { OFFICES } from "@/lib/offices";
 import { AREAS, areaHref } from "@/components/novidom360/areas";
+import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
   return (
     <footer className="border-t border-line bg-ink py-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-ivory-dim sm:flex-row lg:px-10">
-        <span className="font-display text-base font-semibold text-ivory">
-          Novi<span className="text-amber">Dom</span> Immo
-        </span>
+        <Logo className="h-10 w-auto" />
         <div className="flex flex-col gap-3 text-center sm:flex-row sm:gap-8 sm:text-left">
           {OFFICES.map((office) => (
             <address key={office.city} className="not-italic leading-snug">

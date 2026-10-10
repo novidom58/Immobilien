@@ -9,7 +9,8 @@ import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
 import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
 import { createClient } from "@/lib/supabase/server";
-import { CLIP_BUCKET, clipFolder, isClipFile } from "@/lib/listingClips";
+import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
+import { DroneFlight } from "@/components/listing/DroneFlight";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,21 @@ async function getListing(id: string) {
     .filter((f) => isClipFile(f.name))
     .map((f) => supabase.storage.from(CLIP_BUCKET).getPublicUrl(`${clipFolder(id)}/${f.name}`).data.publicUrl);
 
-  return { ...data, photos, clips } as typeof data & { photos: typeof photos; clips: string[] };
+  const { data: flightFiles } = await supabase.storage
+    .from(CLIP_BUCKET)
+    .list(flightFolder(id), { sortBy: { column: "name", order: "asc" } });
+  const flight = (flightFiles ?? [])
+    .filter((f) => isClipFile(f.name))
+    .map((f) => ({
+      url: supabase.storage.from(CLIP_BUCKET).getPublicUrl(`${flightFolder(id)}/${f.name}`).data.publicUrl,
+      label: flightLabel(f.name),
+    }));
+
+  return { ...data, photos, clips, flight } as typeof data & {
+    photos: typeof photos;
+    clips: string[];
+    flight: { url: string; label: string }[];
+  };
 }
 
 export async function generateMetadata({
@@ -130,17 +145,25 @@ export default async function ListingDetailPage({
         {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
       </main>
 
-      {/* Cinematic Scroll-Rundgang */}
-      <ListingFlythrough
-        listing={{
-          title: listing.title,
-          address: listing.address,
-          city: listing.city,
-          price_chf: listing.price_chf,
-          photos: listing.photos,
-          clips: listing.clips,
-        }}
-      />
+      {/* Drohnenflug, falls Übergangs-Clips da sind; sonst der Foto-Rundgang */}
+      {listing.flight.length > 0 ? (
+        <DroneFlight
+          clips={listing.flight}
+          title={listing.title || listing.city}
+          priceText={listing.price_chf ? formatChf(listing.price_chf) : null}
+        />
+      ) : (
+        <ListingFlythrough
+          listing={{
+            title: listing.title,
+            address: listing.address,
+            city: listing.city,
+            price_chf: listing.price_chf,
+            photos: listing.photos,
+            clips: listing.clips,
+          }}
+        />
+      )}
 
       <main className="mx-auto max-w-6xl px-6 pb-28 pt-16 lg:px-10">
         {/* Kopf */}

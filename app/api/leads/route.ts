@@ -4,7 +4,7 @@ import { join } from "path";
 import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
 
-const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "beratung@novidom-immo.ch";
+const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
 
 // Sobald diese Datei existiert (PDF-Export des Ratgebers, siehe env.example-

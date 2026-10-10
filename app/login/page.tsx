@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Kundenlogin",
@@ -14,9 +15,9 @@ export default function LoginPage() {
     <main className="flex min-h-svh flex-col items-center justify-center bg-ink px-6 py-20">
       <Link
         href="/"
-        className="mb-10 font-display text-lg font-semibold tracking-tight text-ivory"
+        className="mb-10"
       >
-        Novi<span className="text-amber">Dom</span>
+        <Logo className="h-12 w-auto" />
       </Link>
 
       <div className="w-full max-w-sm">

@@ -203,7 +203,7 @@ function FinanzierungPanel() {
   return (
     <>
       <Question>Wie viel Immobilie können Sie sich leisten?</Question>
-      <Lede>Ein erster, unverbindlicher Überblick. Die genaue Prüfung übernimmt unser Finanzierungspartner Hypocasa.</Lede>
+      <Lede>Ein erster, unverbindlicher Überblick. Die genaue Prüfung übernimmt unser Finanzierungspartner HypoCasa.</Lede>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border border-line bg-white/[0.02] p-5">
           <label className="block">
@@ -255,7 +255,7 @@ function FinanzierungPanel() {
           </p>
         </div>
         <div className="rounded-2xl border border-amber/25 bg-amber/5 p-5 text-sm leading-relaxed text-ivory-dim">
-          <div className="font-display text-lg font-semibold text-ivory">Hypocasa</div>
+          <div className="font-display text-lg font-semibold text-ivory">HypoCasa</div>
           <p className="mt-1">Hypothekenberatung &amp; Finanzierungsvermittlung, unser Partner für Finanzierungsfragen.</p>
           <a
             href="https://hypocasa.ch"

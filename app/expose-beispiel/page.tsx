@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Beispiel-Exposé",
@@ -46,9 +47,7 @@ export default function ExposeBeispielPage() {
       <div className="mx-auto max-w-3xl bg-white shadow-xl print:shadow-none">
         {/* Kopf */}
         <div className="flex items-center justify-between px-10 pt-8">
-          <span className="text-xl font-bold tracking-tight">
-            Novi<span className="text-[#c07f2a]">Dom</span> Immo
-          </span>
+          <Logo className="h-10 w-auto" />
           <span className="text-xs uppercase tracking-[0.25em] text-[#8a8578]">
             Verkaufsdokumentation
           </span>
@@ -120,7 +119,7 @@ export default function ExposeBeispielPage() {
         <div className="mt-10 flex items-center justify-between border-t border-[#e3ded2] px-10 py-6 text-sm">
           <div>
             <div className="font-bold">NoviDom Immo</div>
-            <div className="text-[#6b675c]">Basel &amp; Zug · beratung@novidom-immo.ch</div>
+            <div className="text-[#6b675c]">Basel &amp; Zug · verkaufen@novidom-immo.ch</div>
           </div>
           <div className="text-right text-[#6b675c]">
             <div>3D-Rundgang &amp; weitere Bilder:</div>

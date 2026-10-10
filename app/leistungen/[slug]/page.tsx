@@ -15,6 +15,8 @@ import { SalesCockpit } from "@/components/sections/SalesCockpit";
 import { AREAS } from "@/components/novidom360/areas";
 import { AREA_CONTACTS, AREA_CONTENT } from "@/components/novidom360/areaContent";
 import { AreaContactCard, AreaFaq, AreaInteractive, OtherAreas } from "@/components/leistungen/AreaParts";
+import { FinanzierenContent } from "@/components/leistungen/FinanzierenContent";
+import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 
 export function generateStaticParams() {
   return AREAS.map((a) => ({ slug: a.slug }));
@@ -41,11 +43,15 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
   const content = AREA_CONTENT[area.id];
   const contact = AREA_CONTACTS[area.id];
+  // Finanzieren läuft mit HypoCasa und übernimmt deren Rot als Akzentfarbe.
+  const themeStyle = content.accentColor
+    ? ({ "--color-amber": content.accentColor, "--color-amber-soft": content.accentColor } as React.CSSProperties)
+    : undefined;
 
   return (
     <>
       <Header />
-      <main className="bg-ink">
+      <main className="bg-ink" style={themeStyle}>
         {/* Kopf im Editorial-Stil der Startseite */}
         <section className="mx-auto max-w-5xl px-6 pb-12 pt-36 text-center lg:pt-44">
           <Link href="/#leistungen" className="block font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim hover:text-ivory">
@@ -72,6 +78,16 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               Ihr Ansprechpartner
             </a>
           </div>
+          {content.badges && (
+            <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ivory-dim">
+              {content.badges.map((badge) => (
+                <span key={badge} className="flex items-center gap-2">
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber" />
+                  {badge}
+                </span>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="mx-auto max-w-7xl px-4 lg:px-10">
@@ -80,25 +96,32 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
-          <SectionLabel>Das bringen wir mit</SectionLabel>
-          <div className="mt-10 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {content.benefits.map((b, i) => (
-              <div key={b.title} className="border-t border-line pt-6">
-                <span className="font-mono text-[11px] tracking-[0.2em] text-amber">{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="mt-3 font-display text-xl text-ivory">{b.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{b.text}</p>
+        {area.id === "fin" ? (
+          <FinanzierenContent />
+        ) : (
+          <>
+            <section className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
+              <SectionLabel>Das bringen wir mit</SectionLabel>
+              <div className="mt-10 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+                {content.benefits.map((b, i) => (
+                  <div key={b.title} className="border-t border-line pt-6">
+                    <span className="font-mono text-[11px] tracking-[0.2em] text-amber">{String(i + 1).padStart(2, "0")}</span>
+                    <h3 className="mt-3 font-display text-xl text-ivory">{b.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{b.text}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
-          <AreaInteractive id={area.id} title={area.title} />
-        </section>
+            <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
+              <AreaInteractive id={area.id} title={area.title} />
+            </section>
+          </>
+        )}
 
         {area.id === "kv" && (
           <>
+            <Giraffe360Showcase />
             <ProblemSolution />
             <Process />
             <ProvisionsRechner />

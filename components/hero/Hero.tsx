@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { motion } from "motion/react";
 import { HeroHeadline } from "./HeroHeadline";
 import { HeroKeyUnlock } from "./HeroKeyUnlock";
 import { LOADER_DURATION_MS } from "@/components/Loader";
+import { HeroShowcase, type ShowcaseItem } from "./HeroShowcase";
 
 const TRUST = [
-  { value: "ab 0.95%", label: "Provision statt 3%", href: "/leistungen/kaufen-verkaufen#kommission" },
+  { value: "CHF 0", label: "Kosten, wenn nicht verkauft wird", href: "/leistungen/kaufen-verkaufen#kommission" },
   { value: "4 in 1", label: "Verkauf, Finanzierung, Umbau, Versicherung", href: "#leistungen" },
   { value: "Basel & Zug", label: "Persönlich vor Ort", href: "#einzugsgebiet" },
 ];
 
-export function Hero() {
+export function Hero({ showcase = [] }: { showcase?: ShowcaseItem[] }) {
   const [showIntro, setShowIntro] = useState(true);
   const [introStart, setIntroStart] = useState(false);
 
@@ -89,39 +89,14 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* Das Zuhause selbst: grosse Bildkarte mit ruhigem Ken-Burns-Zoom. */}
+      {/* Bildkarte mit den aktuellen Objekten und dem Provisions-Siegel */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="relative mx-auto max-w-7xl px-4 pb-20 lg:px-10"
       >
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)] sm:aspect-[16/8]">
-          <motion.div
-            className="absolute inset-0"
-            initial={{ scale: 1.04 }}
-            animate={{ scale: 1.12 }}
-            transition={{ duration: 24, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
-          >
-            <Image
-              src="/images/novidom-holzhaus.webp"
-              alt="Modernes Holzhaus in der Abenddämmerung, im Hintergrund das Basler Münster"
-              fill
-              sizes="(min-width: 1280px) 1200px, 100vw"
-              preload
-              className="object-cover object-[60%_center]"
-            />
-          </motion.div>
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-16 text-white lg:px-8">
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/85">NoviDom 360° · Ihr Zuhause im Mittelpunkt</span>
-            <a
-              href="#kaeufer-radar"
-              className="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-white/25"
-            >
-              Wer sucht Ihre Immobilie? →
-            </a>
-          </div>
-        </div>
+        <HeroShowcase items={showcase} />
       </motion.div>
     </section>
   );

@@ -48,11 +48,14 @@ export function suggestRoles(lead: {
   const roles = new Set<CustomerRole>();
   const source = (lead.source ?? "").toLowerCase();
   const message = (lead.message ?? "").toLowerCase();
-  if (lead.type === "valuation" || source.includes("kaeufer-radar") || message.includes("bereich: kaufen & verkaufen")) roles.add("verkaeufer");
+  if ((lead.type === "valuation" && !source.includes("wertmonitor")) || source.includes("kaeufer-radar") || message.includes("bereich: kaufen & verkaufen") || message.includes("bereich: verkaufen"))
+    roles.add("verkaeufer");
+  if (/bereich: kaufen(\n|$)/.test(message)) roles.add("kaeufer");
   if (lead.listing_id) roles.add("interessent");
   if (lead.wants_financing || source.includes("finanzierung") || message.includes("bereich: finanzieren")) roles.add("finanzierung");
   if (source.includes("versicherung") || message.includes("bereich: versichern")) roles.add("versicherung");
   if (message.includes("bereich: umbauen")) roles.add("umbau");
+  if (source.includes("wertmonitor")) roles.add("eigentuemer");
   if (roles.size === 0) roles.add("interessent");
   return [...roles];
 }

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Camera, LayoutGrid, Rotate3d } from "lucide-react";
+import Link from "next/link";
+import { Camera, LayoutGrid, Rotate3d, Sofa, Plane, Users } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 // Optional: Link auf einen echten Giraffe360-Beispielrundgang (Vercel-Variable).
@@ -55,11 +56,24 @@ function FloorPlan() {
   );
 }
 
+const STEPS = [
+  { title: "Termin vor Ort", text: "Wir gehen mit Ihnen die Checkliste durch: aufräumen, Licht an, Vorhänge auf. Mehr braucht es nicht." },
+  { title: "Aufnahme mit Giraffe360", text: "Die Kamera steht auf einem Stativ und dreht sich selbst. Pro Raum ein paar Positionen, Sie müssen nichts tun." },
+  { title: "In wenigen Tagen online", text: "Fotos, Grundriss, 3D-Rundgang und Drohnenflug erscheinen auf der Objektseite, den Portalen und im Exposé." },
+];
+
+const BENEFITS = [
+  { icon: Users, title: "Weniger Besichtigungstouristen", text: "Käufer kennen jeden Raum schon vorher. Wer kommt, ist ernsthaft interessiert." },
+  { icon: Rotate3d, title: "Rund um die Uhr besichtigt", text: "Der Rundgang läuft auch abends, am Wochenende und für Käufer aus dem Ausland." },
+  { icon: Sofa, title: "Käufer richten sich ein", text: "Der Grundriss kommt in unseren Planer. Interessenten stellen ihre Möbel hinein und verlieben sich." },
+  { icon: Plane, title: "Auffallen auf den Portalen", text: "Profi-Bilder und Drohnenflug heben Ihr Inserat ab und bringen mehr Klicks." },
+];
+
 export function Giraffe360Showcase() {
   const [tab, setTab] = useState<TabId>("foto");
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
+    <section id="giraffe360" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 lg:px-10">
       <SectionLabel>Vermarktung mit Giraffe360</SectionLabel>
       <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_1.5fr] lg:items-center">
         <div>
@@ -67,8 +81,8 @@ export function Giraffe360Showcase() {
             Ein Termin. <em>Alles im Kasten.</em>
           </h2>
           <p className="mt-5 text-lg text-ivory-dim">
-            Mit der Giraffe360-Kamera erfassen wir Ihre Immobilie in einem Durchgang: brillante Profi-Fotos,
-            massstabsgetreue Grundrisse und einen virtuellen Rundgang, durch den Interessenten Raum für Raum gehen können.
+            Giraffe360 ist eine intelligente Kamera, die Ihr Zuhause in einem einzigen Termin komplett erfasst. Daraus entstehen
+            Profi-Fotos, ein massstabsgetreuer Grundriss und ein virtueller Rundgang, durch den Interessenten Raum für Raum gehen.
           </p>
           <ul className="mt-6 space-y-3 text-ivory">
             <li>✓ Fotos in High-End-Qualität, Fenster und Räume perfekt belichtet</li>
@@ -138,6 +152,40 @@ export function Giraffe360Showcase() {
               </div>
             </>
           )}
+        </div>
+      </div>
+
+      <div className="mt-16">
+        <h3 className="font-display text-2xl text-ivory lg:text-3xl">So läuft es ab</h3>
+        <ol className="mt-6 grid gap-6 sm:grid-cols-3">
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="border-t border-line pt-5">
+              <span className="font-display text-3xl text-amber">{i + 1}</span>
+              <div className="mt-2 font-display text-xl text-ivory">{step.title}</div>
+              <p className="mt-1 text-sm leading-relaxed text-ivory-dim">{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="mt-16">
+        <h3 className="font-display text-2xl text-ivory lg:text-3xl">Was das für Ihren Verkauf bringt</h3>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {BENEFITS.map((b) => (
+            <div key={b.title} className="rounded-2xl border border-line bg-white p-6">
+              <b.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
+              <div className="mt-4 font-display text-lg text-ivory">{b.title}</div>
+              <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{b.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/leistungen/kaufen-verkaufen#kontakt" className="rounded-full bg-night px-7 py-4 text-sm font-semibold text-ink hover:bg-amber">
+            Gratis-Bewertung mit Giraffe360-Beratung
+          </Link>
+          <Link href="/expose-beispiel" className="rounded-full border border-line px-7 py-4 text-sm font-semibold text-ivory hover:border-ivory">
+            Beispiel-Exposé ansehen
+          </Link>
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 import type { AreaId } from "./areas";
+import { selectAnliegen, type Anliegen } from "@/lib/anliegen";
 
 const HOUSE_EARLY =
   "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.png";
@@ -72,11 +73,15 @@ function Photo({ src }: { src: string }) {
   );
 }
 
-function CtaLink({ label, onNavigate }: { label: string; onNavigate: () => void }) {
+function CtaLink({ label, anliegen, onNavigate }: { label: string; anliegen: Anliegen; onNavigate: () => void }) {
   return (
     <a
       href="#kontakt"
-      onClick={onNavigate}
+      onClick={() => {
+        // Das Kontaktformular auf derselben Seite gleich auf dieses Anliegen stellen.
+        selectAnliegen(anliegen);
+        onNavigate();
+      }}
       className="mt-8 inline-flex rounded-full bg-amber px-6 py-3.5 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:bg-amber-soft"
     >
       {label}
@@ -121,7 +126,7 @@ function KaufVerkaufPanel({ onNavigate }: { onNavigate: () => void }) {
             </Callout>
             <Photo src={HOUSE_FINISHED} />
           </div>
-          <CtaLink label="Gratis-Bewertung anfragen" onNavigate={onNavigate} />
+          <CtaLink label="Gratis-Bewertung anfragen" anliegen="verkaufen" onNavigate={onNavigate} />
         </div>
       ) : (
         <div role="tabpanel">
@@ -134,7 +139,7 @@ function KaufVerkaufPanel({ onNavigate }: { onNavigate: () => void }) {
             </Callout>
             <Photo src={HOUSE_EARLY} />
           </div>
-          <CtaLink label="Suchprofil anlegen" onNavigate={onNavigate} />
+          <CtaLink label="Suchprofil anlegen" anliegen="kaufen" onNavigate={onNavigate} />
         </div>
       )}
     </>
@@ -185,7 +190,7 @@ function UmbauPanel({ onNavigate }: { onNavigate: () => void }) {
           />
         </div>
       </div>
-      <CtaLink label="Umbau-Beratung anfragen" onNavigate={onNavigate} />
+      <CtaLink label="Umbau-Beratung anfragen" anliegen="umbauen" onNavigate={onNavigate} />
     </>
   );
 }
@@ -293,7 +298,7 @@ function VersicherungPanel({ onNavigate }: { onNavigate: () => void }) {
       <div className="mt-6">
         <Callout title="Unabhängig:">Vermittlung an ausgewählte Partner, passend zu Ihrer Situation und nicht zu einem Standardpaket.</Callout>
       </div>
-      <CtaLink label="Versicherung besprechen" onNavigate={onNavigate} />
+      <CtaLink label="Versicherung besprechen" anliegen="versichern" onNavigate={onNavigate} />
     </>
   );
 }

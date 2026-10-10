@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
+import { syncLeadToCrm } from "@/lib/leadCrm";
+import { isAnliegen } from "@/lib/anliegen";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
@@ -38,6 +40,8 @@ export async function POST(request: Request) {
   const newsletterOptIn = body.newsletterOptIn === true;
   const listingId = typeof body.listingId === "string" && UUID_RE.test(body.listingId) ? body.listingId : null;
   const source = typeof body.source === "string" ? body.source.trim().slice(0, 100) : "";
+  const anliegen = isAnliegen(body.anliegen) ? body.anliegen : null;
+  const profile = body.profile && typeof body.profile === "object" && !Array.isArray(body.profile) ? (body.profile as Record<string, unknown>) : null;
 
   if (!name || !EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Name und eine gültige E-Mail-Adresse sind erforderlich." }, { status: 400 });
@@ -63,6 +67,22 @@ export async function POST(request: Request) {
     if (results.stored && listingId) {
       // Best-effort - zählt für das Verkaufs-Cockpit des Eigentümers mit.
       await supabase.rpc("log_listing_viewing_request", { p_listing_id: listingId });
+    }
+
+    if (results.stored) {
+      // Best-effort: Anfrage gleich in der Kundenakte ablegen (Rollen, Quelle, Angaben).
+      await syncLeadToCrm({
+        type,
+        name,
+        email,
+        phone: phone || null,
+        message: message || null,
+        source: source || null,
+        listing_id: listingId,
+        wants_financing: wantsFinancing,
+        anliegen,
+        profile,
+      }).catch(() => {});
     }
 
     if (newsletterOptIn) {

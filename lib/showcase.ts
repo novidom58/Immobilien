@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ShowcaseItem } from "@/components/hero/HeroShowcase";
+import { publicListingFilter } from "@/lib/offmarket";
 
 function formatChf(value: number) {
   return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
@@ -14,6 +15,7 @@ export async function getShowcase(): Promise<ShowcaseItem[]> {
     .from("listings")
     .select("id, city, rooms, living_area, price_chf, status, listing_photos(url, sort_order)")
     .in("status", ["active", "reserved"])
+    .or(publicListingFilter())
     .order("created_at", { ascending: false })
     .limit(6);
 

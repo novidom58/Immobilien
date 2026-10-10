@@ -17,6 +17,8 @@ import { SaleDeadlineBar } from "./SaleDeadlineBar";
 import { clipFolder, flightFolder } from "@/lib/listingClips";
 import { VideoFolderControl } from "./VideoFolderControl";
 import { BuyerAlertButton } from "./BuyerAlertButton";
+import { OffMarketControl } from "./OffMarketControl";
+import { FeedbackShare } from "./FeedbackShare";
 
 type AdminListing = {
   id: string;
@@ -36,6 +38,7 @@ type AdminListing = {
   sale_deadline_months: number;
   posted_portals: string[];
   lat: number | null;
+  offmarket_until: string | null;
   photoCount: number;
   hasOwner: boolean;
   documents: { id: string; name: string; url: string }[];
@@ -278,6 +281,8 @@ export function ListingCard({
           <VideoFolderControl folder={clipFolder(listing.id)} label="Clips pro Foto" onError={setError} />
           <VideoFolderControl folder={flightFolder(listing.id)} label="Drohnenflug" onError={setError} />
           <BuyerAlertButton listingId={listing.id} active={listing.status === "active" || listing.status === "reserved"} />
+          <OffMarketControl listingId={listing.id} status={listing.status} until={listing.offmarket_until} />
+          <FeedbackShare listingId={listing.id} title={listing.title || `${listing.address}, ${listing.city}`} />
           {listing.berater && <span className="bchip">{listing.berater}</span>}
           <span className="td-light">
             Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}

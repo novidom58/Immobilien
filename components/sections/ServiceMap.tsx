@@ -3,6 +3,7 @@ import { Reveal } from "@/lib/reveal";
 import { ServiceMapClient } from "@/components/map/ServiceMapClient";
 import { createClient } from "@/lib/supabase/server";
 import type { MapListing } from "@/components/map/MapCanvas";
+import { publicListingFilter } from "@/lib/offmarket";
 
 export async function ServiceMap() {
   let listings: MapListing[] = [];
@@ -13,6 +14,7 @@ export async function ServiceMap() {
       .from("listings")
       .select("id, title, address, city, lat, lng, property_type, price_chf")
       .in("status", ["active", "reserved", "sold"])
+      .or(publicListingFilter())
       .not("lat", "is", null)
       .not("lng", "is", null);
     listings = (data as MapListing[] | null) ?? [];

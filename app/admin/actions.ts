@@ -9,6 +9,7 @@ import { createResendClient } from "@/lib/resend";
 import { STARTER_TEMPLATES } from "@/lib/emailTemplates";
 import { matchesPlan } from "@/lib/planMatching";
 import { CUSTOMER_ROLES } from "@/lib/constants";
+import { OFFMARKET_HOURS } from "@/lib/offmarket";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
@@ -571,6 +572,59 @@ export async function setCustomerRoles(customerId: string, roles: string[]) {
   return { error: null };
 }
 
+export async function setCustomerFinanzStatus(customerId: string, status: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+  const value = status === "vorgeprueft" || status === "bestaetigt" ? status : null;
+
+  const { error } = await supabase.from("customers").update({ finanz_status: value }).eq("id", customerId);
+  if (error) return { error: error.message };
+  if (value === "bestaetigt") {
+    await supabase.from("customer_activity").insert({ customer_id: customerId, type: "notiz", text: "Finanzierung durch HypoCasa bestätigt" });
+  }
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/** Hypothekenwächter: Eckdaten der laufenden Hypothek in der Kundenakte. */
+export async function updateCustomerHypo(customerId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const ablauf = String(formData.get("hypo_ablauf") || "").trim();
+  const betrag = String(formData.get("hypo_betrag") || "").replace(/[^\d]/g, "");
+  const zins = String(formData.get("hypo_zins") || "").replace(",", ".").replace(/[^\d.]/g, "");
+  const bank = String(formData.get("hypo_bank") || "").trim().slice(0, 80);
+
+  const { error } = await supabase
+    .from("customers")
+    .update({
+      hypo_ablauf: /^\d{4}-\d{2}-\d{2}$/.test(ablauf) ? ablauf : null,
+      hypo_betrag: betrag ? Number(betrag) : null,
+      hypo_zins: zins ? Number(zins) : null,
+      hypo_bank: bank || null,
+      hypo_erinnert_at: null,
+    })
+    .eq("id", customerId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+export async function markHypoContacted(customerId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("customers").update({ hypo_erinnert_at: new Date().toISOString() }).eq("id", customerId);
+  if (error) return { error: error.message };
+  await supabase.from("customer_activity").insert({ customer_id: customerId, type: "notiz", text: "Hypothekenwächter: wegen Verlängerung kontaktiert" });
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
 const VALID_CUSTOMER_TYPES = ["neukunde", "bestand", "ex"] as const;
 
 export async function setCustomerTyp(customerId: string, typ: string) {
@@ -1126,6 +1180,46 @@ export async function sendTemplateMail(
 }
 
 // ---------------------------------------------------------------------
+// Off-Market-Vorverkauf: 48 Stunden nur für angemeldete Käufer
+// ---------------------------------------------------------------------
+
+export async function startOffMarket(listingId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError, sent: 0 };
+
+  const { data: before } = await supabase.from("listings").select("status, activated_at").eq("id", listingId).single();
+  if (!before) return { error: "Inserat nicht gefunden.", sent: 0 };
+  if (before.status !== "draft" && before.status !== "active") return { error: "Nur Entwürfe oder aktive Inserate.", sent: 0 };
+
+  const until = new Date(Date.now() + OFFMARKET_HOURS * 3_600_000).toISOString();
+  // Newsletter bewusst nicht: der geht an die Öffentlichkeit, erst nach der Exklusivphase.
+  const { error } = await supabase
+    .from("listings")
+    .update({ status: "active", offmarket_until: until, ...(before.activated_at ? {} : { activated_at: new Date().toISOString() }) })
+    .eq("id", listingId);
+  if (error) return { error: error.message, sent: 0 };
+
+  const alert = await notifyMatchingBuyers(listingId, false);
+  revalidatePath("/admin", "layout");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  return { error: alert.error, sent: alert.sent };
+}
+
+export async function endOffMarket(listingId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase.from("listings").update({ offmarket_until: null }).eq("id", listingId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  return { error: null };
+}
+
+// ---------------------------------------------------------------------
 // Käufer-Alarm: passende vorgemerkte Käufer über ein Objekt informieren
 // ---------------------------------------------------------------------
 
@@ -1135,10 +1229,11 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
 
   const { data: listing } = await supabase
     .from("listings")
-    .select("id, title, address, city, price_chf, rooms, living_area, property_type, status")
+    .select("id, title, address, city, price_chf, rooms, living_area, property_type, status, offmarket_until")
     .eq("id", listingId)
     .single();
   if (!listing) return { error: "Inserat nicht gefunden.", matches: 0, sent: 0 };
+  const exclusive = listing.offmarket_until && new Date(listing.offmarket_until).getTime() > Date.now();
   if (listing.status !== "active" && listing.status !== "reserved") {
     return { error: "Nur aktive Inserate können gemeldet werden.", matches: 0, sent: 0 };
   }
@@ -1184,13 +1279,16 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
     const { error: sendError } = await resend.emails.send({
       from,
       to: buyer.email as string,
-      subject: `Neu für Sie: ${name}`,
+      subject: exclusive ? `Exklusiv vorab für Sie: ${name}` : `Neu für Sie: ${name}`,
       text: [
         `Hallo ${firstName}`,
         "",
         `Ein neues Objekt passt zu Ihrem Suchprofil: ${name}, ${listing.city}`,
         facts,
         "",
+        exclusive
+          ? `Off-Market: Sie sehen dieses Objekt ${OFFMARKET_HOURS} Stunden vor allen anderen. Melden Sie sich im Kundenportal an, um alle Details zu sehen und eine Besichtigung anzufragen.\n`
+          : null,
         `Objekt ansehen: ${siteUrl}/immobilien/${listing.id}`,
         listing.price_chf ? `Finanzierung gleich prüfen: ${siteUrl}/dashboard?preis=${listing.price_chf}#finanzierung` : "",
         "",

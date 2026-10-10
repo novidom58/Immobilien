@@ -19,6 +19,8 @@ import { FinanzierenContent } from "@/components/leistungen/FinanzierenContent";
 import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 import { UmbauContent } from "@/components/leistungen/UmbauContent";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
+import { SellVsPrivate } from "@/components/sections/SellVsPrivate";
+import { BuyerSection, OwnerSection } from "@/components/sections/BuyerAndOwnerSections";
 
 export function generateStaticParams() {
   return AREAS.map((a) => ({ slug: a.slug }));
@@ -128,8 +130,11 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           <>
             <Giraffe360Showcase />
             <ProblemSolution />
+            <SellVsPrivate />
             <Process />
             <ProvisionsRechner />
+            <BuyerSection />
+            <OwnerSection />
             <Preparation />
             <Situations />
             <SalesCockpit />

@@ -667,3 +667,58 @@ alter table customers add column if not exists rollen text[] not null default '{
 alter table customers add column if not exists source_lead_id uuid references leads (id) on delete set null;
 alter table customers add column if not exists quelle text;
 alter table customer_plans add column if not exists layouts jsonb not null default '{}';
+
+-- ---------------------------------------------------------------------
+-- Off-Market-Vorverkauf, Finanzierungs-Pass, Wertmonitor,
+-- Hypothekenwächter und Besichtigungsfeedback
+-- ---------------------------------------------------------------------
+
+-- Off-Market: bis zu diesem Zeitpunkt sehen nur angemeldete Käufer das Objekt.
+alter table listings add column if not exists offmarket_until timestamptz;
+
+-- Finanzierungs-Pass: vorgeprüft (Selbst-Check im Portal) oder bestätigt (HypoCasa)
+alter table customers add column if not exists finanz_status text
+  check (finanz_status in ('vorgeprueft', 'bestaetigt') or finanz_status is null);
+alter table customers add column if not exists finanz_max integer;
+
+-- Hypothekenwächter
+alter table customers add column if not exists hypo_ablauf date;
+alter table customers add column if not exists hypo_betrag integer;
+alter table customers add column if not exists hypo_zins numeric;
+alter table customers add column if not exists hypo_bank text;
+alter table customers add column if not exists hypo_erinnert_at timestamptz;
+
+-- Wertmonitor: Angaben zum eigenen Objekt plus letzter Versand
+alter table customers add column if not exists wertmonitor jsonb;
+alter table customer_plans add column if not exists eigentum jsonb;
+
+-- Feedback nach der Besichtigung (per Link über WhatsApp, Instagram oder QR)
+create table if not exists viewing_feedback (
+  id uuid primary key default gen_random_uuid(),
+  listing_id uuid not null references listings (id) on delete cascade,
+  name text,
+  rating int check (rating between 1 and 5),
+  preis text check (preis in ('zu_tief', 'passt', 'zu_hoch') or preis is null),
+  interesse text check (interesse in ('ja', 'vielleicht', 'nein') or interesse is null),
+  positiv text,
+  negativ text,
+  kanal text,
+  created_at timestamptz not null default now()
+);
+
+alter table viewing_feedback enable row level security;
+
+drop policy if exists "viewing_feedback_public_insert" on viewing_feedback;
+create policy "viewing_feedback_public_insert" on viewing_feedback
+  for insert with check (true);
+
+drop policy if exists "viewing_feedback_owner_or_admin_select" on viewing_feedback;
+create policy "viewing_feedback_owner_or_admin_select" on viewing_feedback
+  for select using (
+    public.is_admin()
+    or exists (select 1 from listings l where l.id = listing_id and l.owner_id = auth.uid())
+  );
+
+drop policy if exists "viewing_feedback_admin_delete" on viewing_feedback;
+create policy "viewing_feedback_admin_delete" on viewing_feedback
+  for delete using (public.is_admin());

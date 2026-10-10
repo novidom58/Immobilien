@@ -179,8 +179,13 @@ export function CustomerList({
                         {c.email}
                         {c.phone ? ` · ${formatSwissPhone(c.phone)}` : ""}
                       </div>
-                      {c.rollen.length > 0 && (
+                      {(c.rollen.length > 0 || c.finanz_status) && (
                         <div className="flex flex-wrap gap-1" style={{ marginTop: 4 }}>
+                          {c.finanz_status && (
+                            <span className={`badge ${c.finanz_status === "bestaetigt" ? "badge-green" : "badge-blue"}`}>
+                              {c.finanz_status === "bestaetigt" ? "Fin. bestätigt" : "Fin. vorgeprüft"}
+                            </span>
+                          )}
                           {c.rollen.map((r) => (
                             <span key={r} className="badge badge-muted">
                               {ROLE_LABEL[r] ?? r}

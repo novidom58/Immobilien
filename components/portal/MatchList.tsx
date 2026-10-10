@@ -4,7 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, LayoutGrid, Calculator, Sofa } from "lucide-react";
+import { Heart, LayoutGrid, Calculator, Sofa, CalendarCheck, MessageCircle } from "lucide-react";
+import { whatsappLink } from "@/lib/social";
+import { offmarketHoursLeft } from "@/lib/offmarket";
+
+const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK_VIEWING || process.env.NEXT_PUBLIC_CAL_LINK;
+const HAS_WHATSAPP = Boolean(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER);
 import { toggleFavorite } from "@/app/dashboard/actions";
 
 export type PortalListing = {
@@ -18,6 +23,7 @@ export type PortalListing = {
   tour_url: string | null;
   favorite: boolean;
   match: boolean;
+  offmarket_until?: string | null;
 };
 
 function chf(value: number) {
@@ -49,11 +55,18 @@ export function MatchList({ listings, onCheckPrice }: { listings: PortalListing[
         <article key={l.id} className="overflow-hidden rounded-2xl border border-line bg-white">
           <div className="relative aspect-[16/10] bg-ink-3">
             {l.cover && <Image src={l.cover} alt="" fill sizes="(min-width: 640px) 400px, 100vw" unoptimized className="object-cover" />}
-            {l.match && (
-              <span className="absolute left-3 top-3 rounded-full bg-night/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink">
-                Passt zu Ihrem Profil
-              </span>
-            )}
+            <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+              {offmarketHoursLeft(l.offmarket_until) && (
+                <span className="rounded-full bg-amber px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white">
+                  Off-Market · noch {offmarketHoursLeft(l.offmarket_until)}h exklusiv
+                </span>
+              )}
+              {l.match && (
+                <span className="rounded-full bg-night/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink">
+                  Passt zu Ihrem Profil
+                </span>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => handleFavorite(l.id)}
@@ -92,6 +105,26 @@ export function MatchList({ listings, onCheckPrice }: { listings: PortalListing[
                 <Sofa className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Selbst einrichten
               </Link>
+              <a
+                href={CAL_LINK ? `https://cal.com/${CAL_LINK}` : `/immobilien/${l.id}#anfragen`}
+                target={CAL_LINK ? "_blank" : undefined}
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs text-ivory hover:border-ivory"
+              >
+                <CalendarCheck className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Besichtigung buchen
+              </a>
+              {HAS_WHATSAPP && (
+                <a
+                  href={whatsappLink(`Hallo NoviDom, ich möchte «${l.title}» in ${l.city} besichtigen.`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#25d366] px-4 py-2 text-xs font-semibold text-white"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
+                  WhatsApp
+                </a>
+              )}
               {l.tour_url && (
                 <a
                   href={l.tour_url}

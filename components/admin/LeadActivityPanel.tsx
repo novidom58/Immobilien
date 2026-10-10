@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Phone, Mail, Users, StickyNote, Trash2, UserPlus } from "lucide-react";
+import { Phone, Mail, Users, StickyNote, Trash2, UserPlus, MessageCircle } from "lucide-react";
+import { whatsappTo } from "@/lib/social";
 import { updateLeadStatus, updateLeadFollowUp, addLeadActivity, deleteLeadActivity, convertLeadToCustomer } from "@/app/admin/actions";
 import { LEAD_STATUS_OPTIONS, CUSTOMER_ROLES, type CustomerRole } from "@/lib/constants";
 import { TemplateMailer } from "./TemplateMailer";
@@ -33,6 +34,7 @@ export function LeadActivityPanel({
   followUpAt,
   activity,
   suggestedRoles,
+  listingId,
 }: {
   leadId: string;
   name: string;
@@ -42,6 +44,7 @@ export function LeadActivityPanel({
   followUpAt: string | null;
   activity: Activity[];
   suggestedRoles: CustomerRole[];
+  listingId?: string | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -96,6 +99,32 @@ export function LeadActivityPanel({
           <a href={`tel:${phone}`} className="btn btn-primary btn-sm" style={{ justifyContent: "center" }}>
             <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
             Anrufen ({phone})
+          </a>
+        )}
+        {phone && (
+          <a
+            href={whatsappTo(phone, `Hallo ${name.split(" ")[0]}, hier ist NoviDom Immo. `)}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-sm"
+            style={{ justifyContent: "center", background: "#25d366", color: "#fff" }}
+          >
+            <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.75} />
+            WhatsApp schreiben
+          </a>
+        )}
+        {phone && listingId && (
+          <a
+            href={whatsappTo(
+              phone,
+              `Hallo ${name.split(" ")[0]}, danke für Ihren Besuch! Wie hat es Ihnen gefallen? Eine Minute, ganz ohne Anruf: ${process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch"}/feedback/${listingId}?k=whatsapp`
+            )}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-ghost btn-sm"
+            style={{ justifyContent: "center" }}
+          >
+            Feedback-Link per WhatsApp
           </a>
         )}
         {email && (

@@ -57,6 +57,8 @@ export function AdminShell({
         { href: "/admin/nachfassen", label: "Nachfassen", icon: "📌" },
         { href: "/admin/fristen", label: "Ablaufende Fristen", icon: "⏰", badge: counts.fristen, badgeTone: "gold" },
         { href: "/admin/inserate", label: "Alle Inserate", icon: "🏠" },
+        { href: "/admin/hypotheken", label: "Hypothekenwächter", icon: "🏦" },
+        { href: "/admin/feedback", label: "Besichtigungsfeedback", icon: "💬" },
       ],
     },
     {

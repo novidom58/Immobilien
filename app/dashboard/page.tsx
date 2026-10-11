@@ -107,6 +107,7 @@ const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
   umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "weg", "suchprofil", "objekte", "verkaufen"],
   versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "weg", "suchprofil", "objekte", "verkaufen"],
   eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "weg", "suchprofil", "objekte"],
+  trennung: ["finanzierung", "eigentum", "verkaufen", "weg", "suchprofil", "objekte", "versicherung", "umbau"],
 };
 
 /**
@@ -117,6 +118,7 @@ const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
 function sectionOrder(fokus: string | undefined, rollen: string[], hasListing: boolean): PortalSection[] {
   if (isAnliegen(fokus)) return ORDER[fokus];
   if (!hasListing && rollen.includes("verkaeufer")) return ORDER.verkaufen;
+  if (rollen.includes("trennung")) return ORDER.trennung;
   if (rollen.includes("umbau")) return ORDER.umbauen;
   if (rollen.includes("finanzierung") && !rollen.includes("kaeufer")) return ORDER.finanzieren;
   if (rollen.includes("versicherung") && !rollen.includes("kaeufer")) return ORDER.versichern;
@@ -131,6 +133,7 @@ const INTRO: Record<Anliegen | "eigentum", string> = {
   umbauen: "Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
   versichern: "Prüfen Sie in zwei Minuten, ob Ihr Zuhause richtig versichert ist. Wir zeigen Ihnen, wo Lücken sein könnten.",
   eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
+  trennung: "Prüfen Sie, ob Sie das Haus allein finanzieren können, und sehen Sie den aktuellen Richtwert. Vertraulich und nur für Sie sichtbar.",
 };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ preis?: string; fokus?: string }> }) {

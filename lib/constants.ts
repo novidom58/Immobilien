@@ -33,6 +33,7 @@ export const CUSTOMER_ROLES = [
   { value: "umbau", label: "Umbau" },
   { value: "mieter", label: "Mieter" },
   { value: "eigentuemer", label: "Eigentümer" },
+  { value: "trennung", label: "Trennung" },
 ] as const;
 
 export type CustomerRole = (typeof CUSTOMER_ROLES)[number]["value"];
@@ -56,6 +57,10 @@ export function suggestRoles(lead: {
   if (source.includes("versicherung") || message.includes("bereich: versichern")) roles.add("versicherung");
   if (message.includes("bereich: umbauen")) roles.add("umbau");
   if (source.includes("wertmonitor")) roles.add("eigentuemer");
+  if (message.includes("bereich: trennung")) {
+    roles.add("trennung");
+    roles.add("eigentuemer");
+  }
   if (roles.size === 0) roles.add("interessent");
   return [...roles];
 }

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { MagneticSubmitButton } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/lib/reveal";
 import { LEAD_SOURCE_OPTIONS } from "@/lib/constants";
-import { ANLIEGEN, ANLIEGEN_CONFIG, anliegenFromTopic, isAnliegen, portalHref, type Anliegen } from "@/lib/anliegen";
+import { ANLIEGEN_CHOICES, ANLIEGEN_CONFIG, anliegenFromTopic, isAnliegen, portalHref, type Anliegen } from "@/lib/anliegen";
 
 const CONTACT_EMAIL = "verkaufen@novidom-immo.ch";
 const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK;
@@ -22,6 +22,8 @@ const PROJEKTE = ["Küche", "Bad", "Heizung", "Solar", "Fenster & Dämmung", "Au
 const UMBAU_BUDGET = ["bis CHF 50'000", "CHF 50'000–150'000", "über CHF 150'000", "noch offen"];
 const SITUATIONEN = ["Ich kaufe", "Ich baue um", "Ich wohne im Eigentum", "Ich vermiete"];
 const KONTAKTWEG = ["Telefon", "WhatsApp", "E-Mail"];
+const TRENNUNG_WEG = ["Eine Person übernimmt", "Wir verkaufen", "Noch offen"];
+const TRENNUNG_INFO = ["Ja, wir kommen gemeinsam", "Nein, zuerst nur ich"];
 
 function Chips({
   options,
@@ -88,6 +90,8 @@ export function FinalCta({
   const [projekte, setProjekte] = useState<string[]>([]);
   const [umbauBudget, setUmbauBudget] = useState("");
   const [situation, setSituation] = useState<string[]>([]);
+  const [trennungWeg, setTrennungWeg] = useState<string[]>([]);
+  const [trennungInfo, setTrennungInfo] = useState<string[]>([]);
 
   // Kontakt
   const [name, setName] = useState("");
@@ -137,7 +141,9 @@ export function FinalCta({
             ? projekte.length > 0
             : anliegen === "versichern"
               ? situation.length > 0
-              : false;
+              : anliegen === "trennung"
+                ? propertyType.length > 0 && trennungWeg.length > 0
+                : false;
 
   function handleNext(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -166,6 +172,14 @@ export function FinalCta({
         return [`Projekt: ${projekte.join(", ")}`, `Ort: ${address || "keine Angabe"}`, `Budget: ${umbauBudget || "keine Angabe"}`, `Zeitpunkt: ${timeframe || "keine Angabe"}`];
       case "versichern":
         return [`Situation: ${situation.join(", ")}`, `Ort: ${address || "keine Angabe"}`];
+      case "trennung":
+        return [
+          `Objekttyp: ${propertyType.join(", ")}`,
+          `Ort: ${address || "keine Angabe"}`,
+          `Wunsch: ${trennungWeg.join(", ")}`,
+          `Gemeinsames Gespräch: ${trennungInfo.join(", ") || "keine Angabe"}`,
+          "Vertraulich behandeln",
+        ];
       default:
         return [];
     }
@@ -279,7 +293,7 @@ export function FinalCta({
                   <div>
                     <p className="mb-2 text-sm text-ivory-dim">Worum geht es?</p>
                     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Anliegen">
-                      {ANLIEGEN.map((a) => (
+                      {[...ANLIEGEN_CHOICES, ...(preset && !ANLIEGEN_CHOICES.includes(preset) ? [preset] : [])].map((a) => (
                         <button
                           key={a}
                           type="button"
@@ -378,6 +392,21 @@ export function FinalCta({
                     <>
                       <Chips options={SITUATIONEN} value={situation} onToggle={multi(situation, setSituation)} />
                       <input placeholder="Ort (optional)" value={address} onChange={(e) => setAddress(e.target.value)} className={fieldClasses} />
+                    </>
+                  )}
+
+                  {anliegen === "trennung" && (
+                    <>
+                      <Chips options={PROPERTY_TYPES} value={propertyType} onToggle={single(setPropertyType)} />
+                      <input placeholder="Ort (optional)" value={address} onChange={(e) => setAddress(e.target.value)} className={fieldClasses} />
+                      <div>
+                        <p className="mb-2 text-sm text-ivory-dim">Was ist Ihr Wunsch?</p>
+                        <Chips options={TRENNUNG_WEG} value={trennungWeg} onToggle={single(setTrennungWeg)} />
+                      </div>
+                      <div>
+                        <p className="mb-2 text-sm text-ivory-dim">Kommen Sie gemeinsam?</p>
+                        <Chips options={TRENNUNG_INFO} value={trennungInfo} onToggle={single(setTrennungInfo)} />
+                      </div>
                     </>
                   )}
 

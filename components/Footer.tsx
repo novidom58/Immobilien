@@ -38,6 +38,9 @@ export function Footer() {
             {a.title}
           </Link>
         ))}
+        <Link href="/trennung-scheidung" className="text-ivory-dim hover:text-ivory">
+          Trennung &amp; Scheidung
+        </Link>
       </nav>
       <div className="mx-auto mt-6 flex max-w-7xl justify-center gap-4 px-6 lg:px-10">
         {SOCIAL_LINKS.map((s) => (

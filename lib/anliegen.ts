@@ -1,8 +1,11 @@
 // Das Anliegen einer Anfrage steuert Formular, Lead, CRM-Rollen und den
 // Fokus im Kundenportal. So landet jede Anfrage dort, wo sie hingehört.
 
-export const ANLIEGEN = ["verkaufen", "kaufen", "finanzieren", "umbauen", "versichern"] as const;
+export const ANLIEGEN = ["verkaufen", "kaufen", "finanzieren", "umbauen", "versichern", "trennung"] as const;
 export type Anliegen = (typeof ANLIEGEN)[number];
+
+/** Die Auswahl im allgemeinen Formular; Spezialfälle wie «trennung» nur auf ihrer eigenen Seite. */
+export const ANLIEGEN_CHOICES: Anliegen[] = ["verkaufen", "kaufen", "finanzieren", "umbauen", "versichern"];
 
 export const ANLIEGEN_CONFIG: Record<
   Anliegen,
@@ -43,6 +46,13 @@ export const ANLIEGEN_CONFIG: Record<
     submit: "Versicherungs-Check anfragen",
     portalLabel: "Versicherungs-Check im Kundenportal",
   },
+  trennung: {
+    label: "Trennung",
+    title: "Reden wir vertraulich.",
+    text: "Ein erstes Gespräch, auf Wunsch nur mit Ihnen. Wir zeigen, was das Haus wert ist und welche Wege es gibt.",
+    submit: "Diskretes Erstgespräch anfragen",
+    portalLabel: "Finanzierung für die Übernahme prüfen",
+  },
 };
 
 /** Bereichsname einer Leistungsseite → passendes Anliegen. */
@@ -53,6 +63,7 @@ export function anliegenFromTopic(topic: string | undefined): Anliegen | null {
   if (t.startsWith("finanz")) return "finanzieren";
   if (t.startsWith("umbau")) return "umbauen";
   if (t.startsWith("versich")) return "versichern";
+  if (t.startsWith("trennung")) return "trennung";
   return null;
 }
 
@@ -63,6 +74,7 @@ export function isAnliegen(value: unknown): value is Anliegen {
 /** Portal-Link, der nach dem Login direkt den passenden Bereich zeigt. */
 export function portalHref(anliegen: Anliegen) {
   if (anliegen === "umbauen") return "/dashboard/planer/demo";
+  if (anliegen === "trennung") return `/login?redirect=${encodeURIComponent("/dashboard?fokus=finanzieren")}`;
   return `/login?redirect=${encodeURIComponent(`/dashboard?fokus=${anliegen}`)}`;
 }
 

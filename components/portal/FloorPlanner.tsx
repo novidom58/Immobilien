@@ -54,10 +54,13 @@ export function FloorPlanner({
   plan,
   listing,
   initialItems,
+  guestLoginHref,
 }: {
   plan: FloorPlan;
   listing: { id: string; title: string; price: number | null; isDemo: boolean };
   initialItems: PlacedItem[];
+  /** Ohne Login: statt Speichern ein Link zur Anmeldung (danach geht es im Portal weiter). */
+  guestLoginHref?: string;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
@@ -302,15 +305,25 @@ export function FloorPlanner({
       </details>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saveState === "saving"}
-          className="inline-flex items-center gap-2 rounded-full bg-night px-6 py-3 text-sm font-semibold text-ink hover:bg-amber disabled:opacity-60"
-        >
-          <Save className="h-4 w-4" />
-          {saveState === "saving" ? "Speichert …" : "Einrichtung speichern"}
-        </button>
+        {guestLoginHref ? (
+          <Link
+            href={guestLoginHref}
+            className="inline-flex items-center gap-2 rounded-full bg-night px-6 py-3 text-sm font-semibold text-ink hover:bg-amber"
+          >
+            <Save className="h-4 w-4" />
+            Anmelden und Einrichtung speichern
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveState === "saving"}
+            className="inline-flex items-center gap-2 rounded-full bg-night px-6 py-3 text-sm font-semibold text-ink hover:bg-amber disabled:opacity-60"
+          >
+            <Save className="h-4 w-4" />
+            {saveState === "saving" ? "Speichert …" : "Einrichtung speichern"}
+          </button>
+        )}
         {saveState === "saved" && <span className="text-sm text-emerald-700">Gespeichert.</span>}
         {saveState === "error" && <span className="text-sm text-red-700">Speichern fehlgeschlagen.</span>}
         {dirty && saveState === "idle" && <span className="text-sm text-ivory-dim">Nicht gespeicherte Änderungen</span>}

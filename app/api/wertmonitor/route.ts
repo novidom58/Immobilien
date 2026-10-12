@@ -31,13 +31,14 @@ export async function POST(request: Request) {
   if (!url || !key) return NextResponse.json({ error: "Der Wertmonitor ist noch nicht eingerichtet." }, { status: 503 });
   const admin = createSupabaseClient(url, key);
 
-  const { wert } = await upsertOwner(admin, { email, name, phone }, input, "Wertmonitor");
+  const herkunft = typeof body.quelle === "string" ? body.quelle.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) : "";
+  const { wert } = await upsertOwner(admin, { email, name, phone }, input, herkunft ? `Wertmonitor (${herkunft})` : "Wertmonitor");
   await admin.from("leads").insert({
     type: "valuation",
     name,
     email,
     phone: phone || null,
-    source: "wertmonitor",
+    source: herkunft ? `wertmonitor-${herkunft}` : "wertmonitor",
     message: [
       `Wertmonitor-Anmeldung: ${input.typ}, ${input.flaeche} m², ${input.region}${input.adresse ? `, ${input.adresse}` : ""}`,
       `Richtwert: ${formatChf(wert.low)} – ${formatChf(wert.high)}`,

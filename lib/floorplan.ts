@@ -95,3 +95,36 @@ export function sanitizeItems(value: unknown): PlacedItem[] {
       rot: ([0, 90, 180, 270] as const).includes(v.rot) ? v.rot : 0,
     }));
 }
+
+/**
+ * Beispielwohnung für /rundgang: 3.5 Zimmer mit grossem Balkon, aus einem
+ * Verkaufsplan (1:100) nachgezeichnet. Masse gerundet, ca.-Angaben.
+ */
+export const RUNDGANG_PLAN: FloorPlan = {
+  width: 1020,
+  height: 1590,
+  rooms: [
+    { name: "Zimmer 1", x: 170, y: 40, w: 360, h: 370 },
+    { name: "Zimmer 2", x: 550, y: 40, w: 460, h: 370 },
+    { name: "Gang", x: 170, y: 430, w: 560, h: 130 },
+    { name: "Entrée", x: 170, y: 560, w: 200, h: 210 },
+    { name: "WC", x: 380, y: 570, w: 190, h: 180 },
+    { name: "Waschen", x: 580, y: 570, w: 150, h: 180 },
+    { name: "Bad", x: 740, y: 430, w: 270, h: 320 },
+    { name: "Reduit", x: 10, y: 800, w: 200, h: 180 },
+    { name: "Wohnen / Essen", x: 260, y: 780, w: 750, h: 470 },
+    { name: "Küche", x: 10, y: 990, w: 240, h: 260 },
+    { name: "Balkon", x: 10, y: 1270, w: 1000, h: 310, outdoor: true },
+  ],
+  fixtures: [
+    { x: 20, y: 1000, w: 50, h: 240, label: "Küche" },
+    { x: 90, y: 1190, w: 150, h: 50, label: "Insel" },
+    { x: 830, y: 440, w: 170, h: 75, label: "Wanne" },
+    { x: 590, y: 580, w: 55, h: 55, label: "WM" },
+  ],
+};
+
+/** Plan pro Planer-Seite: Beispiel aus dem Portal oder die Rundgang-Wohnung. */
+export function planFor(id: string): FloorPlan {
+  return id === "rundgang" ? RUNDGANG_PLAN : SAMPLE_PLAN;
+}

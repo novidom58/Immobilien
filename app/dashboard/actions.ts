@@ -193,7 +193,7 @@ export async function toggleFavorite(listingId: string) {
 export async function saveLayout(listingId: string, items: unknown) {
   const { supabase, user } = await requireUser();
   if (!supabase || !user) return { error: "Bitte melden Sie sich an." };
-  if (listingId !== "demo" && !/^[0-9a-f-]{36}$/i.test(listingId)) return { error: "Ungültiges Objekt." };
+  if (listingId !== "demo" && listingId !== "rundgang" && !/^[0-9a-f-]{36}$/i.test(listingId)) return { error: "Ungültiges Objekt." };
 
   const clean = sanitizeItems(items);
 
@@ -212,8 +212,8 @@ export async function saveLayout(listingId: string, items: unknown) {
       const admin = createSupabaseClient(url, key);
       const { data: customer } = await admin.from("customers").select("id").eq("portal_user_id", user.id).maybeSingle();
       if (customer) {
-        let name = "die Beispielwohnung";
-        if (listingId !== "demo") {
+        let name = listingId === "rundgang" ? "die Rundgang-Wohnung" : "die Beispielwohnung";
+        if (listingId !== "demo" && listingId !== "rundgang") {
           const { data: listing } = await admin.from("listings").select("title, address, city").eq("id", listingId).maybeSingle();
           if (listing) name = listing.title || `${listing.address}, ${listing.city}`;
         }

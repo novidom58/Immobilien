@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FloorPlanner } from "@/components/portal/FloorPlanner";
 import { Logo } from "@/components/ui/Logo";
-import { SAMPLE_PLAN, sanitizeItems } from "@/lib/floorplan";
+import { planFor, sanitizeItems } from "@/lib/floorplan";
 
 export const metadata: Metadata = {
   title: "Grundriss-Planer",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function PlanerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  if (id !== "demo" && !/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  if (id !== "demo" && id !== "rundgang" && !/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const supabase = await createClient();
   if (!supabase) notFound();
@@ -22,8 +22,13 @@ export default async function PlanerPage({ params }: { params: Promise<{ id: str
   } = await supabase.auth.getUser();
   if (!user) redirect(`/login?redirect=/dashboard/planer/${id}`);
 
-  let listing = { id, title: "Beispielwohnung 5.5 Zimmer", price: null as number | null, isDemo: true };
-  if (id !== "demo") {
+  let listing = {
+    id,
+    title: id === "rundgang" ? "Wohnung 3.5 Zimmer mit Balkon" : "Beispielwohnung 5.5 Zimmer",
+    price: null as number | null,
+    isDemo: true,
+  };
+  if (id !== "demo" && id !== "rundgang") {
     const { data } = await supabase
       .from("listings")
       .select("id, title, address, city, price_chf")
@@ -56,7 +61,7 @@ export default async function PlanerPage({ params }: { params: Promise<{ id: str
           {" "}Der Grundriss ist ein Beispielplan, bis der echte Giraffe360-Plan des Objekts hinterlegt ist.
         </p>
         <div className="mt-6">
-          <FloorPlanner plan={SAMPLE_PLAN} listing={listing} initialItems={sanitizeItems(saved)} />
+          <FloorPlanner plan={planFor(id)} listing={listing} initialItems={sanitizeItems(saved)} />
         </div>
       </div>
     </main>

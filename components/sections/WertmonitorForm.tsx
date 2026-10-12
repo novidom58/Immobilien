@@ -41,10 +41,12 @@ export function WertmonitorForm({ portal = false, initial }: { portal?: boolean;
       return;
     }
     try {
+      // Herkunft aus dem QR-Link (/wert?q=…), z.B. ein Türhänger in einem Quartier.
+      const quelle = new URLSearchParams(window.location.search).get("quelle");
       const res = await fetch("/api/wertmonitor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, consent: data.consent === "on" }),
+        body: JSON.stringify({ ...data, consent: data.consent === "on", quelle }),
       });
       const json = await res.json().catch(() => ({}));
       setState({ busy: false, error: res.ok ? null : (json.error ?? "Senden fehlgeschlagen."), wert: res.ok ? json.wert : null });

@@ -103,7 +103,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
       >
         <Link
           href="/leistungen/kaufen-verkaufen#kommission"
-          aria-label="Nur ab 0.95% Provision statt 3%"
+          aria-label="Ab nur 0.95% Provision statt 3%"
           className="group relative flex h-32 w-32 items-center justify-center transition-transform hover:scale-110 motion-safe:animate-[nd-wiggle_7s_ease-in-out_3.5s_infinite] sm:h-48 sm:w-48"
         >
           {/* Pulsierende Wellen hinter dem Siegel */}
@@ -123,7 +123,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
             <span className="absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent motion-safe:animate-[nd-shine_4.5s_ease-in-out_2.5s_infinite]" />
           </span>
           <span className="relative flex flex-col items-center text-center text-white">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/90 sm:text-xs">nur ab</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/90 sm:text-xs">ab nur</span>
             <span className="font-display text-[2.1rem] font-semibold leading-none tracking-tight sm:text-[2.9rem]">0.95%</span>
             <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] sm:text-xs">Provision</span>
             <span className="mt-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-amber sm:text-xs">

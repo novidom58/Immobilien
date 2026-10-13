@@ -4,31 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
 const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
-// Domains, auf denen die HypoCasa-Seite (app/hypocasa) ausgeliefert wird.
-const HYPOCASA_HOSTS = (process.env.HYPOCASA_HOSTS || "hypocasa.ch,www.hypocasa.ch")
-  .split(",")
-  .map((h) => h.trim().toLowerCase())
-  .filter(Boolean);
-
-/**
- * hypocasa.ch zeigt nur die HypoCasa-Seite: «/» wird intern auf /hypocasa
- * umgeschrieben, API und Dateien laufen normal, alle anderen Pfade (NoviDom-
- * Seiten) leiten auf novidom-immo.ch weiter, damit nichts doppelt indexiert wird.
- */
-function hypoCasaRoute(request: NextRequest) {
-  const host = (request.headers.get("host") || "").split(":")[0].toLowerCase();
-  if (!HYPOCASA_HOSTS.includes(host)) return null;
-  const { pathname } = request.nextUrl;
-  if (pathname === "/") return NextResponse.rewrite(new URL("/hypocasa", request.url));
-  if (pathname === "/hypocasa") return NextResponse.redirect(new URL("/", request.url), 308);
-  if (pathname.startsWith("/api/") || pathname.startsWith("/_next/") || pathname.includes(".")) return NextResponse.next();
-  return NextResponse.redirect(new URL(pathname + request.nextUrl.search, "https://www.novidom-immo.ch"), 307);
-}
-
 export async function proxy(request: NextRequest) {
-  const hypoCasa = hypoCasaRoute(request);
-  if (hypoCasa) return hypoCasa;
-
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

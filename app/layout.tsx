@@ -119,16 +119,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SmoothScroll />
-        {/* NoviDom-Elemente; auf der HypoCasa-Seite per CSS ausgeblendet (globals.css). */}
-        <div className="novidom-chrome">
-          <Loader />
-          <ScrollProgress />
-        </div>
+        <Loader />
+        <ScrollProgress />
         {children}
-        <div className="novidom-chrome">
-          <StickyContact />
-          <CookieConsent />
-        </div>
+        <StickyContact />
+        <CookieConsent />
       </body>
     </html>
   );

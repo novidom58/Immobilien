@@ -236,18 +236,3 @@ h2.font-display {
     transform: scale(1);
   }
 }
-
-/* NoviDom-Elemente aus dem Root-Layout (Loader, Kontakt-Button, Cookie-Hinweis)
-   gehören nicht auf die HypoCasa-Seite. :has greift schon beim ersten
-   Rendern, also ohne Aufblitzen. Der Loader sperrt das Scrollen kurz per
-   Inline-Style, das wird hier ebenfalls aufgehoben. */
-.novidom-chrome {
-  display: contents;
-}
-body:has([data-site="hypocasa"]) .novidom-chrome {
-  display: none;
-}
-body:has([data-site="hypocasa"]) {
-  overflow: auto !important;
-  background: #ffffff;
-}

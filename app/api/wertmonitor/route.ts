@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createResendClient } from "@/lib/resend";
 import { parseOwnerInput, upsertOwner } from "@/lib/wertmonitor";
 import { formatChf, PRICE_STAND } from "@/lib/valuation";
+import { notifyHypoCasa } from "@/lib/hypocasa";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
@@ -77,6 +78,15 @@ export async function POST(request: Request) {
       subject: `Wertmonitor: ${name} (${input.region})`,
       text: `${name}\n${email}\n${phone || "—"}\n\n${input.typ}, ${input.flaeche} m², ${input.region}\nRichtwert ${formatChf(wert.mid)}${input.hypo_ablauf ? `\nHypothek bis ${input.hypo_ablauf}` : ""}`,
     });
+  }
+
+  // Hypothekenwächter: Wer das Ablaufdatum angibt, ist ein Verlängerungs-Lead für HypoCasa.
+  if (input.hypo_ablauf) {
+    await notifyHypoCasa({
+      replyTo: email,
+      subject: `Hypothekenwächter (NoviDom): ${name}, Ablauf ${new Date(input.hypo_ablauf).toLocaleDateString("de-CH")}`,
+      text: `${name}\n${email}\n${phone || "—"}\n\nHypothek läuft ab: ${new Date(input.hypo_ablauf).toLocaleDateString("de-CH")}\nObjekt: ${input.typ}, ${input.flaeche} m², ${input.region}\nRichtwert: ${formatChf(wert.mid)}\n\nAngemeldet über den Wertmonitor von NoviDom Immo.`,
+    }).catch(() => false);
   }
 
   return NextResponse.json({ ok: true, wert });

@@ -5,6 +5,7 @@ import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
 import { syncLeadToCrm } from "@/lib/leadCrm";
 import { isAnliegen } from "@/lib/anliegen";
+import { HYPOCASA_FROM, HYPOCASA_TO, isHypoCasaSource, notifyHypoCasa } from "@/lib/hypocasa";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
@@ -92,7 +93,26 @@ export async function POST(request: Request) {
   }
 
   const resend = createResendClient();
-  if (resend) {
+  const fromHypoCasa = isHypoCasaSource(source);
+  if (resend && fromHypoCasa) {
+    // Anfrage über die HypoCasa-Seite: geht direkt an HypoCasa, Antwort im HypoCasa-Auftritt.
+    const { error } = await resend.emails.send({
+      from: HYPOCASA_FROM,
+      to: HYPOCASA_TO,
+      replyTo: email,
+      subject: `HypoCasa-Anfrage (${source.replace(/^hypocasa-?/, "") || "allgemein"}) von ${name}`,
+      text: `Name: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\nQuelle: ${source}\n\n${message || "—"}`,
+    });
+    results.emailed = !error;
+    if (!error) {
+      await resend.emails.send({
+        from: HYPOCASA_FROM,
+        to: email,
+        subject: "Ihre Anfrage bei HypoCasa ist eingegangen",
+        text: `Hallo ${name.split(" ")[0]}\n\nVielen Dank für Ihre Anfrage. Wir vergleichen die Angebote von über 50 Banken, Versicherungen und Pensionskassen und melden uns innert 24 Stunden persönlich bei Ihnen.\n\nFreundliche Grüsse\nIhr Team von HypoCasa`,
+      });
+    }
+  } else if (resend) {
     const { error } = await resend.emails.send({
       from: NOTIFY_FROM,
       to: NOTIFY_TO,
@@ -101,6 +121,17 @@ export async function POST(request: Request) {
       text: `Typ: ${type}\nName: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\n\nNachricht:\n${message || "—"}`,
     });
     results.emailed = !error;
+
+    // Finanzierungswunsch aus dem NoviDom-Auftritt (Formular, Finanzierungs-Pass
+    // im Portal): HypoCasa erhält den Lead direkt, ohne Umweg über das Team.
+    if (wantsFinancing || anliegen === "finanzieren") {
+      const sent = await notifyHypoCasa({
+        replyTo: email,
+        subject: `Finanzierungs-Lead von NoviDom: ${name}`,
+        text: `Name: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\nQuelle: NoviDom ${source || type}\n\n${message || "—"}`,
+      }).catch(() => false);
+      results.emailed = results.emailed || sent;
+    }
 
     // Best-effort auto-reply to the submitter. Failing this never fails the
     // request - the internal notification above already went through.

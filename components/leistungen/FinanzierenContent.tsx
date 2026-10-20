@@ -114,7 +114,7 @@ export function FinanzierenContent() {
       </section>
 
       {/* Rechner + individuelle Prüfung */}
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 pb-24 lg:grid-cols-[1.3fr_1fr] lg:px-10">
+      <section id="analyse" className="mx-auto grid max-w-7xl scroll-mt-24 gap-8 px-4 pb-24 lg:grid-cols-[1.3fr_1fr] lg:px-10">
         <AreaInteractive id="fin" title="Erste Orientierung" />
         <div className={card}>
           <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber">Individuelle Prüfung</div>

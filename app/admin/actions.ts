@@ -1309,3 +1309,34 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
   revalidatePath("/admin", "layout");
   return { error: sent < targets.length ? `${targets.length - sent} Mail(s) konnten nicht verschickt werden.` : null, matches: targets.length, sent };
 }
+
+const ZINS_LAUFZEITEN = ["saron", "2", "5", "10"] as const;
+
+/** Richtzinsen fürs Zinsbarometer speichern; der bisherige Wert wird zur Vorwoche. */
+export async function saveZinssaetze(formData: FormData) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: current } = await supabase.from("zinssaetze").select("laufzeit, zins");
+  const previous = new Map((current ?? []).map((r) => [r.laufzeit as string, Number(r.zins)]));
+
+  const rows = [];
+  for (const laufzeit of ZINS_LAUFZEITEN) {
+    const raw = String(formData.get(laufzeit) ?? "").replace(",", ".").trim();
+    if (!raw) continue;
+    const zins = Number(raw);
+    if (!Number.isFinite(zins) || zins < 0 || zins > 10) return { error: `Ungültiger Zins bei ${laufzeit}.` };
+    const before = previous.get(laufzeit);
+    // Unveränderte Werte nicht als neue Woche zählen
+    if (before === zins) continue;
+    rows.push({ laufzeit, zins, vorwoche: before ?? null, updated_at: new Date().toISOString() });
+  }
+  if (rows.length) {
+    const { error } = await supabase.from("zinssaetze").upsert(rows);
+    if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+  }
+
+  revalidatePath("/admin/hypotheken");
+  revalidatePath("/leistungen/finanzieren");
+  return { error: null, saved: rows.length };
+}

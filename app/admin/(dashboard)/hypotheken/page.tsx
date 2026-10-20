@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getCrmCustomers } from "@/lib/admin-data";
 import { HypoWatchList } from "@/components/admin/HypoWatchList";
+import { ZinsEditor } from "@/components/admin/ZinsEditor";
 
 export const metadata: Metadata = {
   title: "Hypothekenwächter — Admin",
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
 export default async function HypothekenPage() {
   const supabase = await createClient();
   if (!supabase) return null;
-  const customers = await getCrmCustomers(supabase);
+  const [customers, { data: rates }] = await Promise.all([
+    getCrmCustomers(supabase),
+    supabase.from("zinssaetze").select("laufzeit, zins, updated_at"),
+  ]);
 
   const hypos = customers
     .filter((c) => c.hypo_ablauf && c.typ !== "ex")
@@ -39,5 +43,10 @@ export default async function HypothekenPage() {
       lastSent: c.wertmonitor!.last_sent_at ?? null,
     }));
 
-  return <HypoWatchList hypos={hypos} owners={owners} />;
+  return (
+    <>
+      <HypoWatchList hypos={hypos} owners={owners} />
+      <ZinsEditor rates={rates ?? []} />
+    </>
+  );
 }

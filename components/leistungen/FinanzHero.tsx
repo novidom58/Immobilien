@@ -53,18 +53,9 @@ export function FinanzHero() {
     <section className="mx-auto max-w-7xl px-4 lg:px-10">
       <div className="relative overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)]">
         <Image src={MUENSTER} alt="Basel mit Münster am Rhein" fill sizes="(min-width: 1280px) 1200px, 100vw" preload className="object-cover object-[50%_35%]" />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[rgba(28,40,50,0.82)] via-[rgba(28,40,50,0.55)] to-[rgba(28,40,50,0.25)]" />
-        <div className="relative grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_420px] lg:items-center lg:p-14">
-          <div className="text-white">
-            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/75">Mit HypoCasa · Basel &amp; Zug</div>
-            <h2 className="mt-4 max-w-md text-balance font-display text-3xl leading-tight lg:text-5xl">
-              Wie viel Haus liegt <em>für Sie drin?</em>
-            </h2>
-            <p className="mt-4 max-w-md text-white/80">
-              Drei Zahlen, eine erste Antwort nach den Regeln der Schweizer Banken. Die verbindliche Prüfung machen wir mit über 50 Anbietern.
-            </p>
-          </div>
-
+        {/* Abdunkeln nur unten (Handy) bzw. rechts unten (Desktop), damit das Münster frei bleibt */}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[rgba(28,40,50,0.9)] via-[rgba(28,40,50,0.35)] to-transparent lg:bg-gradient-to-tl lg:from-[rgba(28,40,50,0.8)] lg:via-transparent" />
+        <div className="relative grid gap-8 p-6 pt-56 sm:p-10 sm:pt-72 lg:min-h-[640px] lg:grid-cols-[420px_1fr] lg:items-end lg:p-12 lg:pt-12">
           <div className="rounded-2xl bg-white/95 p-5 backdrop-blur sm:p-6" aria-live="polite">
             <div className="font-display text-xl text-ivory">Schnell-Check</div>
             <div className="mt-4 grid gap-3">
@@ -112,6 +103,16 @@ export function FinanzHero() {
               </a>
             </div>
           </div>
+          <div className="order-first text-white lg:order-none lg:self-end lg:justify-self-end lg:text-right">
+            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/75">Mit HypoCasa · Basel &amp; Zug</div>
+            <h2 className="mt-4 max-w-md text-balance font-display text-3xl leading-tight lg:ml-auto lg:text-5xl">
+              Wie viel Haus liegt <em>für Sie drin?</em>
+            </h2>
+            <p className="mt-4 max-w-md text-white/85 lg:ml-auto">
+              Drei Zahlen, eine erste Antwort nach den Regeln der Schweizer Banken. Die verbindliche Prüfung machen wir mit über 50 Anbietern.
+            </p>
+          </div>
+
         </div>
       </div>
       <p className="mt-2 px-2 text-xs text-ivory-dim">Richtwerte mit 5% kalkulatorischem Zins und 1% Nebenkosten, keine Zusage.</p>

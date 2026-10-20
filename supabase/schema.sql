@@ -722,3 +722,23 @@ create policy "viewing_feedback_owner_or_admin_select" on viewing_feedback
 drop policy if exists "viewing_feedback_admin_delete" on viewing_feedback;
 create policy "viewing_feedback_admin_delete" on viewing_feedback
   for delete using (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- Zinsbarometer: Richtzinsen, im Admin gepflegt, öffentlich lesbar
+-- ---------------------------------------------------------------------
+create table if not exists zinssaetze (
+  laufzeit text primary key check (laufzeit in ('saron', '2', '5', '10')),
+  zins numeric not null,
+  vorwoche numeric,
+  updated_at timestamptz not null default now()
+);
+
+alter table zinssaetze enable row level security;
+
+drop policy if exists "zinssaetze_public_read" on zinssaetze;
+create policy "zinssaetze_public_read" on zinssaetze
+  for select using (true);
+
+drop policy if exists "zinssaetze_admin_write" on zinssaetze;
+create policy "zinssaetze_admin_write" on zinssaetze
+  for all using (public.is_admin()) with check (public.is_admin());

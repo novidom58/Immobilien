@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, FileUp, LifeBuoy, ShieldCheck } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 const SITUATIONS = [
@@ -19,6 +19,15 @@ const SITUATIONS = [
     title: "Ich vermiete",
     items: ["Gebäudehaftpflicht als Vermieter", "Mietzinsausfall", "Rechtsschutz für Mietstreitigkeiten", "Hausrat bleibt Sache der Mieter"],
   },
+];
+
+// Was im Schadenfall zuerst zählt, in dieser Reihenfolge
+const SCHADEN = [
+  { title: "Sicherheit zuerst", text: "Menschen in Sicherheit bringen, bei Feuer 118, bei Verletzten 144 anrufen." },
+  { title: "Schaden begrenzen", text: "Wasser abstellen, Strom aus, Fenster abdecken. Was Sie zumutbar tun können, ist Pflicht und wird bezahlt." },
+  { title: "Fotos & nichts wegwerfen", text: "Alles fotografieren, beschädigte Gegenstände aufbewahren, bis die Versicherung sie gesehen hat." },
+  { title: "Polizei bei Einbruch", text: "Bei Diebstahl oder Einbruch Anzeige erstatten, der Rapport ist für die Hausratversicherung nötig." },
+  { title: "Uns melden", text: "Wir melden den Schaden bei der richtigen Versicherung, auch bei der kantonalen Gebäudeversicherung, und begleiten Sie bis zur Zahlung." },
 ];
 
 const COVERAGE = [
@@ -100,6 +109,59 @@ export function VersicherungContent() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pt-24 lg:px-10">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="flex flex-col rounded-[28px] border border-line bg-white p-8 lg:p-10">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber text-white">
+              <FileUp className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <h2 className="mt-5 font-display text-2xl text-ivory lg:text-3xl">
+              Policen hochladen, <em>Lücken-Check erhalten.</em>
+            </h2>
+            <p className="mt-3 leading-relaxed text-ivory-dim">
+              Fotografieren Sie Ihre Policen oder laden Sie die PDFs hoch. Wir legen alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
+            </p>
+            <ul className="mt-5 grid gap-2 text-sm text-ivory">
+              {["Kostenlos und unverbindlich", "Antwort innert 5 Arbeitstagen", "Gebäude, Hausrat, Haftpflicht, Leben und 3a in einem Blick"].map((t) => (
+                <li key={t} className="flex gap-2.5">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.5} />
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard?fokus=versichern#policen"
+              className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
+            >
+              Policen hochladen
+              <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
+            </Link>
+          </div>
+
+          <div className="rounded-[28px] bg-night p-8 text-ink lg:p-10">
+            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">
+              <LifeBuoy className="h-4 w-4" strokeWidth={1.75} />
+              Schadenfall-Hilfe
+            </div>
+            <h2 className="mt-3 font-display text-2xl lg:text-3xl">Es ist etwas passiert?</h2>
+            <ol className="mt-5 grid gap-4">
+              {SCHADEN.map((s, i) => (
+                <li key={s.title} className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber font-display text-sm text-white">{i + 1}</span>
+                  <span>
+                    <span className="block font-semibold">{s.title}</span>
+                    <span className="block text-sm leading-relaxed text-ink/75">{s.text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <a href="#kontakt" className="mt-7 inline-flex rounded-full bg-amber px-6 py-3.5 text-sm font-semibold text-white hover:bg-amber-soft">
+              Schaden melden
+            </a>
           </div>
         </div>
       </section>

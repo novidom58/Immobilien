@@ -19,6 +19,7 @@ import { FinanzierenContent } from "@/components/leistungen/FinanzierenContent";
 import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 import { UmbauContent } from "@/components/leistungen/UmbauContent";
 import { FinanzHero } from "@/components/leistungen/FinanzHero";
+import { ZinsBarometer } from "@/components/leistungen/ZinsBarometer";
 import { BuildUpHero } from "@/components/leistungen/BuildUpHero";
 import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
@@ -99,7 +100,10 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
         {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Aufbau-Animation, Versicherung als Schutzschichten */}
         {area.id === "fin" ? (
-          <FinanzHero />
+          <>
+            <FinanzHero />
+            <ZinsBarometer />
+          </>
         ) : area.id === "umbau" ? (
           <BuildUpHero />
         ) : area.id === "vers" ? (
@@ -129,9 +133,12 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               </div>
             </section>
 
-            <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
-              <AreaInteractive id={area.id} title={area.title} />
-            </section>
+            {/* Beim Umbau zeigen Vorher/Nachher und Grundriss-Ideen weiter unten mehr als der kurze Puzzle-Teil */}
+            {area.id !== "umbau" && (
+              <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
+                <AreaInteractive id={area.id} title={area.title} />
+              </section>
+            )}
           </>
         )}
 

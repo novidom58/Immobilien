@@ -21,6 +21,8 @@ import { UmbauContent } from "@/components/leistungen/UmbauContent";
 import { FinanzHero } from "@/components/leistungen/FinanzHero";
 import { ZinsBarometer } from "@/components/leistungen/ZinsBarometer";
 import { BuildUpHero } from "@/components/leistungen/BuildUpHero";
+import { SellFlight } from "@/components/leistungen/SellFlight";
+import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
 import { SellVsPrivate } from "@/components/sections/SellVsPrivate";
@@ -100,7 +102,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           )}
         </section>
 
-        {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Aufbau-Animation, Versicherung als Schutzschichten */}
+        {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Aufbau-Animation, Versicherung als Schutzschichten, Verkaufen als Flug übers Quartier */}
         {area.id === "fin" ? (
           <>
             <FinanzHero />
@@ -110,6 +112,11 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           <BuildUpHero />
         ) : area.id === "vers" ? (
           <ProtectionVisual />
+        ) : area.id === "kv" ? (
+          <>
+            <SellFlight />
+            <FeaturedListings limit={6} title="Diese Objekte vermarkten" accent="wir gerade, zum Kauf und zur Miete." />
+          </>
         ) : (
           <section className="mx-auto max-w-7xl px-4 lg:px-10">
             <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)] sm:aspect-[16/7]">
@@ -135,8 +142,8 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               </div>
             </section>
 
-            {/* Beim Umbau zeigen Vorher/Nachher und Grundriss-Ideen weiter unten mehr als der kurze Puzzle-Teil */}
-            {area.id !== "umbau" && (
+            {/* Umbau und Verkaufen zeigen weiter unten mehr als der kurze Puzzle-Teil */}
+            {area.id !== "umbau" && area.id !== "kv" && (
               <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
                 <AreaInteractive id={area.id} title={area.title} />
               </section>

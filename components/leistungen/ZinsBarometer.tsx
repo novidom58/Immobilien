@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 
 type Rate = { laufzeit: string; zins: number; vorwoche: number | null; updated_at: string };
 
-const LABEL: Record<string, string> = { saron: "SARON", "2": "Fest 2 Jahre", "5": "Fest 5 Jahre", "10": "Fest 10 Jahre" };
-const ORDER = ["saron", "2", "5", "10"];
+const LABEL: Record<string, string> = { saron: "SARON", "3": "Fest 3 Jahre", "5": "Fest 5 Jahre", "7": "Fest 7 Jahre", "10": "Fest 10 Jahre" };
+const ORDER = ["saron", "3", "5", "7", "10"];
 const CAL = process.env.NEXT_PUBLIC_CAL_LINK_VIDEO || process.env.NEXT_PUBLIC_CAL_LINK;
 
 /**
@@ -26,7 +26,13 @@ export function ZinsBarometer() {
     supabase
       .from("zinssaetze")
       .select("laufzeit, zins, vorwoche, updated_at")
-      .then(({ data }) => setRates(((data as Rate[] | null) ?? []).sort((a, b) => ORDER.indexOf(a.laufzeit) - ORDER.indexOf(b.laufzeit))));
+      .then(({ data }) =>
+        setRates(
+          ((data as Rate[] | null) ?? [])
+            .filter((r) => ORDER.includes(r.laufzeit))
+            .sort((a, b) => ORDER.indexOf(a.laufzeit) - ORDER.indexOf(b.laufzeit))
+        )
+      );
   }, []);
 
   async function subscribe(e: FormEvent) {
@@ -61,7 +67,7 @@ export function ZinsBarometer() {
           {rates.length === 0 ? (
             <p className="mt-3 text-sm text-ivory-dim">Die aktuellen Richtzinsen erscheinen hier, sobald sie erfasst sind. Fragen Sie uns gerne direkt nach Ihrem Zins.</p>
           ) : (
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
               {rates.map((r) => {
                 const diff = r.vorwoche != null ? r.zins - r.vorwoche : 0;
                 const Icon = diff > 0.005 ? ArrowUpRight : diff < -0.005 ? ArrowDownRight : ArrowRight;

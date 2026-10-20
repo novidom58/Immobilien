@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { offerTypeOf, priceText, statusBadge } from "@/lib/listingOffer";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -17,24 +18,36 @@ import { offmarketHoursLeft } from "@/lib/offmarket";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL: Record<string, { label: string; classes: string }> = {
-  active: { label: "Zum Verkauf", classes: "border-amber/50 text-amber-soft" },
-  reserved: { label: "Reserviert", classes: "border-blueprint/50 text-blueprint" },
-  sold: { label: "Verkauft", classes: "border-line text-ivory-dim/60" },
+
+type ListingDetail = {
+  id: string;
+  title: string | null;
+  address: string;
+  city: string;
+  postal_code: string | null;
+  price_chf: number | null;
+  status: string;
+  offer_type?: string | null;
+  property_type: string | null;
+  rooms: number | null;
+  living_area: number | null;
+  description: string | null;
+  tour_url: string | null;
+  offmarket_until: string | null;
+  photos: { url: string; sort_order: number }[];
+  clips: string[];
+  flight: { url: string; label: string }[];
+  loggedIn: boolean;
 };
 
-function formatChf(value: number) {
-  return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
-}
-
-async function getListing(id: string) {
+async function getListing(id: string): Promise<ListingDetail | null> {
   const supabase = await createClient();
   if (!supabase) return null;
 
   const { data } = await supabase
     .from("listings")
     .select(
-      "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, description, tour_url, offmarket_until, listing_photos(url, sort_order)"
+      "*, listing_photos(url, sort_order)"
     )
     .eq("id", id)
     .in("status", ["active", "reserved", "sold"])
@@ -69,12 +82,7 @@ async function getListing(id: string) {
       label: flightLabel(f.name),
     }));
 
-  return { ...data, photos, clips, flight, loggedIn: Boolean(user) } as typeof data & {
-    photos: typeof photos;
-    clips: string[];
-    flight: { url: string; label: string }[];
-    loggedIn: boolean;
-  };
+  return { ...data, photos, clips, flight, loggedIn: Boolean(user) } as ListingDetail;
 }
 
 export async function generateMetadata({
@@ -100,7 +108,8 @@ export default async function ListingDetailPage({
   const listing = await getListing(id);
   if (!listing) notFound();
 
-  const status = STATUS_LABEL[listing.status] ?? STATUS_LABEL.active;
+  const offer = offerTypeOf(listing.offer_type);
+  const status = statusBadge(listing.status, offer);
   const [main, ...rest] = listing.photos;
   const offmarketHours = listing.status === "active" ? offmarketHoursLeft(listing.offmarket_until as string | null) : null;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
@@ -169,7 +178,7 @@ export default async function ListingDetailPage({
         <DroneFlight
           clips={listing.flight}
           title={listing.title || listing.city}
-          priceText={listing.price_chf ? formatChf(listing.price_chf) : null}
+          priceText={listing.price_chf ? priceText(listing.price_chf, offer) : null}
         />
       ) : (
         <ListingFlythrough
@@ -232,16 +241,16 @@ export default async function ListingDetailPage({
               </div>
             )}
 
-            {listing.price_chf && listing.status !== "sold" && <MonthlyCost price={listing.price_chf} />}
+            {listing.price_chf && listing.status !== "sold" && offer === "kauf" && <MonthlyCost price={listing.price_chf} />}
           </div>
 
           {/* CTA-Karte */}
           <div className="h-fit rounded-2xl border border-line bg-ink-2 p-7">
             <div className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60">
-              Verkaufspreis
+              {offer === "miete" ? "Miete pro Monat" : "Verkaufspreis"}
             </div>
             <div className="mt-2 font-display text-3xl font-semibold text-amber-soft">
-              {listing.price_chf ? formatChf(listing.price_chf) : "Auf Anfrage"}
+              {priceText(listing.price_chf, offer, "Auf Anfrage")}
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-wide text-ivory-dim/60">
               Besichtigung anfragen

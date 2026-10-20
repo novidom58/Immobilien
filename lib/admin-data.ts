@@ -14,13 +14,14 @@ export type WertmonitorData = {
   last_sent_at?: string | null;
 };
 
-export async function getLeadsWithActivity(supabase: Supabase) {
+/**
+ * Leads fürs Admin. Archivierte (Fakes, Tests, anderweitig erledigt) sind
+ * standardmässig ausgeblendet. "*" statt fester Spalten, damit die Liste
+ * auch vor dem SQL-Update mit archived_at funktioniert.
+ */
+export async function getLeadsWithActivity(supabase: Supabase, { archived = false }: { archived?: boolean } = {}) {
   const [leadsRes, activityRes] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("id, type, name, email, phone, message, status, wants_financing, follow_up_at, listing_id, source, created_at")
-      .order("created_at", { ascending: false })
-      .limit(30),
+    supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(300),
     supabase.from("lead_activity").select("id, lead_id, type, text, created_at").order("created_at", { ascending: false }),
   ]);
 
@@ -31,11 +32,41 @@ export async function getLeadsWithActivity(supabase: Supabase) {
     activityByLead.set(a.lead_id, list);
   }
 
-  return (leadsRes.data ?? []).map((l) => ({
-    ...l,
-    daysOpen: daysSince(l.created_at),
-    activity: activityByLead.get(l.id) ?? [],
-  }));
+  type LeadRowData = {
+    id: string;
+    type: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    message: string | null;
+    status: string;
+    wants_financing: boolean;
+    follow_up_at: string | null;
+    listing_id: string | null;
+    source: string | null;
+    created_at: string;
+    archived_at?: string | null;
+  };
+  return ((leadsRes.data ?? []) as LeadRowData[])
+    .filter((l) => Boolean(l.archived_at) === archived)
+    .slice(0, archived ? 300 : 60)
+    .map((l) => ({
+      id: l.id,
+      type: l.type,
+      name: l.name,
+      email: l.email,
+      phone: l.phone,
+      message: l.message,
+      status: l.status,
+      wants_financing: l.wants_financing,
+      follow_up_at: l.follow_up_at,
+      listing_id: l.listing_id,
+      source: l.source,
+      created_at: l.created_at,
+      archived_at: l.archived_at ?? null,
+      daysOpen: daysSince(l.created_at),
+      activity: activityByLead.get(l.id) ?? [],
+    }));
 }
 
 export type AdminLeadWithActivity = Awaited<ReturnType<typeof getLeadsWithActivity>>[number];
@@ -49,7 +80,8 @@ export async function getListingsForAdmin(supabase: Supabase) {
   const { data } = await supabase
     .from("listings")
     .select(
-      "id, title, address, city, postal_code, status, owner_id, price_chf, property_type, rooms, living_area, description, tour_url, berater, activated_at, sale_deadline_months, posted_portals, lat, offmarket_until, listing_photos(count), listing_documents(id, name, url)"
+      // "*" statt fester Spalten, damit neue Felder (offer_type) vor dem SQL-Update nichts brechen
+      "*, listing_photos(count), listing_documents(id, name, url)"
     )
     .order("created_at", { ascending: false });
 
@@ -61,6 +93,7 @@ export async function getListingsForAdmin(supabase: Supabase) {
     postal_code: (l.postal_code as string | null) ?? null,
     status: l.status as string,
     property_type: (l.property_type as string) ?? "Haus",
+    offer_type: (l.offer_type as string | null) === "miete" ? "miete" : "kauf",
     price_chf: (l.price_chf as number | null) ?? null,
     rooms: (l.rooms as number | null) ?? null,
     living_area: (l.living_area as number | null) ?? null,
@@ -109,11 +142,14 @@ export async function getCrmCustomers(supabase: Supabase) {
     supabase
       .from("customers")
       .select(
-        "*, listings(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
+        "*, listings!customers_listing_id_fkey(id, address, city, price_chf, status, activated_at, sale_deadline_months)"
       )
       .order("created_at", { ascending: false }),
     supabase.from("customer_activity").select("id, customer_id, type, text, created_at").order("created_at", { ascending: false }),
   ]);
+
+  // Fehler sichtbar machen, sonst erscheint die Kundenliste einfach leer
+  if (customersRes.error) console.error("Kunden laden fehlgeschlagen:", customersRes.error.message);
 
   const activityByCustomer = new Map<string, { id: string; type: string; text: string; created_at: string }[]>();
   for (const a of activityRes.data ?? []) {

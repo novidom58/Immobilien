@@ -28,6 +28,7 @@ type AdminListing = {
   postal_code: string | null;
   status: string;
   property_type: string;
+  offer_type: string;
   price_chf: number | null;
   rooms: number | null;
   living_area: number | null;
@@ -378,6 +379,10 @@ export function ListingCard({
             <input name="city" required defaultValue={listing.city} placeholder="Ort *" className="field-input" />
             <input name="postal_code" defaultValue={listing.postal_code ?? ""} placeholder="PLZ" className="field-input" />
             <input name="price_chf" inputMode="numeric" defaultValue={listing.price_chf ?? ""} placeholder="Preis (CHF)" className="field-input" />
+            <select name="offer_type" defaultValue={listing.offer_type} className="field-select">
+              <option value="kauf">Zum Verkauf</option>
+              <option value="miete">Zur Miete (Preis = Miete pro Monat)</option>
+            </select>
             <select name="property_type" defaultValue={listing.property_type} className="field-select">
               {TYPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>

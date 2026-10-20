@@ -5,6 +5,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { createClient } from "@/lib/supabase/server";
 import { publicListingFilter } from "@/lib/offmarket";
+import { offerTypeOf, priceText, statusBadge, type OfferType } from "@/lib/listingOffer";
 
 type Listing = {
   id: string;
@@ -14,20 +15,15 @@ type Listing = {
   postal_code: string | null;
   price_chf: number | null;
   status: string;
+  offer: OfferType;
   cover: string | null;
 };
 
-const STATUS_LABEL: Record<string, { label: string; classes: string }> = {
-  active: { label: "Zum Verkauf", classes: "border-amber/50 text-amber-soft" },
-  reserved: { label: "Reserviert", classes: "border-blueprint/50 text-blueprint" },
-  sold: { label: "Verkauft", classes: "border-line text-ivory-dim/60" },
-};
-
-function formatChf(value: number) {
-  return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
-}
-
-export async function FeaturedListings() {
+/**
+ * Aktuelle Objekte zum Verkauf und zur Miete. Auf der Verkaufen-Seite mit
+ * mehr Objekten und eigenem Titel, damit Eigentümer sehen, was wir vermarkten.
+ */
+export async function FeaturedListings({ limit = 3, title, accent }: { limit?: number; title?: string; accent?: string } = {}) {
   let listings: Listing[] = [];
 
   const supabase = await createClient();
@@ -35,12 +31,12 @@ export async function FeaturedListings() {
     const { data } = await supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, price_chf, status, listing_photos(url, sort_order)"
+        "*, listing_photos(url, sort_order)"
       )
       .in("status", ["active", "reserved", "sold"])
       .or(publicListingFilter())
       .order("created_at", { ascending: false })
-      .limit(3);
+      .limit(limit);
 
     listings = (data ?? []).map((l) => {
       const photos = (l.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
@@ -55,6 +51,7 @@ export async function FeaturedListings() {
         postal_code: (l.postal_code as string | null) ?? null,
         price_chf: (l.price_chf as number | null) ?? null,
         status: l.status as string,
+        offer: offerTypeOf(l.offer_type),
         cover,
       };
     });
@@ -69,9 +66,9 @@ export async function FeaturedListings() {
           <div>
             <SectionLabel>Aktuelle Objekte</SectionLabel>
             <h2 className="mt-4 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Diese Immobilien verkaufen
+              {title ?? "Diese Immobilien verkaufen"}
               <br />
-              <span className="text-amber-soft">wir gerade.</span>
+              <span className="text-amber-soft">{accent ?? "wir gerade."}</span>
             </h2>
           </div>
           <Link
@@ -84,7 +81,7 @@ export async function FeaturedListings() {
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing, i) => {
-            const status = STATUS_LABEL[listing.status] ?? STATUS_LABEL.active;
+            const status = statusBadge(listing.status, listing.offer);
             return (
               <Reveal key={listing.id} delay={i * 0.08}>
                 <Link
@@ -120,7 +117,7 @@ export async function FeaturedListings() {
                       {listing.title || listing.address}
                     </div>
                     <div className="mt-4 font-mono text-amber-soft">
-                      {listing.price_chf ? formatChf(listing.price_chf) : "Preis auf Anfrage"}
+                      {priceText(listing.price_chf, listing.offer)}
                     </div>
                   </div>
                 </Link>

@@ -24,6 +24,9 @@ function parse(value: string) {
   return Number.isFinite(n) ? n : 0;
 }
 
+// Eigenes Bild (KI-generiert, Higgsfield), damit keine fremden Bildrechte im Spiel sind.
+const MUENSTER = "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20261020_211922_655cc7b3-9f47-4d64-8be3-d30a2dd67b41.png";
+
 const STATUS = {
   ok: { icon: CheckCircle2, text: "Voraussichtlich tragbar", tone: "text-emerald-700" },
   knapp: { icon: AlertTriangle, text: "Knapp, oft mit Optimierung machbar", tone: "text-amber-700" },
@@ -49,7 +52,7 @@ export function FinanzHero() {
   return (
     <section className="mx-auto max-w-7xl px-4 lg:px-10">
       <div className="relative overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)]">
-        <Image src="/images/basel-muenster.webp" alt="Basel mit Münster am Rhein" fill sizes="(min-width: 1280px) 1200px, 100vw" preload className="object-cover object-[50%_35%]" />
+        <Image src={MUENSTER} alt="Basel mit Münster am Rhein" fill sizes="(min-width: 1280px) 1200px, 100vw" preload className="object-cover object-[50%_35%]" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[rgba(28,40,50,0.82)] via-[rgba(28,40,50,0.55)] to-[rgba(28,40,50,0.25)]" />
         <div className="relative grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_420px] lg:items-center lg:p-14">
           <div className="text-white">

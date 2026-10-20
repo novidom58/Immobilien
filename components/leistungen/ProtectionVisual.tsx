@@ -1,55 +1,102 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  Activity,
+  AppWindow,
+  Car,
+  CloudHail,
+  Droplets,
+  Flame,
+  HeartPulse,
+  House,
+  PiggyBank,
+  Plane,
+  ReceiptText,
+  Scale,
+  ShieldCheck,
+  Sofa,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
-const LAYERS = [
-  { name: "Gebäude", text: "Feuer, Sturm, Hagel, Hochwasser", r: 150 },
-  { name: "Wasser & Glas", text: "Leitungswasser, Rückstau, Glasbruch", r: 178 },
-  { name: "Hausrat", text: "Möbel, Geräte, Diebstahl", r: 206 },
-  { name: "Haftpflicht", text: "Schäden an Dritten, auch durchs Gebäude", r: 234 },
-  { name: "Rechtsschutz", text: "Streit mit Handwerkern oder Nachbarn", r: 262 },
+type Item = { icon: LucideIcon; label: string };
+type Ring = { name: string; claim: string; items: Item[] };
+
+// Von innen nach aussen: was im Haus ist, das Haus selbst, die Menschen darin.
+const RINGS: Ring[] = [
+  {
+    name: "Ihr Hab & Gut",
+    claim: "Alles, was in Ihrem Zuhause steht und mit Ihnen unterwegs ist.",
+    items: [
+      { icon: Sofa, label: "Hausrat" },
+      { icon: AppWindow, label: "Glasbruch" },
+      { icon: ShieldCheck, label: "Privathaftpflicht" },
+      { icon: Scale, label: "Rechtsschutz" },
+      { icon: Plane, label: "Reise" },
+      { icon: Car, label: "Auto & Kasko" },
+    ],
+  },
+  {
+    name: "Ihr Gebäude",
+    claim: "Die Mauern, das Dach und alles, was fest verbaut ist.",
+    items: [
+      { icon: Flame, label: "Feuer" },
+      { icon: CloudHail, label: "Elementar & Hagel" },
+      { icon: Droplets, label: "Gebäudewasser" },
+      { icon: Activity, label: "Erdbeben" },
+      { icon: House, label: "Gebäudehaftpflicht" },
+    ],
+  },
+  {
+    name: "Sie & Ihre Familie",
+    claim: "Damit die Hypothek tragbar bleibt, auch wenn das Leben anders kommt.",
+    items: [
+      { icon: HeartPulse, label: "Erwerbsunfähigkeit" },
+      { icon: Users, label: "Todesfall" },
+      { icon: PiggyBank, label: "Säule 3a & Sparen" },
+      { icon: ReceiptText, label: "Steuern sparen" },
+    ],
+  },
 ];
 
-const DROPS = [
-  [-220, 0],
-  [-150, 0.6],
-  [-80, 1.2],
-  [-10, 0.3],
-  [60, 0.9],
-  [130, 1.5],
-  [200, 0.45],
-  [250, 1.1],
-] as const;
+const RADIUS = [27, 37, 47]; // in % der Bühne
 
 /**
- * Ein Haus unter fünf Schutzschichten. Beim Erscheinen baut sich eine
- * Schicht nach der anderen auf; Hagel und Regen prallen an der äussersten ab.
+ * Schutz von innen nach aussen: zuerst Hab & Gut, dann das Gebäude, dann
+ * die Menschen. Die Ringe bauen sich nacheinander auf und lassen sich
+ * danach antippen; die Liste daneben erklärt den aktiven Ring.
  */
 export function ProtectionVisual() {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(0);
+  const [active, setActive] = useState(0);
+  const [manual, setManual] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- ohne Bewegung alle Schichten sofort zeigen
-      setShown(LAYERS.length);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ohne Bewegung alle Ringe sofort zeigen
+      setShown(RINGS.length);
       return;
     }
     let timer: ReturnType<typeof setInterval> | undefined;
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !timer) {
-          timer = setInterval(() => {
-            setShown((n) => {
-              if (n >= LAYERS.length && timer) clearInterval(timer);
-              return Math.min(LAYERS.length, n + 1);
-            });
-          }, 650);
-        }
+        if (!entry.isIntersecting || timer) return;
+        let step = 0;
+        timer = setInterval(() => {
+          step++;
+          if (step <= RINGS.length) {
+            setShown(step);
+            setActive(step - 1);
+          } else if (timer) {
+            clearInterval(timer);
+          }
+        }, 1400);
       },
-      { threshold: 0.35 }
+      { threshold: 0.2 }
     );
     io.observe(el);
     return () => {
@@ -58,90 +105,122 @@ export function ProtectionVisual() {
     };
   }, []);
 
-  const outer = LAYERS[Math.max(0, shown - 1)].r;
+  // Nach dem Aufbau wandert die Hervorhebung weiter, bis jemand tippt
+  useEffect(() => {
+    if (manual || shown < RINGS.length) return;
+    const t = setInterval(() => setActive((a) => (a + 1) % RINGS.length), 4200);
+    return () => clearInterval(t);
+  }, [manual, shown]);
+
+  function pick(i: number) {
+    setManual(true);
+    setShown(RINGS.length);
+    setActive(i);
+  }
+
+  const ring = RINGS[active];
 
   return (
     <section className="mx-auto max-w-7xl px-4 lg:px-10">
-      <div ref={ref} className="grid items-center gap-6 overflow-hidden rounded-[28px] border border-line bg-gradient-to-b from-[#eef2f6] to-white p-5 sm:p-8 lg:grid-cols-[1.3fr_1fr]">
-        <svg viewBox="-300 -300 600 380" className="h-auto w-full" role="img" aria-label="Haus unter fünf Schutzschichten: Gebäude, Wasser und Glas, Hausrat, Haftpflicht, Rechtsschutz">
-          <style>{`
-            @keyframes nd-drop { 0% { transform: translateY(-40px); opacity: 0 } 15% { opacity: .8 } 100% { transform: translateY(var(--stop)); opacity: 0 } }
-            @keyframes nd-flash { 0%, 86%, 100% { opacity: 0 } 88%, 92% { opacity: 1 } }
-            @media (prefers-reduced-motion: reduce) { .nd-anim { animation: none !important; opacity: 0 } }
-          `}</style>
-          {/* Wolke und Blitz */}
-          <g transform="translate(-170 -268)" opacity="0.9">
-            <ellipse cx="0" cy="10" rx="58" ry="20" fill="#c9d3dc" />
-            <ellipse cx="-28" cy="0" rx="30" ry="22" fill="#d6dee5" />
-            <ellipse cx="20" cy="-6" rx="34" ry="26" fill="#dfe6ec" />
-            <path className="nd-anim" d="M6 26 L-8 52 L4 52 L-6 78 L18 44 L6 44 L14 26 Z" fill="#e2b13c" style={{ animation: "nd-flash 4.5s infinite" }} />
-          </g>
-          <g transform="translate(150 -278)" opacity="0.85">
-            <ellipse cx="0" cy="10" rx="64" ry="20" fill="#d6dee5" />
-            <ellipse cx="26" cy="-4" rx="34" ry="24" fill="#e1e7ed" />
-          </g>
+      <div ref={ref} className="overflow-hidden rounded-[28px] border border-line bg-gradient-to-br from-[#f3efe7] via-white to-[#eef2f6] p-5 sm:p-10">
+        <div className="text-center">
+          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Rundum-Schutz · von innen nach aussen</div>
+          <h2 className="mx-auto mt-3 max-w-2xl text-balance font-display text-3xl text-ivory lg:text-4xl">
+            Damit Ihr Traumzuhause <em>ein Traum bleibt.</em>
+          </h2>
+        </div>
 
-          {/* Hagel und Regen, prallt an der äussersten Schicht ab */}
-          {DROPS.map(([x, delay]) => {
-            // Fallweg bis zur Schicht: Kuppel bei y = 60 - sqrt(r² - x²), Tropfen startet bei y = -222
-            const stop = 282 - Math.sqrt(Math.max(0, outer * outer - x * x));
-            return (
-              <line
-                key={x}
-                className="nd-anim"
-                x1={x}
-                y1={-235}
-                x2={x - 4}
-                y2={-222}
-                stroke="#6f8aa3"
-                strokeWidth="3"
-                strokeLinecap="round"
-                style={{ animation: `nd-drop 1.8s ${delay}s infinite linear`, ["--stop" as string]: `${stop}px` }}
-              />
-            );
-          })}
+        <div className="mt-8 grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
+          {/* Bühne mit Ringen */}
+          <div className="relative mx-auto aspect-square w-full max-w-[520px]">
+            {RINGS.map((r, i) => {
+              const on = i < shown;
+              return (
+                <button
+                  key={r.name}
+                  type="button"
+                  onClick={() => pick(i)}
+                  aria-label={r.name}
+                  className="absolute left-1/2 top-1/2 rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${RADIUS[i] * 2}%`,
+                    height: `${RADIUS[i] * 2}%`,
+                    transform: `translate(-50%, -50%) scale(${on ? 1 : 0.6})`,
+                    opacity: on ? 1 : 0,
+                    border: `${i === active ? 3 : 1.5}px ${i === 0 ? "solid" : "dashed"} rgba(143,106,57,${i === active ? 0.9 : 0.45})`,
+                    background: i === active ? "rgba(143,106,57,0.06)" : "transparent",
+                    zIndex: 3 - i,
+                  }}
+                />
+              );
+            })}
+            {/* Puls nach aussen */}
+            {shown === RINGS.length && (
+              <span aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[94%] w-[94%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber/30 motion-safe:animate-[nd-pulse_3.2s_ease-out_infinite]" />
+            )}
+            {/* Haus im Zentrum */}
+            <div className="absolute left-1/2 top-1/2 z-10 flex h-[30%] w-[30%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber text-white shadow-[0_18px_40px_-12px_rgba(143,106,57,0.7)]">
+              <House className="h-1/2 w-1/2" strokeWidth={1.4} />
+            </div>
+            {/* Symbole auf den Ringen */}
+            {RINGS.map((r, i) =>
+              r.items.map((it, j) => {
+                const angle = (-90 + (360 / r.items.length) * j + i * 22) * (Math.PI / 180);
+                // gerundet, damit Server und Browser denselben Wert schreiben
+                const x = Math.round((50 + Math.cos(angle) * RADIUS[i]) * 100) / 100;
+                const y = Math.round((50 + Math.sin(angle) * RADIUS[i]) * 100) / 100;
+                const on = i < shown;
+                return (
+                  <span
+                    key={it.label}
+                    title={it.label}
+                    className={`absolute z-20 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm transition-all duration-700 sm:h-11 sm:w-11 ${
+                      i === active ? "border-amber bg-amber text-white" : "border-line bg-white text-amber"
+                    }`}
+                    style={{ left: `${x}%`, top: `${y}%`, opacity: on ? 1 : 0, transform: `translate(-50%, -50%) scale(${on ? 1 : 0.3})`, transitionDelay: `${j * 90}ms` }}
+                  >
+                    <it.icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.6} />
+                  </span>
+                );
+              })
+            )}
+          </div>
 
-          {/* Schutzschichten */}
-          {LAYERS.map((l, i) => (
-            <path
-              key={l.name}
-              d={`M${-l.r} 60 A${l.r} ${l.r} 0 0 1 ${l.r} 60`}
-              fill={i === 0 ? "#8f6a39" : "none"}
-              fillOpacity={i === 0 ? 0.06 : 0}
-              stroke="#8f6a39"
-              strokeOpacity={0.85 - i * 0.12}
-              strokeWidth={i === shown - 1 ? 4 : 2.2}
-              strokeDasharray={i === 0 ? undefined : "2 7"}
-              strokeLinecap="round"
-              style={{ opacity: i < shown ? 1 : 0, transition: "opacity 500ms, stroke-width 300ms" }}
-            />
-          ))}
-
-          {/* Haus */}
-          <g>
-            <rect x="-96" y="-30" width="192" height="90" fill="#f4efe5" stroke="#191b1d" strokeOpacity="0.25" />
-            <path d="M-116 -26 L0 -112 L116 -26 Z" fill="#8f6a39" />
-            <rect x="-70" y="-6" width="40" height="34" fill="#9db4c8" stroke="#4f6b84" strokeWidth="1.5" />
-            <rect x="30" y="-6" width="40" height="34" fill="#9db4c8" stroke="#4f6b84" strokeWidth="1.5" />
-            <rect x="-16" y="12" width="32" height="48" fill="#6f5230" />
-            <rect x="-300" y="60" width="600" height="20" fill="#e3e8dc" />
-          </g>
-        </svg>
-
-        <ul className="grid gap-2">
-          {LAYERS.map((l, i) => (
-            <li
-              key={l.name}
-              className={`flex items-start gap-3 rounded-xl border p-3 transition-all duration-500 ${i < shown ? "border-line bg-white opacity-100" : "border-transparent opacity-30"}`}
-            >
-              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber text-xs font-semibold text-white">{i + 1}</span>
-              <span>
-                <span className="block font-display text-lg leading-tight text-ivory">{l.name}</span>
-                <span className="text-sm text-ivory-dim">{l.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+          {/* Erklärung zum aktiven Ring */}
+          <div>
+            <div className="flex flex-wrap gap-2" role="tablist">
+              {RINGS.map((r, i) => (
+                <button
+                  key={r.name}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === active}
+                  onClick={() => pick(i)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${i === active ? "bg-night text-ink" : "border border-line bg-white text-ivory-dim hover:text-ivory"}`}
+                >
+                  {i + 1}. {r.name}
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 rounded-2xl border border-line bg-white p-6" aria-live="polite">
+              <div className="font-display text-2xl text-ivory">{ring.name}</div>
+              <p className="mt-1 text-sm text-ivory-dim">{ring.claim}</p>
+              <ul className="mt-5 grid grid-cols-2 gap-3">
+                {ring.items.map((it) => (
+                  <li key={it.label} className="flex items-center gap-2.5 text-sm text-ivory">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber/10 text-amber">
+                      <it.icon className="h-4 w-4" strokeWidth={1.6} />
+                    </span>
+                    {it.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-ivory-dim">
+              Wir prüfen alle drei Ringe zusammen. So entstehen keine Lücken und keine doppelten Prämien.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );

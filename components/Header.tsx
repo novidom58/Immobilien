@@ -6,11 +6,14 @@ import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 
+// Die Leistungen direkt in der Navigation: Kunden suchen nach dem, was sie
+// vorhaben, nicht nach «NoviDom 360°». Der Käufer-Radar bleibt auf der Startseite.
 const links = [
-  { href: "/#leistungen", label: "NoviDom 360°" },
-  { href: "/leistungen/kaufen-verkaufen", label: "Verkaufen" },
   { href: "/immobilien", label: "Immobilien" },
-  { href: "/#kaeufer-radar", label: "Käufer-Radar" },
+  { href: "/leistungen/kaufen-verkaufen", label: "Verkaufen" },
+  { href: "/leistungen/finanzieren", label: "Finanzieren" },
+  { href: "/leistungen/umbauen", label: "Umbauen" },
+  { href: "/leistungen/versichern", label: "Versichern" },
   { href: "/#ueber-uns", label: "Über uns" },
 ];
 

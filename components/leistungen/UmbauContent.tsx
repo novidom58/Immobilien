@@ -2,6 +2,15 @@ import Link from "next/link";
 import { ArrowRight, Sofa } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { UmbauIdeas } from "@/components/leistungen/UmbauIdeas";
+import { BeforeAfterShowcase, type BeforeAfterItem } from "@/components/leistungen/BeforeAfter";
+
+// Nachher-Bilder: KI-Visualisierungen (Higgsfield), Vorher: Fotos der Beispielwohnung
+const VIS = "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/";
+const BEFORE_AFTER: BeforeAfterItem[] = [
+  { key: "kueche", title: "Küche: offen, mit Insel", text: "Die halbhohe Wand fällt, die Küche öffnet sich zum Wohnraum und eine Insel mit Barhockern wird zum Treffpunkt.", cost: "Richtwert ca. CHF 35'000 – 60'000", before: "/images/umbau/kueche-vorher.webp", after: `${VIS}hf_20261020_211921_592459a5-4c55-437a-b4b9-e788bfedf73a.png` },
+  { key: "balkon", title: "Balkon: das Aussenzimmer", text: "Holz statt Netz als Sichtschutz, neue Dielen, Lounge, Pflanzen und warmes Licht. Wenig Aufwand, grosse Wirkung.", cost: "Richtwert ab CHF 3'000", before: "/images/umbau/balkon-vorher.webp", after: `${VIS}hf_20261020_211922_369d43d3-7348-4c69-829b-3e491562efd4.png` },
+  { key: "bad", title: "Bad: Spa statt Standard", text: "Grossformatige Platten, Holzmöbel, Messing-Armaturen und indirektes Licht. Der Grundriss bleibt, die Leitungen auch.", cost: "Richtwert ca. CHF 25'000 – 40'000", before: "/images/umbau/bad-vorher.webp", after: `${VIS}hf_20261020_211922_acfeb165-2cc3-475a-86c4-ef3f2ff1018d.png` },
+];
 
 // Richtwerte für die Region Basel/Zug, inkl. MwSt. Sie dienen der ersten
 // Orientierung und ersetzen keine Offerte.
@@ -44,6 +53,7 @@ const FUNDING = [
 export function UmbauContent() {
   return (
     <>
+      <BeforeAfterShowcase items={BEFORE_AFTER} />
       <UmbauIdeas />
 
       <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-10">

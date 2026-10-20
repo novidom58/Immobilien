@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { AREAS } from "@/components/novidom360/areas";
+import { ARTICLES } from "@/lib/ratgeber";
 
 const siteUrl = "https://www.novidom-immo.ch";
 
@@ -29,6 +30,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${siteUrl}/ratgeber`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    ...ARTICLES.map((a) => ({
+      url: `${siteUrl}/ratgeber/${a.slug}`,
+      lastModified: new Date(a.updated),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
     {
       url: `${siteUrl}/datenschutz`,
       lastModified: new Date(),

@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { MyDocuments } from "@/components/MyDocuments";
+import { DocChecklist, FINANZ_UNTERLAGEN, POLICEN } from "@/components/DocChecklist";
 import { SaleStepper } from "@/components/SaleStepper";
 import { Logo } from "@/components/ui/Logo";
 import { SearchProfileForm, type SearchProfile } from "@/components/portal/SearchProfileForm";
@@ -334,6 +335,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <div className="mt-5">
             <FinanceCheck key={preis ?? "plan"} initial={financeInitial} user={portalUser} priceOptions={priceOptions} />
           </div>
+          <div className="mt-5">
+            <DocChecklist
+              title="Unterlagen für die Bank"
+              intro="Laden Sie die Dokumente hier hoch, dann können wir die Finanzierung ohne Papierkram einreichen."
+              items={FINANZ_UNTERLAGEN}
+            />
+          </div>
         </section>
     ),
     versicherung: (
@@ -341,6 +349,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <h2 className={sectionHead}>Richtig versichert?</h2>
           <div className="mt-5">
             <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+          </div>
+          <div id="policen" className="mt-5 scroll-mt-28">
+            <DocChecklist
+              title="Policen hochladen, Lücken-Check erhalten"
+              intro="Fotos oder PDFs genügen. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
+              items={POLICEN}
+            />
           </div>
         </section>
     ),

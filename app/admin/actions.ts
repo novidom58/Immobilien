@@ -35,6 +35,23 @@ async function requireAdmin() {
   return { supabase, error: null };
 }
 
+/**
+ * offer_type (Verkauf/Miete) gibt es erst nach dem SQL-Update. Fehlt die
+ * Spalte noch, wird ein Verkaufsobjekt ohne das Feld gespeichert.
+ */
+async function saveWithOfferType(offerType: string, run: (extra: { offer_type?: string }) => PromiseLike<{ error: { message: string } | null }>) {
+  const res = await run({ offer_type: offerType });
+  if (res.error?.message.includes("offer_type")) {
+    if (offerType === "kauf") return run({});
+    return { error: { message: "Für Mietobjekte bitte zuerst das SQL «Mietobjekte» in Supabase ausführen." } };
+  }
+  return res;
+}
+
+function readOfferType(formData: FormData) {
+  return formData.get("offer_type") === "miete" ? "miete" : "kauf";
+}
+
 export async function createListing(formData: FormData) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };
@@ -60,7 +77,8 @@ export async function createListing(formData: FormData) {
   // wird das Inserat trotzdem gespeichert.
   const coords = await geocodeAddress(address, city);
 
-  const { error } = await supabase.from("listings").insert({
+  const { error } = await saveWithOfferType(readOfferType(formData), (extra) => supabase.from("listings").insert({
+    ...extra,
     address,
     city,
     postal_code: postalCode || null,
@@ -75,7 +93,7 @@ export async function createListing(formData: FormData) {
     posted_portals: postedPortals,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
-  });
+  }));
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
@@ -109,9 +127,10 @@ export async function updateListing(listingId: string, formData: FormData) {
   // Bei Adress-/Ortsänderung erneut geocodieren, damit der Karten-Pin stimmt.
   const coords = await geocodeAddress(address, city);
 
-  const { error } = await supabase
+  const { error } = await saveWithOfferType(readOfferType(formData), (extra) => supabase
     .from("listings")
     .update({
+      ...extra,
       address,
       city,
       postal_code: postalCode || null,
@@ -126,7 +145,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       posted_portals: postedPortals,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
-    .eq("id", listingId);
+    .eq("id", listingId));
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
@@ -212,6 +231,37 @@ export async function updateLeadStatus(leadId: string, status: string) {
 
   const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
   if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/** Lead archivieren (Fake, Test, anderweitig erledigt) oder zurückholen. */
+export async function archiveLead(leadId: string, archive: boolean) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ archived_at: archive ? new Date().toISOString() : null })
+    .eq("id", leadId);
+  if (error) {
+    return { error: error.message.includes("archived_at") ? "Bitte zuerst das SQL «Leads archivieren» in Supabase ausführen." : error.message };
+  }
+
+  revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/** Lead endgültig löschen, inkl. Kontakthistorie. */
+export async function deleteLead(leadId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data, error } = await supabase.from("leads").delete().eq("id", leadId).select("id");
+  if (error) return { error: error.message };
+  // Ohne Lösch-Policy meldet Supabase keinen Fehler, löscht aber nichts
+  if (!data?.length) return { error: "Nicht gelöscht. Bitte zuerst das SQL «Leads archivieren» in Supabase ausführen." };
 
   revalidatePath("/admin", "layout");
   return { error: null };
@@ -862,7 +912,7 @@ export async function sendExposeEmail(customerId: string) {
 
   const { data: customer, error: fetchError } = await supabase
     .from("customers")
-    .select("full_name, email, listing_id, listings(address, city, title)")
+    .select("full_name, email, listing_id, listings!customers_listing_id_fkey(address, city, title)")
     .eq("id", customerId)
     .single();
   if (fetchError || !customer) return { error: fetchError?.message || "Kunde nicht gefunden." };
@@ -1310,7 +1360,7 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
   return { error: sent < targets.length ? `${targets.length - sent} Mail(s) konnten nicht verschickt werden.` : null, matches: targets.length, sent };
 }
 
-const ZINS_LAUFZEITEN = ["saron", "2", "5", "10"] as const;
+const ZINS_LAUFZEITEN = ["saron", "3", "5", "7", "10"] as const;
 
 /** Richtzinsen fürs Zinsbarometer speichern; der bisherige Wert wird zur Vorwoche. */
 export async function saveZinssaetze(formData: FormData) {

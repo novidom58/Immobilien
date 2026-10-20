@@ -727,11 +727,15 @@ create policy "viewing_feedback_admin_delete" on viewing_feedback
 -- Zinsbarometer: Richtzinsen, im Admin gepflegt, öffentlich lesbar
 -- ---------------------------------------------------------------------
 create table if not exists zinssaetze (
-  laufzeit text primary key check (laufzeit in ('saron', '2', '5', '10')),
+  laufzeit text primary key,
   zins numeric not null,
   vorwoche numeric,
   updated_at timestamptz not null default now()
 );
+
+-- Laufzeiten: SARON, 3, 5, 7 und 10 Jahre fest (auch für bestehende Tabellen)
+alter table zinssaetze drop constraint if exists zinssaetze_laufzeit_check;
+alter table zinssaetze add constraint zinssaetze_laufzeit_check check (laufzeit in ('saron', '2', '3', '5', '7', '10'));
 
 alter table zinssaetze enable row level security;
 
@@ -742,3 +746,18 @@ create policy "zinssaetze_public_read" on zinssaetze
 drop policy if exists "zinssaetze_admin_write" on zinssaetze;
 create policy "zinssaetze_admin_write" on zinssaetze
   for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- Leads archivieren (Fakes, Tests, anderweitig erledigt) und löschen
+-- ---------------------------------------------------------------------
+alter table leads add column if not exists archived_at timestamptz;
+
+drop policy if exists "leads_admin_delete" on leads;
+create policy "leads_admin_delete" on leads
+  for delete using (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- Mietobjekte: Inserate zum Verkauf oder zur Miete (Preis = Miete/Monat)
+-- ---------------------------------------------------------------------
+alter table listings add column if not exists offer_type text not null default 'kauf'
+  check (offer_type in ('kauf', 'miete'));

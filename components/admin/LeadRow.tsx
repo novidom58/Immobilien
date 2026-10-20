@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Archive, ArchiveRestore, ChevronDown, Trash2 } from "lucide-react";
+import { archiveLead, deleteLead } from "@/app/admin/actions";
 import { LEAD_STATUS_OPTIONS, suggestRoles } from "@/lib/constants";
 import { LeadActivityPanel } from "./LeadActivityPanel";
 
@@ -19,6 +21,7 @@ type AdminLead = {
   follow_up_at: string | null;
   source: string | null;
   listing_id?: string | null;
+  archived_at?: string | null;
   activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
@@ -33,7 +36,27 @@ const STATUS_BADGE: Record<string, string> = {
 const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 
 export function LeadRow({ lead }: { lead: AdminLead }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const archived = Boolean(lead.archived_at);
+
+  async function toggleArchive() {
+    setBusy(true);
+    const res = await archiveLead(lead.id, !archived);
+    setBusy(false);
+    if (res.error) window.alert(res.error);
+    else router.refresh();
+  }
+
+  async function remove() {
+    if (!window.confirm(`Lead «${lead.name}» endgültig löschen? Das lässt sich nicht rückgängig machen.`)) return;
+    setBusy(true);
+    const res = await deleteLead(lead.id);
+    setBusy(false);
+    if (res.error) window.alert(res.error);
+    else router.refresh();
+  }
 
   const referralHref = PARTNER_EMAIL
     ? `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(
@@ -99,10 +122,25 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
             ))}
         </td>
         <td>
-          <button type="button" onClick={() => setOpen((v) => !v)} className="btn btn-ghost btn-sm">
-            Details
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
-          </button>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <button type="button" onClick={() => setOpen((v) => !v)} className="btn btn-ghost btn-sm">
+              Details
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={toggleArchive}
+              className="btn btn-ghost btn-sm"
+              title={archived ? "Wiederherstellen" : "Archivieren (Fake, Test, anderweitig erledigt)"}
+              aria-label={archived ? "Wiederherstellen" : "Archivieren"}
+            >
+              {archived ? <ArchiveRestore className="h-3.5 w-3.5" strokeWidth={1.5} /> : <Archive className="h-3.5 w-3.5" strokeWidth={1.5} />}
+            </button>
+            <button type="button" disabled={busy} onClick={remove} className="btn btn-ghost btn-sm" title="Endgültig löschen" aria-label="Löschen">
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </button>
+          </div>
         </td>
       </tr>
       {open && (

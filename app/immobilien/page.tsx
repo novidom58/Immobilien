@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { offerTypeOf, priceText, statusBadge, type OfferType } from "@/lib/listingOffer";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, BedDouble, Ruler } from "lucide-react";
@@ -27,18 +28,10 @@ type PublicListing = {
   rooms: number | null;
   living_area: number | null;
   created_at: string;
+  offer: OfferType;
   cover: string | null;
 };
 
-const STATUS_LABEL: Record<string, { label: string; classes: string }> = {
-  active: { label: "Zum Verkauf", classes: "border-amber/50 text-amber-soft" },
-  reserved: { label: "Reserviert", classes: "border-blueprint/50 text-blueprint" },
-  sold: { label: "Verkauft", classes: "border-line text-ivory-dim/60" },
-};
-
-function formatChf(value: number) {
-  return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
-}
 
 export default async function ImmobilienPage() {
   let listings: PublicListing[] = [];
@@ -48,7 +41,7 @@ export default async function ImmobilienPage() {
     const { data } = await supabase
       .from("listings")
       .select(
-        "id, title, address, city, postal_code, price_chf, status, property_type, rooms, living_area, created_at, listing_photos(url, sort_order)"
+        "*, listing_photos(url, sort_order)"
       )
       .in("status", ["active", "reserved", "sold"])
       .or(publicListingFilter())
@@ -71,6 +64,7 @@ export default async function ImmobilienPage() {
         rooms: (l.rooms as number | null) ?? null,
         living_area: (l.living_area as number | null) ?? null,
         created_at: l.created_at as string,
+        offer: offerTypeOf(l.offer_type),
         cover,
       };
     });
@@ -110,7 +104,7 @@ export default async function ImmobilienPage() {
         ) : (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {available.map((listing) => {
-              const status = STATUS_LABEL[listing.status] ?? STATUS_LABEL.active;
+              const status = statusBadge(listing.status, listing.offer);
               return (
                 <Link
                   key={listing.id}
@@ -157,7 +151,7 @@ export default async function ImmobilienPage() {
                       </div>
                     )}
                     <div className="mt-4 font-mono text-amber-soft">
-                      {listing.price_chf ? formatChf(listing.price_chf) : "Preis auf Anfrage"}
+                      {priceText(listing.price_chf, listing.offer)}
                     </div>
                     <span className="mt-5 inline-block font-mono text-xs uppercase tracking-wide text-ivory-dim underline underline-offset-4 group-hover:text-ivory">
                       Details ansehen

@@ -7,8 +7,9 @@ type Rate = { laufzeit: string; zins: number; updated_at: string };
 
 const FIELDS = [
   { key: "saron", label: "SARON" },
-  { key: "2", label: "Fest 2 J." },
+  { key: "3", label: "Fest 3 J." },
   { key: "5", label: "Fest 5 J." },
+  { key: "7", label: "Fest 7 J." },
   { key: "10", label: "Fest 10 J." },
 ];
 

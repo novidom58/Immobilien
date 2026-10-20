@@ -1,32 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-// Isometrische Projektion: x nach rechts hinten, y nach links hinten, z nach oben.
-const S = 26;
-const C30 = 0.866;
-function iso(x: number, y: number, z: number) {
-  return [(x - y) * C30 * S, (x + y) * 0.5 * S - z * S] as const;
-}
-function pts(...p: [number, number, number][]) {
-  return p.map(([x, y, z]) => iso(x, y, z).join(",")).join(" ");
-}
-
-type Box = { x: number; y: number; z: number; dx: number; dy: number; dz: number };
-
-/** Sichtbare Flächen eines Quaders: oben, rechts (x = Ende), links vorne (y = Ende). */
-function Block({ b, top, right, left }: { b: Box; top: string; right: string; left: string }) {
-  const x1 = b.x + b.dx;
-  const y1 = b.y + b.dy;
-  const z1 = b.z + b.dz;
-  return (
-    <g stroke="#191b1d" strokeOpacity="0.18" strokeWidth="0.8" strokeLinejoin="round">
-      <polygon points={pts([x1, b.y, b.z], [x1, y1, b.z], [x1, y1, z1], [x1, b.y, z1])} fill={right} />
-      <polygon points={pts([b.x, y1, b.z], [x1, y1, b.z], [x1, y1, z1], [b.x, y1, z1])} fill={left} />
-      <polygon points={pts([b.x, b.y, z1], [x1, b.y, z1], [x1, y1, z1], [b.x, y1, z1])} fill={top} />
-    </g>
-  );
-}
+import { useRef } from "react";
+import { Block, iso, pts } from "@/components/leistungen/iso";
+import { useScrollProgress } from "@/lib/useScrollProgress";
 
 // Fenster auf der linken Front (y = Hausende) bzw. der rechten Seite (x = Hausende)
 function WindowFront({ x, z, w, h, y }: { x: number; z: number; w: number; h: number; y: number }) {
@@ -57,35 +33,7 @@ const STEPS = [
  */
 export function BuildUpHero() {
   const wrap = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- ohne Bewegung gleich das fertige Haus zeigen
-      setProgress(1);
-      return;
-    }
-    let frame = 0;
-    function onScroll() {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const el = wrap.current;
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const total = rect.height - window.innerHeight;
-        const p = total > 0 ? -rect.top / total : 1;
-        setProgress(Math.min(1, Math.max(0, p)));
-      });
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
+  const progress = useScrollProgress(wrap);
 
   // Fortschritt einer Ebene 0..1, ab ihrem Startpunkt über eine kurze Strecke
   const layer = (start: number, span = 0.1) => Math.min(1, Math.max(0, (progress - start) / span));

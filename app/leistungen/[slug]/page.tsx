@@ -18,6 +18,9 @@ import { AreaContactCard, AreaFaq, AreaInteractive, OtherAreas } from "@/compone
 import { FinanzierenContent } from "@/components/leistungen/FinanzierenContent";
 import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 import { UmbauContent } from "@/components/leistungen/UmbauContent";
+import { FinanzHero } from "@/components/leistungen/FinanzHero";
+import { BuildUpHero } from "@/components/leistungen/BuildUpHero";
+import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
 import { SellVsPrivate } from "@/components/sections/SellVsPrivate";
 import { BuyerSection, OwnerSection } from "@/components/sections/BuyerAndOwnerSections";
@@ -94,11 +97,20 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           )}
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 lg:px-10">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)] sm:aspect-[16/7]">
-            <Image src={content.image} alt="" fill sizes="(min-width: 1280px) 1200px, 100vw" preload className="object-cover object-[60%_center]" />
-          </div>
-        </section>
+        {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Aufbau-Animation, Versicherung als Schutzschichten */}
+        {area.id === "fin" ? (
+          <FinanzHero />
+        ) : area.id === "umbau" ? (
+          <BuildUpHero />
+        ) : area.id === "vers" ? (
+          <ProtectionVisual />
+        ) : (
+          <section className="mx-auto max-w-7xl px-4 lg:px-10">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)] sm:aspect-[16/7]">
+              <Image src={content.image} alt="" fill sizes="(min-width: 1280px) 1200px, 100vw" preload className="object-cover object-[60%_center]" />
+            </div>
+          </section>
+        )}
 
         {area.id === "fin" ? (
           <FinanzierenContent />

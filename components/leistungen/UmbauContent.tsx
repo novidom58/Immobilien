@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Sofa } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { UmbauIdeas } from "@/components/leistungen/UmbauIdeas";
 
 // Richtwerte für die Region Basel/Zug, inkl. MwSt. Sie dienen der ersten
 // Orientierung und ersetzen keine Offerte.
@@ -43,6 +44,8 @@ const FUNDING = [
 export function UmbauContent() {
   return (
     <>
+      <UmbauIdeas />
+
       <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-10">
         <SectionLabel>Typische Projekte</SectionLabel>
         <h2 className="mb-3 mt-6 font-display text-3xl text-ivory lg:text-4xl">

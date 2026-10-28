@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { DayNightOverlay } from "./DayNightOverlay";
 
 // Gezackter Siegelrand mit 28 Zacken, einmal beim Laden berechnet.
 const STAR_PATH = (() => {
@@ -65,6 +66,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
             />
           </motion.div>
         </AnimatePresence>
+        <DayNightOverlay />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-5 pt-20 text-white lg:px-8">
           {current ? (

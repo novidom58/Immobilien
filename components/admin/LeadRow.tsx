@@ -46,33 +46,24 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
     : undefined;
 
   const isOverdue = (lead.status === "neu" || lead.status === "kontaktiert") && lead.daysOpen >= 3;
+  const roles = suggestRoles({ ...lead, listing_id: lead.listing_id ?? null });
 
   return (
     <>
       <tr className={isOverdue ? "termin-offen" : ""}>
-        <td className="td-light">{lead.type}</td>
-        <td className="td-name">
+        <td className="td-name" style={{ minWidth: 190 }}>
           {lead.name}
-          {isOverdue && (
-            <span className="badge badge-red" style={{ marginLeft: 6 }}>
-              {lead.daysOpen}T überfällig
-            </span>
-          )}
-          {lead.wants_financing && (
-            <span
-              title={referralHref ? "An hypotheken-analyse.ch weiterleiten" : "Finanzierungsberatung gewünscht"}
-              className="badge badge-blue"
-              style={{ marginLeft: 6 }}
-            >
-              Finanzierung
-            </span>
-          )}
+          <div className="td-light" style={{ fontWeight: 400, marginTop: 2, whiteSpace: "nowrap" }}>
+            {lead.email}
+            {lead.phone ? ` · ${lead.phone}` : ""}
+          </div>
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+            <span className="badge badge-muted">{lead.type}</span>
+            {isOverdue && <span className="badge badge-red">{lead.daysOpen}T überfällig</span>}
+            {lead.wants_financing && <span className="badge badge-blue">Finanzierung</span>}
+          </div>
         </td>
-        <td className="td-light">
-          {lead.email}
-          {lead.phone ? ` · ${lead.phone}` : ""}
-        </td>
-        <td className="td-light" style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <td className="td-light" style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {lead.message}
         </td>
         <td className="td-light">
@@ -88,31 +79,24 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
             {LEAD_STATUS_OPTIONS.find((o) => o.value === lead.status)?.label ?? lead.status}
           </span>
         </td>
-        <td>
-          {lead.wants_financing &&
-            (referralHref ? (
-              <a href={referralHref} className="btn btn-ghost btn-sm">
-                An hypotheken-analyse.ch
-              </a>
-            ) : (
-              <span className="td-light" style={{ fontSize: 11 }}>
-                Partner-E-Mail fehlt
-              </span>
-            ))}
-        </td>
-        <td>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+        <td style={{ minWidth: 300 }}>
+          <LeadArchiveButtons leadId={lead.id} name={lead.name} archived={Boolean(lead.archived_at)} roles={roles} />
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
             <button type="button" onClick={() => setOpen((v) => !v)} className="btn btn-ghost btn-sm">
               Details
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.5} />
             </button>
-            <LeadArchiveButtons leadId={lead.id} name={lead.name} archived={Boolean(lead.archived_at)} />
+            {lead.wants_financing && referralHref && (
+              <a href={referralHref} className="btn btn-ghost btn-sm" title="An hypotheken-analyse.ch weiterleiten">
+                Finanzierung weiterleiten
+              </a>
+            )}
           </div>
         </td>
       </tr>
       {open && (
         <tr>
-          <td colSpan={8} style={{ background: "var(--bg)", padding: "16px 20px" }}>
+          <td colSpan={5} style={{ background: "var(--bg)", padding: "16px 20px" }}>
             <LeadActivityPanel
               leadId={lead.id}
               name={lead.name}
@@ -121,7 +105,7 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
               phone={lead.phone}
               followUpAt={lead.follow_up_at}
               activity={lead.activity}
-              suggestedRoles={suggestRoles({ ...lead, listing_id: lead.listing_id ?? null })}
+              suggestedRoles={roles}
               listingId={lead.listing_id ?? null}
             />
           </td>

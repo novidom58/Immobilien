@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Plus } from "lucide-react";
 import { AREAS, type AreaId } from "./areas";
-import { DayNightHouse } from "./DayNightHouse";
 
 const C = 360;
 const R_OUT = 340;
@@ -178,7 +178,13 @@ export function PuzzleHub({ onSelect }: { onSelect: (id: AreaId) => void }) {
         ref={centerRef}
         className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[42%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-[6px] border-ink-3 shadow-[0_0_0_1px_rgba(143,106,57,0.28),0_30px_80px_-20px_rgba(41,37,27,0.35)]"
       >
-        <DayNightHouse zoomed={Boolean(active)} />
+        <Image
+          src="/images/novidom-holzhaus.webp"
+          alt=""
+          fill
+          sizes="(min-width: 768px) 300px, 42vw"
+          className={`object-cover transition-transform duration-700 ${active ? "scale-110" : "scale-100"}`}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/20 to-ink/85" />
         <div className="absolute inset-x-0 bottom-[16%] px-4 text-center">
           <div className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.16em] text-amber-soft sm:text-[10px] sm:tracking-[0.24em]">

@@ -7,7 +7,7 @@ import { syncLeadToCrm } from "@/lib/leadCrm";
 import { isAnliegen } from "@/lib/anliegen";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
-const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
 
 // Sobald diese Datei existiert (PDF-Export des Ratgebers, siehe env.example-
 // Hinweis), wird sie automatisch an die Bestätigungsmail einer
@@ -113,11 +113,11 @@ export async function POST(request: Request) {
         from: NOTIFY_FROM,
         to: email,
         subject: isGuideRequest
-          ? "Ihr Ratgeber von NoviDom Immo"
-          : "Ihre Anfrage bei NoviDom Immo ist eingegangen",
+          ? "Ihr Ratgeber von NoviDom Immobilien AG"
+          : "Ihre Anfrage bei NoviDom Immobilien AG ist eingegangen",
         text: hasGuidePdf
-          ? `Hallo ${firstName}\n\nVielen Dank für Ihr Interesse. Im Anhang finden Sie Ihren kostenlosen Ratgeber „1×1 des Immobilienverkaufs in der Schweiz“.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`
-          : `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`,
+          ? `Hallo ${firstName}\n\nVielen Dank für Ihr Interesse. Im Anhang finden Sie Ihren kostenlosen Ratgeber „1×1 des Immobilienverkaufs in der Schweiz“.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immobilien AG`
+          : `Hallo ${firstName}\n\nVielen Dank für Ihre Anfrage. Wir haben sie erhalten und melden uns innert kurzer Zeit persönlich bei Ihnen.\n\nFreundliche Grüsse\nIhr Team von NoviDom Immobilien AG`,
         attachments: hasGuidePdf
           ? [{ filename: "1x1-Immobilienverkauf-NoviDom.pdf", content: readFileSync(GUIDE_PDF_PATH) }]
           : undefined,

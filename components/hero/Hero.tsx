@@ -51,7 +51,7 @@ export function Hero({ showcase = [] }: { showcase?: ShowcaseItem[] }) {
           transition={{ duration: 0.8, delay: 0.7 }}
           className="mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-ivory-dim lg:text-xl"
         >
-          Verkaufen, finanzieren, umbauen, absichern. Persönlich begleitet, aus einer Hand, zu fairen Kosten.
+          Verkaufen und umbauen, finanzieren und absichern. Persönlich begleitet, aus einer Hand, zu fairen Kosten.
         </motion.p>
 
         <motion.div

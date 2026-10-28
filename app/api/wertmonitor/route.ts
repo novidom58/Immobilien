@@ -5,7 +5,7 @@ import { parseOwnerInput, upsertOwner } from "@/lib/wertmonitor";
 import { formatChf, PRICE_STAND } from "@/lib/valuation";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
-const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Öffentliche Anmeldung zum Wertmonitor (und optional Hypothekenwächter). */
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from: NOTIFY_FROM,
       to: email,
-      subject: "Ihr Wertmonitor von NoviDom Immo",
+      subject: "Ihr Wertmonitor von NoviDom Immobilien AG",
       text: [
         `Hallo ${firstName}`,
         "",
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         input.hypo_ablauf ? "\nIhre Hypothek behalten wir im Blick und melden uns rechtzeitig vor dem Ablauf mit besseren Konditionen." : "",
         "",
         "Freundliche Grüsse",
-        "Ihr Team von NoviDom Immo",
+        "Ihr Team von NoviDom Immobilien AG",
       ].join("\n"),
     });
     await resend.emails.send({

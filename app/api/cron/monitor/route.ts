@@ -6,7 +6,7 @@ import { ownerValue, parseOwnerInput } from "@/lib/wertmonitor";
 
 export const dynamic = "force-dynamic";
 
-const FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+const FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
 const TEAM = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
 const QUARTER_MS = 90 * 24 * 3_600_000;
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         "Keine Updates mehr? Einfach kurz antworten.",
         "",
         "Freundliche Grüsse",
-        "Ihr Team von NoviDom Immo",
+        "Ihr Team von NoviDom Immobilien AG",
       ].join("\n"),
     });
     if (error) continue;
@@ -104,7 +104,7 @@ export async function GET(request: Request) {
         "Antworten Sie einfach auf diese Mail, dann melden wir uns.",
         "",
         "Freundliche Grüsse",
-        "Ihr Team von NoviDom Immo",
+        "Ihr Team von NoviDom Immobilien AG",
       ].join("\n"),
     });
     if (error) continue;

@@ -43,8 +43,8 @@ export default async function RatgeberArticlePage({ params }: { params: Promise<
     dateModified: article.updated,
     inLanguage: "de-CH",
     mainEntityOfPage: `${siteUrl}/ratgeber/${article.slug}`,
-    author: { "@type": "Organization", name: "NoviDom Immo", url: siteUrl },
-    publisher: { "@type": "Organization", name: "NoviDom Immo", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/icon.png` } },
+    author: { "@type": "Organization", name: "NoviDom Immobilien AG", url: siteUrl },
+    publisher: { "@type": "Organization", name: "NoviDom Immobilien AG", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/icon.png` } },
     citation: article.sources.map((s) => s.url),
   };
   // Der Rechner-Hinweis steht nach dem zweiten Abschnitt, damit er beim Lesen auftaucht
@@ -65,7 +65,7 @@ export default async function RatgeberArticlePage({ params }: { params: Promise<
           </nav>
           <h1 className="mt-6 text-balance font-display text-[clamp(2.1rem,4.6vw,3.4rem)] leading-[1.08] tracking-[-0.02em] text-ivory">{article.title}</h1>
           <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ivory-dim">
-            <span>NoviDom Immo</span>
+            <span>NoviDom Immobilien AG</span>
             <span>
               Veröffentlicht <time dateTime={article.published}>{formatDate(article.published)}</time>
             </span>

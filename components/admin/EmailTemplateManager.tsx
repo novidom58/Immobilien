@@ -48,7 +48,7 @@ function TemplateForm({
         required
         rows={12}
         defaultValue={template?.body ?? ""}
-        placeholder={"Hallo {vorname}\n\n…\n\nFreundliche Grüsse\n{berater}\nNoviDom Immo"}
+        placeholder={"Hallo {vorname}\n\n…\n\nFreundliche Grüsse\n{berater}\nNoviDom Immobilien AG"}
         className="field-textarea sm:col-span-2"
       />
       <div className="flex flex-wrap items-center gap-1.5 sm:col-span-2" style={{ fontSize: 12 }}>

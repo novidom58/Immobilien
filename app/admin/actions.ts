@@ -205,7 +205,7 @@ async function notifyNewsletterSubscribers(
     ? `CHF ${listing.price_chf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`
     : "Preis auf Anfrage";
   const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch"}/immobilien/${listingId}`;
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
 
   await Promise.allSettled(
     subscribers.map((s) =>
@@ -213,7 +213,7 @@ async function notifyNewsletterSubscribers(
         from,
         to: s.email,
         subject: `Neu bei NoviDom: ${name}`,
-        text: `Hallo\n\nEin neues Objekt ist bei NoviDom Immo online:\n\n${name}\n${price}\n\nAnsehen: ${url}\n\nFreundliche Grüsse\nNoviDom Immo`,
+        text: `Hallo\n\nEin neues Objekt ist bei NoviDom Immobilien AG online:\n\n${name}\n${price}\n\nAnsehen: ${url}\n\nFreundliche Grüsse\nNoviDom Immobilien AG`,
       })
     )
   );
@@ -923,7 +923,7 @@ export async function sendExposeEmail(customerId: string) {
   if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://novidom-immo.ch";
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
   const listing = customer.listings as unknown as { address: string; city: string; title: string | null } | null;
   const name = listing?.title || `${listing?.address ?? ""}, ${listing?.city ?? ""}`;
   const url = `${siteUrl}/immobilien/${customer.listing_id}/expose`;
@@ -933,7 +933,7 @@ export async function sendExposeEmail(customerId: string) {
     from,
     to: customer.email,
     subject: `Ihr Exposé — ${name}`,
-    text: `Hallo ${firstName}\n\nHier ist der Link zu Ihrem Exposé:\n\n${url}\n\nFreundliche Grüsse\nIhr Team von NoviDom Immo`,
+    text: `Hallo ${firstName}\n\nHier ist der Link zu Ihrem Exposé:\n\n${url}\n\nFreundliche Grüsse\nIhr Team von NoviDom Immobilien AG`,
   });
   if (error) return { error: error.message };
 
@@ -970,15 +970,15 @@ export async function sendFollowUpEmail(customerId: string) {
   const resend = createResendClient();
   if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
 
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
   const firstName = customer.full_name.split(" ")[0];
-  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+  const berater = customer.berater || "Ihr Team von NoviDom Immobilien AG";
 
   const { error } = await resend.emails.send({
     from,
     to: customer.email,
     subject: "Kurzes Update zu Ihrem Anliegen",
-    text: `Hallo ${firstName}\n\nWir wollten kurz nachfragen, ob sich bei Ihnen in der Zwischenzeit etwas getan hat oder ob noch Fragen offen sind. Gerne melden wir uns auch telefonisch, wenn Ihnen das lieber ist.\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+    text: `Hallo ${firstName}\n\nWir wollten kurz nachfragen, ob sich bei Ihnen in der Zwischenzeit etwas getan hat oder ob noch Fragen offen sind. Gerne melden wir uns auch telefonisch, wenn Ihnen das lieber ist.\n\nFreundliche Grüsse\n${berater}\nNoviDom Immobilien AG`,
   });
   if (error) return { error: error.message };
 
@@ -1006,16 +1006,16 @@ export async function sendDocumentRequestEmail(customerId: string) {
   const resend = createResendClient();
   if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet." };
 
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
   const firstName = customer.full_name.split(" ")[0];
-  const berater = customer.berater || "Ihr Team von NoviDom Immo";
+  const berater = customer.berater || "Ihr Team von NoviDom Immobilien AG";
   const docList = REQUIRED_DOCUMENTS.map((d) => `• ${d}`).join("\n");
 
   const { error } = await resend.emails.send({
     from,
     to: customer.email,
     subject: "Unterlagen für den Verkauf",
-    text: `Hallo ${firstName}\n\nDamit wir mit dem Verkauf weiterkommen, benötigen wir noch folgende Unterlagen von Ihnen:\n\n${docList}\n\nSie können uns diese einfach per E-Mail zurücksenden. Vielen Dank!\n\nFreundliche Grüsse\n${berater}\nNoviDom Immo`,
+    text: `Hallo ${firstName}\n\nDamit wir mit dem Verkauf weiterkommen, benötigen wir noch folgende Unterlagen von Ihnen:\n\n${docList}\n\nSie können uns diese einfach per E-Mail zurücksenden. Vielen Dank!\n\nFreundliche Grüsse\n${berater}\nNoviDom Immobilien AG`,
   });
   if (error) return { error: error.message };
 
@@ -1211,7 +1211,7 @@ export async function sendTemplateMail(
     return { error: "Direktversand ist noch nicht eingerichtet (RESEND_API_KEY fehlt). Bitte über das E-Mail-Programm senden." };
   }
 
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
   const replyTo = process.env.LEADS_EMAIL_TO || undefined;
   const { error: sendError } = await resend.emails.send({
     from,
@@ -1316,7 +1316,7 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
   if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet.", matches: targets.length, sent: 0 };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
   const name = listing.title || `${listing.address}, ${listing.city}`;
   const price = listing.price_chf ? `CHF ${listing.price_chf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}` : "Preis auf Anfrage";
   const facts = [listing.rooms ? `${listing.rooms} Zimmer` : null, listing.living_area ? `${listing.living_area} m²` : null, price]
@@ -1345,7 +1345,7 @@ export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
         "Möchten Sie keine Käufer-Alarme mehr? Im Kundenportal unter «Suchprofil» abmelden oder kurz antworten.",
         "",
         "Freundliche Grüsse",
-        "NoviDom Immo",
+        "NoviDom Immobilien AG",
       ]
         .filter((line) => line !== null)
         .join("\n"),

@@ -103,7 +103,7 @@ export function LeadActivityPanel({
         )}
         {phone && (
           <a
-            href={whatsappTo(phone, `Hallo ${name.split(" ")[0]}, hier ist NoviDom Immo. `)}
+            href={whatsappTo(phone, `Hallo ${name.split(" ")[0]}, hier ist NoviDom Immobilien. `)}
             target="_blank"
             rel="noreferrer"
             className="btn btn-sm"

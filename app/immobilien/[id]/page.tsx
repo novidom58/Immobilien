@@ -95,7 +95,7 @@ export async function generateMetadata({
   if (!listing) return { title: "Immobilie nicht gefunden" };
   return {
     title: listing.title || `${listing.address}, ${listing.city}`,
-    description: listing.description || `Immobilie in ${listing.city} — vermittelt von NoviDom Immo.`,
+    description: listing.description || `Immobilie in ${listing.city} — vermittelt von NoviDom Immobilien AG.`,
   };
 }
 
@@ -265,7 +265,7 @@ export default async function ListingDetailPage({
               Exposé als PDF →
             </Link>
             <p className="mt-4 text-xs text-ivory-dim/60">
-              Persönliche Auskunft durch unser Team, NoviDom Immo.
+              Persönliche Auskunft durch unser Team, NoviDom Immobilien AG.
             </p>
           </div>
         </div>

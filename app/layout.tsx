@@ -35,11 +35,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   appleWebApp: { capable: true, title: "NoviDom", statusBarStyle: "default" },
   title: {
-    default: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
-    template: "%s | NoviDom Immo",
+    default: "NoviDom Immobilien AG — Ihr Zuhause verdient den besten Preis",
+    template: "%s | NoviDom Immobilien AG",
   },
   description:
-    "NoviDom Immo verkauft Ihre Immobilie von der Nordwestschweiz bis zum Vierwaldstättersee transparent, schnell und persönlich — zur Provision ab 0.95%. Jetzt kostenlose Bewertung sichern.",
+    "NoviDom Immobilien AG verkauft Ihre Immobilie von der Nordwestschweiz bis zum Vierwaldstättersee transparent, schnell und persönlich — zur Provision ab 0.95%. Jetzt kostenlose Bewertung sichern.",
   keywords: [
     "Immobilienmakler Nordwestschweiz",
     "Immobilienmakler Basel",
@@ -49,21 +49,21 @@ export const metadata: Metadata = {
     "Immobilie verkaufen Basel",
     "Immobilienbewertung Basel",
     "faire Maklerkommission",
-    "NoviDom Immo",
+    "NoviDom Immobilien AG",
   ],
-  authors: [{ name: "NoviDom Immo" }],
+  authors: [{ name: "NoviDom Immobilien AG" }],
   openGraph: {
     type: "website",
     locale: "de_CH",
     url: siteUrl,
-    siteName: "NoviDom Immo",
-    title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
+    siteName: "NoviDom Immobilien AG",
+    title: "NoviDom Immobilien AG — Ihr Zuhause verdient den besten Preis",
     description:
       "Immobilien verkaufen von der Nordwestschweiz bis zum Vierwaldstättersee — transparent, persönlich, zur Provision ab 0.95%.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NoviDom Immo — Ihr Zuhause verdient den besten Preis",
+    title: "NoviDom Immobilien AG — Ihr Zuhause verdient den besten Preis",
     description:
       "Immobilien verkaufen von der Nordwestschweiz bis zum Vierwaldstättersee — transparent, persönlich, zur Provision ab 0.95%.",
   },
@@ -79,7 +79,7 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
-  name: "NoviDom Immo",
+  name: "NoviDom Immobilien AG",
   description:
     "Moderner Real-Estate-Partner für den Immobilienverkauf von der Nordwestschweiz bis zum Vierwaldstättersee mit einer Provision ab 0.95%.",
   url: siteUrl,

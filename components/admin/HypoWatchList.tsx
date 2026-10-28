@@ -55,7 +55,7 @@ export function HypoWatchList({ hypos, owners }: { hypos: Hypo[]; owners: Owner[
 
   function referral(h: Hypo) {
     if (!PARTNER_EMAIL) return undefined;
-    const body = `Hallo\n\nHypothek zur Verlängerung:\n\nName: ${h.name}\nE-Mail: ${h.email ?? "—"}\nTelefon: ${h.phone ?? "—"}\nAblauf: ${new Date(h.ablauf).toLocaleDateString("de-CH")}\nBetrag: ${h.betrag ? chf(h.betrag) : "—"}\nBank: ${h.bank ?? "—"}\n\nFreundliche Grüsse\nNoviDom Immo`;
+    const body = `Hallo\n\nHypothek zur Verlängerung:\n\nName: ${h.name}\nE-Mail: ${h.email ?? "—"}\nTelefon: ${h.phone ?? "—"}\nAblauf: ${new Date(h.ablauf).toLocaleDateString("de-CH")}\nBetrag: ${h.betrag ? chf(h.betrag) : "—"}\nBank: ${h.bank ?? "—"}\n\nFreundliche Grüsse\nNoviDom Immobilien AG`;
     return `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(`Verlängerung: ${h.name}`)}&body=${encodeURIComponent(body)}`;
   }
 

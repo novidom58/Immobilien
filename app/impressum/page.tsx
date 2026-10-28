@@ -28,20 +28,19 @@ export default function ImpressumPage() {
                   <br />
                   {OPERATOR.postalCode} {OPERATOR.city}, Schweiz
                 </p>
-                {(OPERATOR.uid || OPERATOR.register) && (
-                  <p className="mt-3">
-                    {OPERATOR.uid && <>UID: {OPERATOR.uid}<br /></>}
-                    {OPERATOR.register && <>Eingetragen im {OPERATOR.register}</>}
-                  </p>
-                )}
+                <p className="mt-3">
+                  {OPERATOR.uid && <>UID: {OPERATOR.uid}<br /></>}
+                  {OPERATOR.register && <>Eingetragen im {OPERATOR.register}</>}
+                  {!OPERATOR.uid && !OPERATOR.register && OPERATOR_PENDING}
+                </p>
               </>
             ) : (
-              <p className="mt-2">NoviDom Immo · {OPERATOR_PENDING}</p>
+              <p className="mt-2">NoviDom Immobilien AG · {OPERATOR_PENDING}</p>
             )}
           </section>
 
           <section>
-            <h2 className="font-display text-xl text-ivory">Büros NoviDom Immo</h2>
+            <h2 className="font-display text-xl text-ivory">Standorte</h2>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               {OFFICES.map((office) => (
                 <address key={office.city} className="not-italic">

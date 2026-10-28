@@ -33,7 +33,7 @@ export function renderTemplate(text: string, ctx: TemplateContext) {
   const values: Record<string, string> = {
     vorname: ctx.name.trim().split(/\s+/)[0] ?? "",
     name: ctx.name.trim(),
-    berater: ctx.berater?.trim() || "Ihr Team von NoviDom Immo",
+    berater: ctx.berater?.trim() || "Ihr Team von NoviDom Immobilien AG",
     objekt: ctx.objekt?.trim() ?? "",
     ort: ctx.ort?.trim() ?? "",
     datum: new Date().toLocaleDateString("de-CH"),
@@ -49,14 +49,14 @@ export function addDays(days: number) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-const SIGNATURE = "\n\nFreundliche Grüsse\n{berater}\nNoviDom Immo";
+const SIGNATURE = "\n\nFreundliche Grüsse\n{berater}\nNoviDom Immobilien AG";
 
 /** Startpaket, das im Admin mit einem Klick angelegt werden kann. */
 export const STARTER_TEMPLATES: Omit<EmailTemplate, "id">[] = [
   {
     category: "Verkauf",
     name: "Erstkontakt nach Bewertungsanfrage",
-    subject: "Ihre Bewertungsanfrage bei NoviDom Immo",
+    subject: "Ihre Bewertungsanfrage bei NoviDom Immobilien AG",
     body: `Hallo {vorname}\n\nVielen Dank für Ihre Anfrage und Ihr Vertrauen. Damit wir Ihre Immobilie fundiert einschätzen können, würden wir sie gerne kurz vor Ort anschauen. Das dauert rund 30 Minuten und ist für Sie kostenlos und unverbindlich.\n\nPasst Ihnen ein Termin in den nächsten Tagen? Antworten Sie einfach auf diese E-Mail oder rufen Sie uns an.${SIGNATURE}`,
     follow_up_days: 3,
   },

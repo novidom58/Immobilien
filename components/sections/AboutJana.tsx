@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -37,7 +39,7 @@ export function AboutJana() {
               Unser Team
             </h2>
             <p className="mt-2 font-mono text-sm uppercase tracking-widest text-blueprint">
-              NoviDom Immo · Basel &amp; Zug
+              NoviDom Immobilien AG · Basel &amp; Zug
             </p>
             <p className="mt-8 max-w-2xl text-balance text-lg text-ivory-dim">
               Hinter NoviDom steht ein erfahrenes Team mit Kompetenzen in
@@ -83,6 +85,14 @@ export function AboutJana() {
                 </div>
               ))}
             </div>
+
+            <Link
+              href="/karriere"
+              className="group mt-10 inline-flex items-center gap-2 rounded-full border border-amber/40 px-6 py-3 text-sm font-semibold text-ivory transition-colors hover:border-amber hover:bg-amber/10"
+            >
+              Teil vom Team werden
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.75} />
+            </Link>
           </Reveal>
         </div>
       </div>

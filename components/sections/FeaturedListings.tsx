@@ -66,9 +66,9 @@ export async function FeaturedListings({ limit = 3, title, accent }: { limit?: n
           <div>
             <SectionLabel>Aktuelle Objekte</SectionLabel>
             <h2 className="mt-4 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              {title ?? "Diese Immobilien verkaufen"}
+              {title ?? "Diese Objekte vermitteln wir"}
               <br />
-              <span className="text-amber-soft">{accent ?? "wir gerade."}</span>
+              <span className="text-amber-soft">{accent ?? "gerade, zum Kauf und zur Miete."}</span>
             </h2>
           </div>
           <Link

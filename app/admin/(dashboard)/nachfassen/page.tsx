@@ -80,14 +80,11 @@ export default async function AdminNachfassenPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Typ</th>
-                  <th>Name</th>
-                  <th>Kontakt</th>
+                  <th>Name &amp; Kontakt</th>
                   <th>Nachricht</th>
-                  <th>Datum</th>
+                  <th>Eingang</th>
                   <th>Status</th>
-                  <th>Finanzierung</th>
-                  <th>Details</th>
+                  <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LeadArchiveButtons } from "@/components/admin/LeadArchiveButtons";
+import { suggestRoles } from "@/lib/constants";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { KalenderEmbed } from "@/components/admin/KalenderEmbed";
@@ -113,7 +114,7 @@ export default async function AdminHeutePage() {
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    <LeadArchiveButtons leadId={lead.id} name={lead.name} />
+                    <LeadArchiveButtons leadId={lead.id} name={lead.name} roles={suggestRoles({ ...lead, listing_id: lead.listing_id ?? null })} />
                     <Link href="/admin/leads" className="btn btn-ghost btn-sm">
                       Zu den Leads →
                     </Link>

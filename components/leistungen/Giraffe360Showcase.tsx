@@ -8,6 +8,8 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 // Optional: Link auf einen echten Giraffe360-Beispielrundgang (Vercel-Variable).
 const DEMO_TOUR = process.env.NEXT_PUBLIC_GIRAFFE_DEMO_URL;
+// Symbolbild (KI, Higgsfield): 360°-Kamera beim Fototermin, bis echte Giraffe360-Aufnahmen vorliegen
+const SHOOT_IMAGE = "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20261028_215930_11e7f739-e718-48f4-98c6-1e6814f4b75c.png";
 
 const TABS = [
   { id: "foto", label: "Profi-Fotos", icon: Camera },
@@ -111,7 +113,10 @@ export function Giraffe360Showcase() {
 
         <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] border border-line bg-white shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)]">
           {tab === "foto" && (
-            <Image src="/images/novidom-holzhaus.webp" alt="Beispiel für ein Profi-Foto" fill sizes="(min-width: 1024px) 700px, 100vw" className="object-cover" />
+            <>
+              <Image src={SHOOT_IMAGE} alt="360°-Kamera auf dem Stativ beim Fototermin in einem hellen Wohnzimmer (Symbolbild)" fill sizes="(min-width: 1024px) 700px, 100vw" className="object-cover" />
+              <span className="absolute bottom-3 right-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] text-night">Symbolbild</span>
+            </>
           )}
           {tab === "plan" && (
             <div className="absolute inset-0 p-4">
@@ -120,7 +125,7 @@ export function Giraffe360Showcase() {
           )}
           {tab === "tour" && (
             <>
-              <Image src="/images/novidom-holzhaus.webp" alt="" fill sizes="(min-width: 1024px) 700px, 100vw" className="object-cover object-[30%_center]" />
+              <Image src={SHOOT_IMAGE} alt="" fill sizes="(min-width: 1024px) 700px, 100vw" className="object-cover" />
               {/* Rundgang-Punkte wie im echten Viewer */}
               {[
                 [28, 72],

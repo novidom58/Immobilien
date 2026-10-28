@@ -118,7 +118,7 @@ export default function ExposeBeispielPage() {
         {/* Fusszeile */}
         <div className="mt-10 flex items-center justify-between border-t border-[#e3ded2] px-10 py-6 text-sm">
           <div>
-            <div className="font-bold">NoviDom Immo</div>
+            <div className="font-bold">NoviDom Immobilien AG</div>
             <div className="text-[#6b675c]">Basel &amp; Zug · verkaufen@novidom-immo.ch</div>
           </div>
           <div className="text-right text-[#6b675c]">

@@ -12,8 +12,8 @@ const SECTIONS: { title: string; body: string[] }[] = [
     title: "Verantwortliche Stelle",
     body: [
       OPERATOR.name
-        ? `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCode} ${OPERATOR.city} (Betreiberin von NoviDom Immo). Kontakt: ${OPERATOR.email}`
-        : `NoviDom Immo (${OPERATOR_PENDING}). Kontakt: ${OPERATOR.email}`,
+        ? `${OPERATOR.name}, ${OPERATOR.street}, ${OPERATOR.postalCode} ${OPERATOR.city}. Kontakt: ${OPERATOR.email}`
+        : `NoviDom Immobilien AG (${OPERATOR_PENDING}). Kontakt: ${OPERATOR.email}`,
     ],
   },
   {

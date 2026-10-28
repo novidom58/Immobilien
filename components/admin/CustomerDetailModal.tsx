@@ -124,7 +124,7 @@ export function CustomerDetailModal({
               )}
               {customer.phone && (
                 <a
-                  href={whatsappTo(customer.phone, `Hallo ${customer.full_name.split(" ")[0]}, hier ist NoviDom Immo. `)}
+                  href={whatsappTo(customer.phone, `Hallo ${customer.full_name.split(" ")[0]}, hier ist NoviDom Immobilien. `)}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-sm"

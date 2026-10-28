@@ -6,7 +6,7 @@ import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Kundenlogin",
-  description: "Login zu Ihrem persönlichen Immobilienplan bei NoviDom Immo.",
+  description: "Login zu Ihrem persönlichen Immobilienplan bei NoviDom Immobilien AG.",
   robots: { index: false, follow: false },
 };
 

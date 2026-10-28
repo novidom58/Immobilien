@@ -44,6 +44,9 @@ export function Footer() {
         <Link href="/ratgeber" className="text-ivory-dim hover:text-ivory">
           Ratgeber
         </Link>
+        <Link href="/karriere" className="text-ivory-dim hover:text-ivory">
+          Karriere
+        </Link>
       </nav>
       <div className="mx-auto mt-6 flex max-w-7xl justify-center gap-4 px-6 lg:px-10">
         {SOCIAL_LINKS.map((s) => (
@@ -60,7 +63,7 @@ export function Footer() {
         ))}
       </div>
       <div className="mx-auto mt-6 max-w-7xl px-6 text-center text-xs text-ivory-dim/40 lg:px-10">
-        &copy; {new Date().getFullYear()} NoviDom Immo. Alle Rechte vorbehalten.
+        &copy; {new Date().getFullYear()} NoviDom Immobilien AG. Alle Rechte vorbehalten.
       </div>
       <div className="mx-auto mt-6 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs sm:flex-row lg:px-10">
         <div className="flex gap-5 text-ivory-dim/50">

@@ -4,7 +4,7 @@ import { createResendClient } from "@/lib/resend";
 
 export const dynamic = "force-dynamic";
 
-const REPORT_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immo <onboarding@resend.dev>";
+const REPORT_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
 
 /**
  * Wöchentlicher Kundenreport (Montag 08:00 UTC via Vercel Cron, siehe
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         `Alle Details finden Sie jederzeit in Ihrem Verkaufs-Cockpit.`,
         ``,
         `Freundliche Grüsse`,
-        `Ihr Team von NoviDom Immo`,
+        `Ihr Team von NoviDom Immobilien AG`,
       ].join("\n"),
     });
 

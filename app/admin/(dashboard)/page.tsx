@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LeadArchiveButtons } from "@/components/admin/LeadArchiveButtons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { KalenderEmbed } from "@/components/admin/KalenderEmbed";
@@ -111,9 +112,12 @@ export default async function AdminHeutePage() {
                       {isDueToday ? " · Wiedervorlage fällig" : ` · ${lead.daysOpen} Tage überfällig`}
                     </div>
                   </div>
-                  <Link href="/admin/leads" className="btn btn-ghost btn-sm">
-                    Zu den Leads →
-                  </Link>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <LeadArchiveButtons leadId={lead.id} name={lead.name} />
+                    <Link href="/admin/leads" className="btn btn-ghost btn-sm">
+                      Zu den Leads →
+                    </Link>
+                  </div>
                 </div>
               );
             })}

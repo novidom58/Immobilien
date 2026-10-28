@@ -1,17 +1,16 @@
-// Rechtliche Angaben zur Betreiberin, gemeinsam für Impressum und
-// Datenschutz. Die Firma wurde umbenannt: Angaben hier eintragen, sobald
-// der Handelsregistereintrag vorliegt. Leere Felder werden auf der Seite
-// als «folgt» angezeigt statt mit falschen Daten.
+// Rechtliche Angaben zur Betreiberin, gemeinsam für Impressum, Datenschutz
+// und Druckvorlagen. Sitz und Firmenadresse: Zug. UID und Handelsregister
+// eintragen, sobald der Auszug vorliegt; leere Felder erscheinen als «folgt».
 export const OPERATOR = {
-  name: "",
+  name: "NoviDom Immobilien AG",
   legalForm: "",
-  street: "",
-  postalCode: "",
-  city: "",
+  street: "Gotthardstrasse 30",
+  postalCode: "6300",
+  city: "Zug",
   uid: "",
   register: "",
   phone: "",
   email: "verkaufen@novidom-immo.ch",
 };
 
-export const OPERATOR_PENDING = "Angaben folgen nach Eintrag im Handelsregister";
+export const OPERATOR_PENDING = "UID und Handelsregister folgen";

@@ -32,7 +32,7 @@ const faqs = [
   },
   {
     q: "Wer begleitet meinen Verkauf persönlich?",
-    a: "Unser Team von NoviDom Immo, mit über 20 Jahren Erfahrung in Immobilien, Hypotheken und Bankwesen — persönlich und bis zum Notartermin erreichbar.",
+    a: "Unser Team von NoviDom Immobilien AG, mit über 20 Jahren Erfahrung in Immobilien, Hypotheken und Bankwesen — persönlich und bis zum Notartermin erreichbar.",
   },
 ];
 

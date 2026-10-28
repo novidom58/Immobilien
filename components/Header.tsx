@@ -11,8 +11,8 @@ import { Logo } from "@/components/ui/Logo";
 const links = [
   { href: "/immobilien", label: "Immobilien" },
   { href: "/leistungen/kaufen-verkaufen", label: "Verkaufen" },
-  { href: "/leistungen/finanzieren", label: "Finanzieren" },
   { href: "/leistungen/umbauen", label: "Umbauen" },
+  { href: "/leistungen/finanzieren", label: "Finanzieren" },
   { href: "/leistungen/versichern", label: "Versichern" },
   { href: "/#ueber-uns", label: "Über uns" },
 ];

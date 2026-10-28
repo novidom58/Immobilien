@@ -11,7 +11,7 @@ import { publicListingFilter } from "@/lib/offmarket";
 export const metadata: Metadata = {
   title: "Immobilien",
   description:
-    "Aktuelle Immobilien-Angebote von NoviDom Immo von der Nordwestschweiz bis zum Vierwaldstättersee.",
+    "Aktuelle Immobilien-Angebote von NoviDom Immobilien AG von der Nordwestschweiz bis zum Vierwaldstättersee.",
 };
 
 export const dynamic = "force-dynamic";

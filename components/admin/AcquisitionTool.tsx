@@ -29,7 +29,7 @@ function buildEmail({
   const body = [
     anrede,
     "",
-    `Mein Name ist ${berater || "[Berater]"} von NoviDom Immo. Wir sind auf den Verkauf von ${objektTyp}-Objekten in der Nordwestschweiz und Zentralschweiz spezialisiert.`,
+    `Mein Name ist ${berater || "[Berater]"} von NoviDom Immobilien AG. Wir sind auf den Verkauf von ${objektTyp}-Objekten in der Nordwestschweiz und Zentralschweiz spezialisiert.`,
     objektLine,
     note.trim(),
     "",
@@ -41,7 +41,7 @@ function buildEmail({
     "",
     "Freundliche Grüsse",
     berater || "[Berater]",
-    "NoviDom Immo · Basel & Zug",
+    "NoviDom Immobilien AG · Basel & Zug",
   ]
     .filter((line, i, arr) => !(line === "" && arr[i - 1] === ""))
     .join("\n");

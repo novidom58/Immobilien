@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorText } from "@/lib/authErrors";
 
 export function ForgotPassword({ initialEmail = "" }: { initialEmail?: string }) {
   const supabase = createClient();
@@ -25,7 +26,7 @@ export function ForgotPassword({ initialEmail = "" }: { initialEmail?: string })
 
     setLoading(false);
     if (resetError) {
-      setError(resetError.message);
+      setError(authErrorText(resetError));
       return;
     }
     setSent(true);

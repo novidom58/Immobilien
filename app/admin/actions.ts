@@ -10,6 +10,7 @@ import { STARTER_TEMPLATES } from "@/lib/emailTemplates";
 import { matchesPlan } from "@/lib/planMatching";
 import { CUSTOMER_ROLES } from "@/lib/constants";
 import { OFFMARKET_HOURS } from "@/lib/offmarket";
+import { authErrorText } from "@/lib/authErrors";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
 const VALID_TYPES = ["Haus", "Wohnung", "Stockwerkeigentum", "Rendite", "Andere"] as const;
@@ -854,7 +855,7 @@ export async function invitePortalAccess(customerId: string) {
     data: { full_name: customer.full_name },
     redirectTo: `${siteUrl}/reset-password`,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: authErrorText(error, "admin") };
 
   const newUserId = data.user?.id;
   if (newUserId) {
@@ -890,7 +891,7 @@ export async function inviteAdmin(formData: FormData) {
     data: fullName ? { full_name: fullName } : undefined,
     redirectTo: `${siteUrl}/reset-password`,
   });
-  if (error) return { error: error.message, success: false };
+  if (error) return { error: authErrorText(error, "admin"), success: false };
 
   const newUserId = data.user?.id;
   if (newUserId) {

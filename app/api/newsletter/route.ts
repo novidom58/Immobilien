@@ -1,9 +1,13 @@
+import { rateLimit } from "@/lib/rateLimit";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "newsletter", 5);
+  if (limited) return limited;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();

@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyUpload } from "@/app/dashboard/actions";
 import { useEffect, useRef, useState } from "react";
 import { FileText, Upload, Trash2, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +46,7 @@ export function MyDocuments() {
     if (!files || files.length === 0 || !supabase || !userId) return;
     setBusy("upload");
     setError(null);
+    const uploaded: string[] = [];
 
     for (const file of Array.from(files)) {
       const path = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
@@ -64,7 +66,9 @@ export function MyDocuments() {
         setBusy(null);
         return;
       }
+      uploaded.push(file.name);
     }
+    if (uploaded.length) notifyUpload(uploaded, "Meine Dokumente").catch(() => null);
 
     setBusy(null);
     if (fileRef.current) fileRef.current.value = "";

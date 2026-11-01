@@ -1,3 +1,4 @@
+import { rateLimit } from "@/lib/rateLimit";
 import { NextResponse } from "next/server";
 import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +20,9 @@ function field(form: FormData, key: string, max = 200) {
  * Team und erscheint als Lead (Quelle «bewerbung») im Admin, ohne Kundenakte.
  */
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "bewerbung", 4);
+  if (limited) return limited;
+
   let form: FormData;
   try {
     form = await request.formData();

@@ -18,7 +18,9 @@ export function LoginForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signupDone, setSignupDone] = useState(false);
@@ -78,7 +80,7 @@ export function LoginForm() {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: { data: { full_name: fullName, first_name: firstName.trim(), last_name: lastName.trim() } },
       });
       setLoading(false);
       if (signUpError) {
@@ -113,22 +115,35 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {mode === "signup" && (
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="fullName"
-              className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
-            >
-              Name
-            </label>
-            <input
-              id="fullName"
-              required
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ihr Name"
-              className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="firstName" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+                Vorname
+              </label>
+              <input
+                id="firstName"
+                required
+                type="text"
+                autoComplete="given-name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="lastName" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+                Nachname
+              </label>
+              <input
+                id="lastName"
+                required
+                type="text"
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+              />
+            </div>
           </div>
         )}
         <div className="flex flex-col gap-1.5">

@@ -84,7 +84,8 @@ export function BuyerRadar() {
       body: JSON.stringify({
         type: "valuation",
         source: "kaeufer-radar",
-        name: form.get("name"),
+        name: `${String(form.get("first_name") ?? "").trim()} ${String(form.get("last_name") ?? "").trim()}`.trim(),
+        first_name: String(form.get("first_name") ?? "").trim(),
         email: form.get("email"),
         phone: form.get("phone"),
         website: form.get("website"),
@@ -193,7 +194,8 @@ export function BuyerRadar() {
                 )}
               </p>
               <form onSubmit={sendLead} className="mt-6 grid gap-3 sm:grid-cols-2">
-                <input name="name" required placeholder="Ihr Name" autoComplete="name" className={`${inputClass} sm:col-span-2`} />
+                <input name="first_name" required placeholder="Vorname" autoComplete="given-name" className={inputClass} />
+                <input name="last_name" required placeholder="Nachname" autoComplete="family-name" className={inputClass} />
                 <input name="email" type="email" required placeholder="E-Mail" autoComplete="email" className={inputClass} />
                 <input name="phone" type="tel" placeholder="Telefon (optional)" autoComplete="tel" className={inputClass} />
                 <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />

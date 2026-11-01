@@ -1,3 +1,4 @@
+import { rateLimit } from "@/lib/rateLimit";
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createResendClient } from "@/lib/resend";
@@ -10,6 +11,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Öffentliche Anmeldung zum Wertmonitor (und optional Hypothekenwächter). */
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "wertmonitor", 6);
+  if (limited) return limited;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();

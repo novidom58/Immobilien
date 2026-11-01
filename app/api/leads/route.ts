@@ -1,3 +1,4 @@
+import { rateLimit } from "@/lib/rateLimit";
 import { NextResponse } from "next/server";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
@@ -19,6 +20,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const VALID_TYPES = new Set(["contact", "valuation", "access_request"]);
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "leads", 8);
+  if (limited) return limited;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -105,7 +109,7 @@ export async function POST(request: Request) {
     // Best-effort auto-reply to the submitter. Failing this never fails the
     // request - the internal notification above already went through.
     if (!error) {
-      const firstName = name.split(" ")[0];
+      const firstName = (typeof body.first_name === "string" && body.first_name.trim().slice(0, 80)) || name.split(" ")[0];
       const isGuideRequest = type === "access_request";
       const hasGuidePdf = isGuideRequest && existsSync(GUIDE_PDF_PATH);
 

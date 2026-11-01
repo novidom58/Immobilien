@@ -1,3 +1,4 @@
+import { rateLimit } from "@/lib/rateLimit";
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
@@ -49,6 +50,9 @@ function matches(buyer: BuyerProfile, input: { ort: string; typ: string | null; 
  * keine personenbezogenen Daten.
  */
 export async function POST(request: Request) {
+  const limited = rateLimit(request, "kaeufer-radar", 20);
+  if (limited) return limited;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();

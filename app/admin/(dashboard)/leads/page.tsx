@@ -26,9 +26,14 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
             {leads.length} {archiv ? "im Archiv · Fakes, Tests und anderweitig Erledigtes" : "Einsendungen · Fakes und Tests über das Archiv-Symbol ausblenden"}
           </div>
         </div>
-        <Link href={archiv ? "/admin/leads" : "/admin/leads?ansicht=archiv"} className="btn btn-ghost btn-sm">
-          {archiv ? "← Aktive Leads" : "Archiv ansehen"}
-        </Link>
+        <div className="flex gap-2">
+          <a href={`/api/admin/leads-export${archiv ? "?archiv=1" : ""}`} className="btn btn-ghost btn-sm">
+            Als Excel/CSV exportieren
+          </a>
+          <Link href={archiv ? "/admin/leads" : "/admin/leads?ansicht=archiv"} className="btn btn-ghost btn-sm">
+            {archiv ? "← Aktive Leads" : "Archiv ansehen"}
+          </Link>
+        </div>
       </div>
 
       <div className="card">

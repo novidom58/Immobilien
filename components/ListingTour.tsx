@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 
 export function ListingTour({ listingId, tourUrl }: { listingId: string; tourUrl: string }) {
   const [open, setOpen] = useState(false);
+  // Ältere Einträge ohne «https://» trotzdem korrekt einbetten
+  const src = /^https?:\/\//i.test(tourUrl) ? tourUrl : `https://${tourUrl}`;
 
   function handleOpen() {
     setOpen(true);
@@ -27,7 +29,7 @@ export function ListingTour({ listingId, tourUrl }: { listingId: string; tourUrl
       <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-ink-2">
         {open ? (
           <iframe
-            src={tourUrl}
+            src={src}
             title="3D-Rundgang"
             className="h-full w-full"
             allow="xr-spatial-tracking; gyroscope; accelerometer"

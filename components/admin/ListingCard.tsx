@@ -7,6 +7,7 @@ import { ImagePlus, Trash2, MapPin, Pencil, UserPlus, UserX, FileText, FileUp } 
 import { createClient } from "@/lib/supabase/client";
 import {
   updateListingStatus,
+  updateListingOffer,
   updateListing,
   assignListingOwner,
   unassignListingOwner,
@@ -53,12 +54,16 @@ const TYPE_OPTIONS = [
   { value: "Andere", label: "Andere" },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Entwurf (nicht öffentlich)" },
-  { value: "active", label: "Zum Verkauf" },
-  { value: "reserved", label: "Reserviert" },
-  { value: "sold", label: "Verkauft" },
-];
+// Status-Bezeichnungen je nach Angebot (Verkauf oder Vermietung)
+function statusOptions(offer: string) {
+  const miete = offer === "miete";
+  return [
+    { value: "draft", label: "Entwurf (nicht öffentlich)" },
+    { value: "active", label: miete ? "Zu vermieten" : "Zum Verkauf" },
+    { value: "reserved", label: "Reserviert" },
+    { value: "sold", label: miete ? "Vermietet" : "Verkauft" },
+  ];
+}
 
 const STATUS_BADGE: Record<string, string> = {
   draft: "badge-muted",
@@ -126,6 +131,15 @@ export function ListingCard({
     setBusy("status");
     setError(null);
     const res = await updateListingStatus(listing.id, status);
+    setBusy(null);
+    if (res.error) setError(res.error);
+    else router.refresh();
+  }
+
+  async function handleOffer(offer: string) {
+    setBusy("offer");
+    setError(null);
+    const res = await updateListingOffer(listing.id, offer);
     setBusy(null);
     if (res.error) setError(res.error);
     else router.refresh();
@@ -230,16 +244,26 @@ export function ListingCard({
           <div className="card-title">{listing.title || `${listing.address}, ${listing.city}`}</div>
           <div className="card-sub">
             {listing.address}, {listing.city} · {listing.property_type}
-            {listing.price_chf ? ` · CHF ${listing.price_chf.toLocaleString("en-US").replace(/,/g, "'")}` : ""}
+            {listing.price_chf ? ` · CHF ${listing.price_chf.toLocaleString("en-US").replace(/,/g, "'")}${listing.offer_type === "miete" ? " / Mt." : ""}` : ""}
           </div>
           <span className={`badge ${STATUS_BADGE[listing.status] ?? "badge-muted"}`} style={{ marginTop: 8, display: "inline-flex" }}>
-            {STATUS_OPTIONS.find((o) => o.value === listing.status)?.label ?? listing.status}
+            {statusOptions(listing.offer_type).find((o) => o.value === listing.status)?.label ?? listing.status}
           </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={listing.offer_type}
+            disabled={busy === "offer"}
+            onChange={(e) => handleOffer(e.target.value)}
+            className="filter-select"
+            aria-label="Verkauf oder Vermietung"
+          >
+            <option value="kauf">Verkauf</option>
+            <option value="miete">Vermietung</option>
+          </select>
           <select value={listing.status} disabled={busy === "status"} onChange={(e) => handleStatus(e.target.value)} className="filter-select">
-            {STATUS_OPTIONS.map((o) => (
+            {statusOptions(listing.offer_type).map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>

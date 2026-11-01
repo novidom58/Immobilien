@@ -1,29 +1,79 @@
 import type { Metadata } from "next";
-import { Handshake, LineChart, MapPin, Sparkles } from "lucide-react";
+import { BadgeCheck, Briefcase, Camera, Crown, GraduationCap, Handshake, Landmark, Layers, MapPin, Radar, TrendingUp, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { BewerbungForm } from "@/components/BewerbungForm";
 
 export const metadata: Metadata = {
-  title: "Karriere: Teil vom NoviDom-Team werden",
+  title: "Karriere: Immobilienberater/in bei NoviDom",
   description:
-    "Immobilien, Finanzierung, Umbau und Versicherung aus einer Hand: Werden Sie Teil der NoviDom Immobilien AG in Basel, Zug und Zürich. Jetzt bewerben.",
+    "Verkaufen Sie Immobilien und bauen Sie sich etwas auf: 35–50 % Anteil an der Provision, Bonus für eigene Mandate, Anteil an Hypotheken und ein Weg bis zur Beteiligung. Basel und Zug.",
   alternates: { canonical: "/karriere" },
 };
 
-const REASONS = [
-  { icon: Handshake, title: "Ein Team, alles aus einer Hand", text: "Verkauf, Finanzierung, Umbau und Versicherung arbeiten zusammen. Sie verkaufen nicht allein, Sie haben Fachleute an Ihrer Seite." },
-  { icon: Sparkles, title: "Moderne Werkzeuge", text: "Eigenes CRM, Kundenportal, 3D-Rundgänge, Drohnenaufnahmen und KI-Visualisierungen. Weniger Papier, mehr Zeit für Kunden." },
-  { icon: LineChart, title: "Fair beteiligt", text: "Wer Abschlüsse bringt, verdient mit. Wir besprechen das Modell offen im ersten Gespräch." },
-  { icon: MapPin, title: "Basel, Zug und Zürich", text: "Kurze Wege in der Region, Büros in Basel und Zug, flexible Einteilung." },
+// Öffentlicher Auszug aus «Karriere bei NoviDom» (ohne interne Folien).
+// Prozente beziehen sich auf die Provision ohne MWST, Sätze für Selbständige.
+const HIGHLIGHTS = [
+  { value: "35–50 %", label: "Anteil an der Provision" },
+  { value: "+5 %", label: "für selbst gewonnene Mandate" },
+  { value: "30 %", label: "der Hypothekenprovision" },
+  { value: "Aktien", label: "für die Besten" },
 ];
 
-const PROFILES = [
-  { title: "Immobilienmakler/in", text: "Sie bewerten, vermarkten und verkaufen, mit Freude am Kontakt und Abschluss. Erfahrung oder Fachausweis ist ein Plus." },
-  { title: "Finanzierung & Versicherung", text: "Hypotheken, Vorsorge und Versicherungen rund ums Eigenheim. Bank- oder Versicherungshintergrund willkommen." },
-  { title: "Quereinstieg & Einstieg", text: "Kaufmännisch, Bau oder Verkauf und Lust auf Immobilien? Wir bilden Sie im Team weiter." },
-  { title: "Tippgeber & Partner", text: "Sie kennen Eigentümer, die verkaufen möchten? Empfehlen Sie uns weiter, bei einem Abschluss erhalten Sie eine Tippgeber-Provision." },
+const OWNER_ARGUMENTS = [
+  "Provision ab 0,95 % statt der üblichen 2–3 %",
+  "CHF 0 Kosten, wenn nicht verkauft wird",
+  "Gratis-Bewertung nach IAZI",
+  "Käufer-Radar mit vorgemerkten Kaufinteressenten",
+  "Fotos, Grundriss, 360°-Rundgang und Drohne mit Giraffe360",
+  "Über 10 Portale und soziale Medien",
+  "Käuferprüfung inklusive Finanzierbarkeit",
+];
+
+const BUILDING_BLOCKS = [
+  { icon: TrendingUp, value: "35–50 %", title: "Leistungsstaffel", text: "Ihr Anteil steigt mit Ihrem Provisionsumsatz der letzten 12 Monate." },
+  { icon: Handshake, value: "+5 %", title: "Bonus Eigenakquise", text: "Zusätzlich auf jeder Stufe für jedes selbst gewonnene Mandat." },
+  { icon: Landmark, value: "30 %", title: "Hypothek", text: "Anteil an der Hypothekenprovision, wenn Ihre Käufer über HypoCasa finanzieren." },
+  { icon: Users, value: "bis 20 %", title: "Teamleitung", text: "Auf jeden Verkauf Ihres Teams, zusätzlich zu Ihren eigenen Verkäufen." },
+  { icon: Crown, value: "Aktien", title: "Beteiligung", text: "Die Besten werden Aktionärinnen und Aktionäre der NoviDom Immobilien AG." },
+  { icon: Layers, value: "Flexibel", title: "Ihr Modell", text: "Angestellt oder selbständig, Vollzeit oder nebenberuflich." },
+];
+
+const CAREER = [
+  { title: "Immobilienberater/in", rate: "35 %", when: "Einstieg mit Einarbeitung" },
+  { title: "Senior-Berater/in", rate: "45 %", when: "ab CHF 40'000 Provisionsumsatz in 12 Monaten" },
+  { title: "Top-Berater/in", rate: "50 %", when: "ab CHF 80'000 Provisionsumsatz in 12 Monaten" },
+  { title: "Teamleiter/in", rate: "55 % + bis 20 % aufs Team", when: "ab Stufe 2, mit mindestens 2 Maklern im Team" },
+  { title: "Beteiligung", rate: "Aktionär/in", when: "nach 2 Jahren als Top-Berater/in oder Teamleiter/in" },
+];
+
+const MODELS = [
+  {
+    kicker: "Sozial abgesichert",
+    title: "Angestellt",
+    items: ["Anstellung bei der NoviDom Immobilien AG", "Pensum nach Vereinbarung", "AHV, Pensionskasse und Unfallversicherung über NoviDom", "Staffel 30 / 40 / 45 %"],
+  },
+  {
+    kicker: "Maximaler Anteil",
+    title: "Selbständig",
+    items: ["Volle Staffel 35 / 45 / 50 %", "Freie Zeiteinteilung, auch nebenberuflich", "Eigene AHV und Versicherungen", "Anerkennung durch die AHV-Ausgleichskasse nötig"],
+  },
+];
+
+const SUPPORT = [
+  { icon: Radar, title: "Käufer-Radar", text: "Vorgemerkte Interessenten für schnellere Verkäufe." },
+  { icon: Camera, title: "Giraffe360", text: "Fotos, Grundriss, 360°-Rundgang und Drohne in einem Termin." },
+  { icon: Briefcase, title: "Leads der Firma", text: "Bewertungsanfragen über Website und Werbung." },
+  { icon: Landmark, title: "Finanzierung im Haus", text: "Hypothekenexperten im Team, Käufer schneller geprüft." },
+  { icon: GraduationCap, title: "Einarbeitung", text: "Training, Gesprächsleitfäden und IAZI-Bewertungen." },
+  { icon: MapPin, title: "Basel und Zug", text: "Zwei Standorte, flexibel im Pensum." },
+];
+
+const STEPS = [
+  { title: "Kennenlernen", text: "Wir sprechen über Ihre Ziele und Ihr Pensum." },
+  { title: "Mitlaufen", text: "Sie begleiten uns an eine Bewertung und eine Besichtigung." },
+  { title: "Starten", text: "Vertrag, Einarbeitung und Ihre ersten Mandate." },
 ];
 
 export default function KarrierePage() {
@@ -31,54 +81,152 @@ export default function KarrierePage() {
     <>
       <Header />
       <main className="bg-ink">
-        <section className="mx-auto max-w-5xl px-6 pb-16 pt-36 text-center lg:pt-44">
-          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Karriere bei NoviDom</div>
+        <section className="mx-auto max-w-5xl px-6 pb-14 pt-36 text-center lg:pt-44">
+          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Karriere bei NoviDom · Basel &amp; Zug</div>
           <h1 className="mt-6 text-balance font-display text-[clamp(2.4rem,5.5vw,4.6rem)] leading-[1.05] tracking-[-0.03em] text-ivory">
-            Werden Sie Teil <em>vom Team.</em>
+            Immobilien verkaufen. <em>Etwas aufbauen.</em>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-ivory-dim">
-            Wir begleiten Menschen beim wichtigsten Kauf ihres Lebens, vom Verkauf über die Hypothek bis zum Umbau. Dafür suchen wir Persönlichkeiten, die genauso denken.
+            Unser Vergütungs- und Karrieremodell für Maklerinnen und Makler: fair am Erfolg beteiligt, mit einem klaren Weg bis zur Beteiligung an der Firma.
           </p>
           <a href="#bewerben" className="mt-8 inline-flex rounded-full bg-night px-7 py-4 text-sm font-semibold text-ink transition-colors hover:bg-amber">
-            Jetzt bewerben
+            Gespräch vereinbaren
           </a>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
-          <div className="grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {REASONS.map((r) => (
-              <div key={r.title} className="border-t border-line pt-6">
-                <r.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
-                <h2 className="mt-4 font-display text-xl text-ivory">{r.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{r.text}</p>
+          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
+            {HIGHLIGHTS.map((h) => (
+              <div key={h.label} className="rounded-2xl border border-line bg-white p-4">
+                <div className="font-display text-2xl text-amber lg:text-3xl">{h.value}</div>
+                <div className="mt-1 text-xs text-ivory-dim">{h.label}</div>
               </div>
             ))}
           </div>
         </section>
 
+        <section className="mx-auto grid max-w-7xl gap-10 px-6 pb-20 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:px-10">
+          <div>
+            <SectionLabel>Warum Eigentümer zu uns kommen</SectionLabel>
+            <h2 className="mt-6 font-display text-3xl text-ivory lg:text-4xl">
+              Ein Angebot, das Sie <em>gerne zeigen.</em>
+            </h2>
+            <p className="mt-4 leading-relaxed text-ivory-dim">Für Sie heisst das: Mandate lassen sich leichter gewinnen.</p>
+          </div>
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {OWNER_ARGUMENTS.map((a) => (
+              <li key={a} className="flex gap-2.5 rounded-xl border border-line bg-white p-3.5 text-sm text-ivory">
+                <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.75} />
+                {a}
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section className="bg-ink-2 py-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <SectionLabel>Wen wir suchen</SectionLabel>
+            <SectionLabel>Das Modell</SectionLabel>
             <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
-              Profile, die <em>zu uns passen.</em>
+              Sechs Bausteine <em>für Ihren Verdienst.</em>
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {PROFILES.map((p) => (
-                <div key={p.title} className="rounded-2xl border border-line bg-white p-6">
-                  <div className="font-display text-xl text-ivory">{p.title}</div>
-                  <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{p.text}</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {BUILDING_BLOCKS.map((b) => (
+                <div key={b.title} className="rounded-2xl border border-line bg-white p-6">
+                  <div className="flex items-center justify-between">
+                    <b.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
+                    <span className="font-display text-2xl text-amber">{b.value}</span>
+                  </div>
+                  <div className="mt-4 font-display text-xl text-ivory">{b.title}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-ivory-dim">{b.text}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-6 text-sm text-ivory-dim">Keine passende Rolle dabei? Bewerben Sie sich initiativ, wir lernen gerne gute Leute kennen.</p>
           </div>
         </section>
 
-        <section id="bewerben" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-24 lg:px-10">
+        <section className="mx-auto max-w-5xl px-6 py-20 lg:px-10">
+          <SectionLabel>Karriere</SectionLabel>
+          <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
+            Ihr Weg vom Einstieg <em>bis zur Beteiligung.</em>
+          </h2>
+          <ol className="grid gap-3">
+            {CAREER.map((c, i) => (
+              <li key={c.title} className="grid items-center gap-2 rounded-2xl border border-line bg-white p-5 sm:grid-cols-[48px_1fr_auto] sm:gap-5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber font-display text-lg text-white">{i + 1}</span>
+                <div>
+                  <div className="font-display text-xl text-ivory">{c.title}</div>
+                  <div className="text-sm text-ivory-dim">{c.when}</div>
+                </div>
+                <div className="font-display text-lg text-amber sm:text-right">{c.rate}</div>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 text-sm text-ivory-dim">Auf jeder Stufe zusätzlich: Bonus Eigenakquise und Anteil an der Hypothekenprovision.</p>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
+          <SectionLabel>Zusammenarbeit</SectionLabel>
+          <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
+            Angestellt oder selbständig: <em>Sie wählen.</em>
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {MODELS.map((m) => (
+              <div key={m.title} className="rounded-2xl border border-line bg-white p-6 lg:p-8">
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-amber">{m.kicker}</div>
+                <div className="mt-2 font-display text-2xl text-ivory">{m.title}</div>
+                <ul className="mt-4 grid gap-2">
+                  {m.items.map((it) => (
+                    <li key={it} className="flex gap-2.5 text-sm text-ivory-dim">
+                      <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.75} />
+                      {it}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-ivory-dim">Vertragsdetails werden individuell vereinbart.</p>
+        </section>
+
+        <section className="bg-ink-2 py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-10">
+            <SectionLabel>Unterstützung</SectionLabel>
+            <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
+              Sie verkaufen, <em>wir machen den Rest.</em>
+            </h2>
+            <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+              {SUPPORT.map((s) => (
+                <div key={s.title} className="border-t border-line pt-5">
+                  <s.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
+                  <div className="mt-3 font-display text-xl text-ivory">{s.title}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-ivory-dim">{s.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-5xl px-6 pt-20 lg:px-10">
+          <SectionLabel>Nächste Schritte</SectionLabel>
+          <h2 className="mb-8 mt-6 font-display text-3xl text-ivory lg:text-4xl">
+            In drei Schritten <em>zu NoviDom.</em>
+          </h2>
+          <ol className="grid gap-4 sm:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="rounded-2xl border border-line bg-white p-6">
+                <span className="font-display text-3xl text-amber">{i + 1}</span>
+                <div className="mt-2 font-display text-xl text-ivory">{s.title}</div>
+                <p className="mt-1 text-sm text-ivory-dim">{s.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section id="bewerben" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-20 lg:px-10">
           <h2 className="mb-8 px-2 font-display text-3xl text-ivory lg:text-4xl">
-            Ihre <em>Bewerbung.</em>
+            Gespräch <em>vereinbaren.</em>
           </h2>
           <BewerbungForm />
+          <p className="mt-6 px-2 text-xs leading-relaxed text-ivory-dim">
+            Alle Prozente beziehen sich auf die bezahlte Provision ohne MWST. Die Staffel 35 / 45 / 50 % gilt für Selbständige, für Angestellte je 5 Punkte tiefer. Vertragsdetails werden individuell vereinbart.
+          </p>
         </section>
       </main>
       <Footer />

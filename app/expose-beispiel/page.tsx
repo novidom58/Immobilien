@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // PDF-Exposé eines Objekts aussieht. Über den Browser-Druckdialog (Ctrl+P)
 // lässt sie sich direkt als PDF speichern.
 const HOUSE_IMG =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png";
+  "/images/ki/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.webp";
 
 const facts = [
   ["Objekttyp", "Einfamilienhaus"],

@@ -7,9 +7,9 @@ import type { AreaId } from "./areas";
 import { selectAnliegen, type Anliegen } from "@/lib/anliegen";
 
 const HOUSE_EARLY =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.png";
+  "/images/ki/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.webp";
 const HOUSE_FINISHED =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png";
+  "/images/ki/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.webp";
 
 function formatChf(value: number) {
   return `CHF ${Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;

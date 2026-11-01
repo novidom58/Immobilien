@@ -9,7 +9,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 // Optional: Link auf einen echten Giraffe360-Beispielrundgang (Vercel-Variable).
 const DEMO_TOUR = process.env.NEXT_PUBLIC_GIRAFFE_DEMO_URL;
 // Symbolbild (KI, Higgsfield): 360°-Kamera beim Fototermin, bis echte Giraffe360-Aufnahmen vorliegen
-const SHOOT_IMAGE = "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20261028_215930_11e7f739-e718-48f4-98c6-1e6814f4b75c.png";
+const SHOOT_IMAGE = "/images/ki/hf_20261028_215930_11e7f739-e718-48f4-98c6-1e6814f4b75c.webp";
 
 const TABS = [
   { id: "foto", label: "Profi-Fotos", icon: Camera },

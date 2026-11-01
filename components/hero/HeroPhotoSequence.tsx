@@ -7,10 +7,10 @@ import Image from "next/image";
 // Gehostet auf der Higgsfield-CDN - vor dem finalen Launch idealerweise auf eigenen
 // Storage/CDN umziehen, siehe Projekt-Notizen.
 const frames = [
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221150_fa74846e-daa4-4137-84c2-ad0e20cace00.png",
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221205_b6c6a47e-25be-48f6-9962-fbea46912246.png",
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221235_bd637878-578d-4c53-902b-01006d1aa395.png",
-  "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png",
+  "/images/ki/hf_20260721_221150_fa74846e-daa4-4137-84c2-ad0e20cace00.webp",
+  "/images/ki/hf_20260721_221205_b6c6a47e-25be-48f6-9962-fbea46912246.webp",
+  "/images/ki/hf_20260721_221235_bd637878-578d-4c53-902b-01006d1aa395.webp",
+  "/images/ki/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.webp",
 ];
 
 const STEP = 1.35;

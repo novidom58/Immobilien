@@ -16,7 +16,7 @@ const rooms = [
     title: "Wo alles beginnt",
     text: "Ein einladender Empfang mit natürlichen Materialien setzt den Ton für das gesamte Zuhause.",
     image:
-      "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.png",
+      "/images/ki/hf_20260724_172033_240313c6-3332-42be-b381-08181cd212e4.webp",
     align: "left" as const,
   },
   {
@@ -26,7 +26,7 @@ const rooms = [
     title: "Ihr Zuhause, wenn es zum Leben erwacht",
     text: "Warmes Licht, ruhige Atmosphäre — der Moment, der zeigt, was möglich ist.",
     image:
-      "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.png",
+      "/images/ki/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.webp",
     align: "center" as const,
     cta: true,
   },

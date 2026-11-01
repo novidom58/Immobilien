@@ -25,7 +25,7 @@ function parse(value: string) {
 }
 
 // Eigenes Bild (KI-generiert, Higgsfield), damit keine fremden Bildrechte im Spiel sind.
-const MUENSTER = "https://d8j0ntlcm91z4.cloudfront.net/user_3FpOaL3BYtZlQsCNldD74LxGPeN/hf_20261020_211922_655cc7b3-9f47-4d64-8be3-d30a2dd67b41.png";
+const MUENSTER = "/images/ki/hf_20261020_211922_655cc7b3-9f47-4d64-8be3-d30a2dd67b41.webp";
 
 const STATUS = {
   ok: { icon: CheckCircle2, text: "Voraussichtlich tragbar", tone: "text-emerald-700" },

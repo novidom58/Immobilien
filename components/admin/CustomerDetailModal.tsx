@@ -1,5 +1,6 @@
 "use client";
 
+import { PortalSnapshotPanel } from "@/components/admin/PortalSnapshotPanel";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, Mail, Users, StickyNote, Trash2, Send, FileText, MessageCircle } from "lucide-react";
@@ -244,6 +245,13 @@ export function CustomerDetailModal({
               {customer.kauf_zeitpunkt && <span>Kaufzeitpunkt: {customer.kauf_zeitpunkt}</span>}
               {customer.portal_user_id && <span>Käufer-Alarm: {customer.alarm_opt_in ? "aktiv" : "aus"}</span>}
             </div>
+          </div>
+
+          <div className="modal-section">
+            <div className="detail-label" style={{ marginBottom: 4 }}>
+              Im Kundenportal eingegeben
+            </div>
+            <PortalSnapshotPanel customerId={customer.id} />
           </div>
 
           <div className="modal-section">

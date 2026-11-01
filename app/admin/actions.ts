@@ -1496,3 +1496,81 @@ export async function adoptPortalAccount(userId: string) {
   revalidatePath("/admin/kunden");
   return { error: null };
 }
+
+export type PortalSnapshot = {
+  linked: boolean;
+  email: string | null;
+  profile: { full_name: string | null; phone: string | null; birthdate: string | null } | null;
+  plan: {
+    wunsch_ort: string | null;
+    objekt_typ: string | null;
+    zimmer_min: number | null;
+    budget_max: number | null;
+    kauf_zeitpunkt: string | null;
+    alarm_opt_in: boolean;
+    finanz: Record<string, unknown> | null;
+    versicherung: Record<string, unknown> | null;
+    eigentum: Record<string, unknown> | null;
+    updated_at: string | null;
+  } | null;
+  favorites: { id: string; label: string }[];
+};
+
+/**
+ * Alles, was der Kunde selbst im Kundenportal eingegeben hat, live aus den
+ * Portal-Tabellen gelesen. So sieht das Team immer genau dasselbe wie der Kunde.
+ */
+export async function getPortalSnapshot(customerId: string): Promise<{ error: string | null; data: PortalSnapshot | null }> {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError, data: null };
+
+  const { data: customer } = await supabase.from("customers").select("portal_user_id, email").eq("id", customerId).maybeSingle();
+  if (!customer) return { error: "Kunde nicht gefunden.", data: null };
+
+  let userId = (customer.portal_user_id as string | null) ?? null;
+  let email = (customer.email as string | null) ?? null;
+  const { data: accounts } = await supabase.rpc("admin_list_customers");
+  const list = (accounts ?? []) as { id: string; email: string; full_name: string | null; phone: string | null; birthdate: string | null }[];
+  if (!userId && email) {
+    const match = list.find((a) => a.email.toLowerCase() === email!.toLowerCase());
+    if (match) {
+      userId = match.id;
+      // Gleich verknüpfen, damit Portal und CRM ab jetzt zusammengehören
+      await supabase.from("customers").update({ portal_user_id: match.id }).eq("id", customerId);
+    }
+  }
+  if (!userId) return { error: null, data: { linked: false, email, profile: null, plan: null, favorites: [] } };
+
+  const account = list.find((a) => a.id === userId) ?? null;
+  email = account?.email ?? email;
+  const { data: plan } = await supabase.from("customer_plans").select("*").eq("user_id", userId).maybeSingle();
+
+  const favIds = ((plan?.favorites as string[] | null) ?? []).slice(0, 30);
+  const { data: favListings } = favIds.length
+    ? await supabase.from("listings").select("id, title, address, city").in("id", favIds)
+    : { data: [] as { id: string; title: string | null; address: string; city: string }[] };
+
+  return {
+    error: null,
+    data: {
+      linked: true,
+      email,
+      profile: account ? { full_name: account.full_name, phone: account.phone, birthdate: account.birthdate } : null,
+      plan: plan
+        ? {
+            wunsch_ort: plan.wunsch_ort ?? null,
+            objekt_typ: plan.objekt_typ ?? null,
+            zimmer_min: plan.zimmer_min ?? null,
+            budget_max: plan.budget_max ?? null,
+            kauf_zeitpunkt: plan.kauf_zeitpunkt ?? null,
+            alarm_opt_in: Boolean(plan.alarm_opt_in),
+            finanz: (plan.finanz as Record<string, unknown> | null) ?? null,
+            versicherung: (plan.versicherung as Record<string, unknown> | null) ?? null,
+            eigentum: (plan.eigentum as Record<string, unknown> | null) ?? null,
+            updated_at: plan.updated_at ?? null,
+          }
+        : null,
+      favorites: (favListings ?? []).map((l) => ({ id: l.id, label: l.title || `${l.address}, ${l.city}` })),
+    },
+  };
+}

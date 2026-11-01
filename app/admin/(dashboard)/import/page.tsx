@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { CsvImportTool } from "@/components/admin/CsvImportTool";
+import { createClient } from "@/lib/supabase/server";
+import { requirePartnerPage } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "Excel-Import — Admin",
   robots: { index: false, follow: false },
 };
 
-export default function AdminImportPage() {
+export default async function AdminImportPage() {
+  const supabase = await createClient();
+  if (!supabase) return null;
+  await requirePartnerPage(supabase);
   return (
     <div>
       <div className="page-header">

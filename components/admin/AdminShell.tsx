@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { AdminPasswordChange } from "@/components/admin/AdminPasswordChange";
+import { PARTNER_ONLY } from "@/lib/roles";
 
 type NavItem = {
   href: string;
@@ -24,9 +25,11 @@ export function AdminShell({
   children,
   userEmail,
   counts,
+  role = "admin",
 }: {
   children: ReactNode;
   userEmail: string;
+  role?: "admin" | "mitarbeiter";
   counts: {
     leads: number;
     fristen: number;
@@ -47,6 +50,7 @@ export function AdminShell({
       items: [
         { href: "/admin", label: "Heute", icon: "☀️" },
         { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
+        { href: "/admin/mitarbeiter", label: "Mitarbeitende", icon: "📈" },
         { href: "/admin/leads", label: "Leads", icon: "⚡", badge: counts.leads, badgeTone: "red" },
       ],
     },
@@ -82,6 +86,14 @@ export function AdminShell({
     },
   ];
 
+  // Mitarbeitende sehen Firmenzahlen und Einstellungen nicht
+  const visibleSections =
+    role === "admin"
+      ? sections
+      : sections
+          .map((sec) => ({ ...sec, items: sec.items.filter((it) => !PARTNER_ONLY.includes(it.href)) }))
+          .filter((sec) => sec.items.length > 0);
+
   function isActive(href: string) {
     return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
   }
@@ -103,7 +115,7 @@ export function AdminShell({
 
       <div className="crm-layout">
         <nav className={`crm-sidebar ${navOpen ? "open" : ""}`}>
-          {sections.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.title}>
               <div className="crm-sidebar-section">{section.title}</div>
               {section.items.map((item) => {

@@ -10,7 +10,15 @@ export type FloorPlan = {
   height: number;
   rooms: Room[];
   fixtures: Fixture[];
+  /** Echter Grundriss als Bild im Hintergrund (massstabsgetreu auf width × height) */
+  background?: string;
 };
+
+/** Grundriss-Bild eines Objekts: Breite in Metern + Seitenverhältnis (Breite/Höhe). */
+export function planFromImage(url: string, breiteM: number, ratio: number): FloorPlan {
+  const width = Math.round(breiteM * 100);
+  return { width, height: Math.round(width / ratio), rooms: [], fixtures: [], background: url };
+}
 
 export const SAMPLE_PLAN: FloorPlan = {
   width: 1680,

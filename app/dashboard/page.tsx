@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PolicyOverview } from "@/components/portal/PolicyOverview";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
@@ -214,7 +215,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
     supabase
       .from("listings")
-      .select("id, title, address, city, price_chf, rooms, living_area, property_type, tour_url, status, offmarket_until, listing_photos(url, sort_order)")
+      .select("*, listing_photos(url, sort_order)")
       .in("status", ["active", "reserved"])
       .order("created_at", { ascending: false })
       .limit(40),
@@ -240,6 +241,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     | null;
   const portalUser = { name: profileRes.data?.full_name || user.email || "Kunde", email: user.email ?? "" };
   const favorites = new Set(plan?.favorites ?? []);
+  // Objekte mit hinterlegtem Grundriss: im Planer massstabsgetreu einrichten
+  const planOptions = (publicRes.data ?? [])
+    .filter((l) => (l.details as { grundriss?: { url?: string } } | null)?.grundriss?.url)
+    .map((l) => ({ id: l.id as string, title: ((l.title as string | null) || `${l.address}, ${l.city}`) as string, rooms: (l.rooms as number | null) ?? null }));
   const portalListings: PortalListing[] = (publicRes.data ?? [])
     .map((l) => {
       const photos = ((l.listing_photos as { url: string; sort_order: number }[] | null) ?? []).sort((a, b) => a.sort_order - b.sort_order);
@@ -309,7 +314,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section id="objekte" className={sectionClass}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
-            <Link href="/dashboard/planer/demo" className="text-sm text-amber underline underline-offset-4">
+            <Link href="#umbau" className="text-sm text-amber underline underline-offset-4">
               Grundriss-Planer ausprobieren →
             </Link>
           </div>
@@ -346,14 +351,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     ),
     versicherung: (
         <section id="versicherung" className={sectionClass}>
-          <h2 className={sectionHead}>Richtig versichert?</h2>
+          <h2 className={sectionHead}>Meine Versicherungen</h2>
           <div className="mt-5">
-            <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+            <PolicyOverview user={portalUser} isOwner={Boolean(plan?.eigentum)} />
           </div>
+          <details className="mt-5 rounded-2xl border border-line bg-white p-5">
+            <summary className="cursor-pointer font-display text-lg text-ivory">Bedarfs-Check: Was brauche ich wirklich?</summary>
+            <div className="mt-4">
+              <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+            </div>
+          </details>
           <div id="policen" className="mt-5 scroll-mt-28">
             <DocChecklist
-              title="Policen hochladen, Lücken-Check erhalten"
-              intro="Fotos oder PDFs genügen. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
+              title="Weitere Unterlagen hochladen"
+              intro="Fotos oder PDFs genügen, z.B. die letzte Prämienrechnung. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
               items={POLICEN}
             />
           </div>
@@ -363,11 +374,25 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section id="umbau" className={sectionClass}>
           <h2 className={sectionHead}>Umbauen &amp; einrichten</h2>
           <p className="mt-2 max-w-2xl text-sm text-ivory-dim">Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen.</p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Link href="/dashboard/planer/demo" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
-              <div className="font-display text-lg text-ivory">Grundriss-Planer</div>
-              <p className="mt-1 text-sm text-ivory-dim">Möbel massstabsgetreu verschieben, am Handy oder Computer.</p>
-            </Link>
+          <div className="mt-5 rounded-2xl border border-line bg-white p-5">
+            <div className="font-display text-lg text-ivory">Grundriss-Planer: Grundriss wählen</div>
+            <p className="mt-1 text-sm text-ivory-dim">
+              Möbel massstabsgetreu verschieben, am Handy oder Computer. Ihre Einrichtung wird pro Grundriss gespeichert.
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {planOptions.map((o) => (
+                <Link key={o.id} href={`/dashboard/planer/${o.id}`} className="rounded-xl border border-line px-4 py-3 text-sm text-ivory transition-colors hover:border-amber">
+                  <span className="font-medium">{o.title}</span>
+                  {o.rooms ? <span className="block text-xs text-ivory-dim">{o.rooms} Zimmer · echter Grundriss</span> : <span className="block text-xs text-ivory-dim">echter Grundriss</span>}
+                </Link>
+              ))}
+              <Link href="/dashboard/planer/demo" className="rounded-xl border border-dashed border-line px-4 py-3 text-sm text-ivory transition-colors hover:border-amber">
+                <span className="font-medium">Beispielwohnung</span>
+                <span className="block text-xs text-ivory-dim">5.5 Zimmer zum Ausprobieren</span>
+              </Link>
+            </div>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Link href="/leistungen/umbauen" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
               <div className="font-display text-lg text-ivory">Richtpreise &amp; Förderung</div>
               <p className="mt-1 text-sm text-ivory-dim">Was Küche, Bad oder Wärmepumpe kosten und welche Beiträge es gibt.</p>

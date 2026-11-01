@@ -791,3 +791,133 @@ alter table listings add column if not exists offer_type text not null default '
 -- Highlights und Merkmale für die öffentliche Objektseite
 -- ---------------------------------------------------------------------
 alter table listings add column if not exists details jsonb not null default '{}'::jsonb;
+
+-- ---------------------------------------------------------------------
+-- Rollen: Partner (role 'admin') sehen alles; Mitarbeitende (role
+-- 'mitarbeiter') sehen nur, was ihrem Berater-Namen zugeteilt ist.
+-- Sicher mehrfach ausführbar.
+-- ---------------------------------------------------------------------
+alter table profiles drop constraint if exists profiles_role_check;
+alter table profiles add constraint profiles_role_check check (role in ('customer', 'admin', 'mitarbeiter'));
+alter table profiles add column if not exists berater_name text;
+alter table leads add column if not exists berater text;
+
+create or replace function public.is_staff()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from profiles where id = auth.uid() and role in ('admin', 'mitarbeiter'));
+$$;
+
+create or replace function public.my_berater()
+returns text language sql stable security definer set search_path = public as $$
+  select berater_name from profiles where id = auth.uid() and role = 'mitarbeiter';
+$$;
+
+-- Leads: nur zugeteilte
+drop policy if exists "leads_staff_select" on leads;
+create policy "leads_staff_select" on leads for select using (public.my_berater() is not null and berater = public.my_berater());
+drop policy if exists "leads_staff_update" on leads;
+create policy "leads_staff_update" on leads for update
+  using (public.my_berater() is not null and berater = public.my_berater())
+  with check (berater = public.my_berater());
+
+drop policy if exists "lead_activity_staff" on lead_activity;
+create policy "lead_activity_staff" on lead_activity for all
+  using (exists (select 1 from leads l where l.id = lead_id and l.berater = public.my_berater()))
+  with check (exists (select 1 from leads l where l.id = lead_id and l.berater = public.my_berater()));
+
+-- Kunden: nur zugeteilte
+drop policy if exists "customers_staff_select" on customers;
+create policy "customers_staff_select" on customers for select using (public.my_berater() is not null and berater = public.my_berater());
+drop policy if exists "customers_staff_insert" on customers;
+create policy "customers_staff_insert" on customers for insert with check (berater = public.my_berater());
+drop policy if exists "customers_staff_update" on customers;
+create policy "customers_staff_update" on customers for update
+  using (public.my_berater() is not null and berater = public.my_berater())
+  with check (berater = public.my_berater());
+
+drop policy if exists "customer_activity_staff" on customer_activity;
+create policy "customer_activity_staff" on customer_activity for all
+  using (exists (select 1 from customers c where c.id = customer_id and c.berater = public.my_berater()))
+  with check (exists (select 1 from customers c where c.id = customer_id and c.berater = public.my_berater()));
+
+-- Portal-Angaben (Finanzierung, Eigentum, Versicherung) nur bei eigenen Kunden
+drop policy if exists "customer_plans_staff_select" on customer_plans;
+create policy "customer_plans_staff_select" on customer_plans for select
+  using (exists (select 1 from customers c where c.portal_user_id = customer_plans.user_id and c.berater = public.my_berater()));
+
+-- Objekte: alle sehen (ohne Eigentümerdaten, die liegen bei den Kunden), nur eigene bearbeiten
+drop policy if exists "listings_staff_select" on listings;
+create policy "listings_staff_select" on listings for select using (public.is_staff());
+drop policy if exists "listings_staff_insert" on listings;
+create policy "listings_staff_insert" on listings for insert with check (public.my_berater() is not null and berater = public.my_berater());
+drop policy if exists "listings_staff_update" on listings;
+create policy "listings_staff_update" on listings for update
+  using (public.my_berater() is not null and berater = public.my_berater())
+  with check (berater = public.my_berater());
+
+drop policy if exists "listing_photos_staff_write" on listing_photos;
+create policy "listing_photos_staff_write" on listing_photos for all
+  using (exists (select 1 from listings l where l.id = listing_id and l.berater = public.my_berater()))
+  with check (exists (select 1 from listings l where l.id = listing_id and l.berater = public.my_berater()));
+
+drop policy if exists "storage_listing_photos_staff_insert" on storage.objects;
+create policy "storage_listing_photos_staff_insert" on storage.objects
+  for insert with check (bucket_id = 'listing-photos' and public.my_berater() is not null);
+
+-- Termine: Firmenkalender für alle im Team, ändern nur eigene
+drop policy if exists "termine_staff_select" on termine;
+create policy "termine_staff_select" on termine for select using (public.is_staff());
+drop policy if exists "termine_staff_write" on termine;
+create policy "termine_staff_write" on termine for insert with check (berater = public.my_berater());
+drop policy if exists "termine_staff_delete" on termine;
+create policy "termine_staff_delete" on termine for delete using (public.my_berater() is not null and berater = public.my_berater());
+
+-- Berater-Namen für Auswahllisten
+drop policy if exists "berater_staff_select" on berater;
+create policy "berater_staff_select" on berater for select using (public.is_staff());
+
+-- Abschluss pro Objekt (vertraulich, nicht öffentlich): Verkaufspreis,
+-- Provision, Eigenakquise. Basis für die Mitarbeiter-Übersicht.
+create table if not exists listing_deals (
+  listing_id uuid primary key references listings (id) on delete cascade,
+  sold_price integer,
+  commission_pct numeric,
+  sold_at date,
+  self_acquired boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+alter table listing_deals enable row level security;
+drop policy if exists "listing_deals_admin_all" on listing_deals;
+create policy "listing_deals_admin_all" on listing_deals for all using (public.is_admin());
+drop policy if exists "listing_deals_staff_own" on listing_deals;
+create policy "listing_deals_staff_own" on listing_deals for select
+  using (exists (select 1 from listings l where l.id = listing_id and l.berater = public.my_berater()));
+
+-- ---------------------------------------------------------------------
+-- Meine Versicherungen im Kundenportal: Policen pro Kunde (PDF im Bucket
+-- kunden-dokumente). Kunde sieht und pflegt seine eigenen, Partner alle,
+-- Mitarbeitende die ihrer Kunden.
+-- ---------------------------------------------------------------------
+create table if not exists customer_policies (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  sparte text not null,
+  versicherer text,
+  policennummer text,
+  praemie_jahr numeric,
+  ablauf date,
+  kuendigungsfrist_monate integer,
+  deckung text,
+  storage_path text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table customer_policies enable row level security;
+drop policy if exists "customer_policies_own" on customer_policies;
+create policy "customer_policies_own" on customer_policies for all
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "customer_policies_admin" on customer_policies;
+create policy "customer_policies_admin" on customer_policies for all using (public.is_admin());
+drop policy if exists "customer_policies_staff_select" on customer_policies;
+create policy "customer_policies_staff_select" on customer_policies for select
+  using (exists (select 1 from customers c where c.portal_user_id = customer_policies.user_id and c.berater = public.my_berater()));

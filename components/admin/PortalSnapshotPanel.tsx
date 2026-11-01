@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getPortalSnapshot, type PortalSnapshot } from "@/app/admin/actions";
+import { createClient } from "@/lib/supabase/client";
+import { kuendigenBis, sparteLabel } from "@/lib/policies";
 
 const chf = (v: unknown) => (typeof v === "number" && v > 0 ? `CHF ${v.toLocaleString("de-CH")}` : null);
 const date = (v: unknown) => (typeof v === "string" && v ? new Date(v).toLocaleDateString("de-CH") : null);
@@ -117,13 +119,44 @@ export function PortalSnapshotPanel({ customerId }: { customerId: string }) {
         </Block>
       )}
 
+      {data.policies.length > 0 && (
+        <Block title={`Policen (${data.policies.length})`}>
+          {data.policies.map((p) => {
+            const bis = kuendigenBis(p);
+            return (
+              <div key={p.id} style={{ fontSize: 13, padding: "3px 0" }}>
+                <b>{sparteLabel(p.sparte)}</b>
+                {p.versicherer ? ` · ${p.versicherer}` : ""}
+                {p.praemie_jahr ? ` · ${chf(Number(p.praemie_jahr))}/Jahr` : ""}
+                {bis ? ` · kündbar bis ${bis.toLocaleDateString("de-CH")}` : ""}
+                {p.deckung ? <div className="td-light">{p.deckung}</div> : null}
+                {p.storage_path && (
+                  <button
+                    type="button"
+                    className="td-light"
+                    style={{ textDecoration: "underline", fontSize: 12 }}
+                    onClick={async () => {
+                      const sb = createClient();
+                      const { data: signed } = (await sb?.storage.from("kunden-dokumente").createSignedUrl(p.storage_path!, 60)) ?? { data: null };
+                      if (signed) window.open(signed.signedUrl, "_blank");
+                    }}
+                  >
+                    Police öffnen
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </Block>
+      )}
+
       {data.favorites.length > 0 && (
         <Block title={`Merkliste (${data.favorites.length})`}>
           <div style={{ fontSize: 13, lineHeight: 1.7 }}>{data.favorites.map((x) => x.label).join(" · ")}</div>
         </Block>
       )}
 
-      {!hasSearch && !f && !e && !v && data.favorites.length === 0 && (
+      {!hasSearch && !f && !e && !v && data.favorites.length === 0 && data.policies.length === 0 && (
         <p className="td-light" style={{ fontSize: 12.5, marginTop: 8 }}>
           Konto vorhanden, aber im Portal noch nichts ausgefüllt.
         </p>

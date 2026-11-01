@@ -27,7 +27,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   if (!user) redirect("/admin/login?redirect=/admin");
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") redirect("/admin/login");
+  const role = profile?.role === "admin" ? "admin" : profile?.role === "mitarbeiter" ? "mitarbeiter" : null;
+  if (!role) redirect("/admin/login");
 
   const [leads, listings] = await Promise.all([getLeadsWithActivity(supabase), getListingsForAdmin(supabase)]);
 
@@ -42,7 +43,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   };
 
   return (
-    <AdminShell userEmail={user.email ?? ""} counts={counts}>
+    <AdminShell userEmail={user.email ?? ""} counts={counts} role={role}>
       {children}
     </AdminShell>
   );

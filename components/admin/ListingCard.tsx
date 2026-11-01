@@ -1,5 +1,6 @@
 "use client";
 
+import { PhotoManager } from "@/components/admin/PhotoManager";
 import { ListingDetailsFields } from "@/components/admin/ListingDetailsFields";
 import { asDetails } from "@/lib/listingDetails";
 import { useRef, useState } from "react";
@@ -163,8 +164,8 @@ export function ListingCard({
     setBusy("upload");
     setError(null);
 
-    // Nach Dateiname sortiert, damit "01-…", "02-…" die Reihenfolge im
-    // Flythrough bestimmt; jedes Foto bekommt seine eigene Position.
+    // Nach Dateiname sortiert, damit "01-…", "02-…" die Reihenfolge der
+    // Bilder bestimmt; danach lässt sie sich unter «Fotos & Titelbild» ändern.
     const sorted = Array.from(files).sort((a, b) => a.name.localeCompare(b.name, "de", { numeric: true }));
     for (const [index, file] of sorted.entries()) {
       const path = `${listing.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
@@ -303,11 +304,8 @@ export function ListingCard({
             <MapPin className="h-3 w-3" strokeWidth={1.75} />
             Karte: {listing.lat ? "Ja" : "Nein"}
           </span>
-          <span className="td-light">
-            {listing.photoCount} Foto{listing.photoCount === 1 ? "" : "s"}
-          </span>
-          <VideoFolderControl folder={clipFolder(listing.id)} label="Clips pro Foto" onError={setError} />
-          <VideoFolderControl folder={flightFolder(listing.id)} label="Drohnenflug" onError={setError} />
+          <VideoFolderControl folder={clipFolder(listing.id)} label="Videos" onError={setError} />
+          <VideoFolderControl folder={flightFolder(listing.id)} label="Drohnenvideo" onError={setError} />
           <BuyerAlertButton listingId={listing.id} active={listing.status === "active" || listing.status === "reserved"} />
           <OffMarketControl listingId={listing.id} status={listing.status} until={listing.offmarket_until} />
           <FeedbackShare listingId={listing.id} title={listing.title || `${listing.address}, ${listing.city}`} />
@@ -321,6 +319,9 @@ export function ListingCard({
           <Link href={`/immobilien/${listing.id}/expose`} target="_blank" style={{ color: "var(--blue)", textDecoration: "underline" }}>
             Exposé ansehen
           </Link>
+        </div>
+        <div style={{ marginTop: 10 }}>
+          <PhotoManager listingId={listing.id} count={listing.photoCount} />
         </div>
 
         {(listing.status === "active" || listing.status === "reserved") && (

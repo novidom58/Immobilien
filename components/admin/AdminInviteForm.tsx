@@ -3,11 +3,12 @@
 import { useActionState } from "react";
 import { inviteAdmin } from "@/app/admin/actions";
 
-const initialState = { error: null as string | null, success: false };
+type InviteState = { error: string | null; success: boolean; message?: string };
+const initialState: InviteState = { error: null, success: false };
 
 export function AdminInviteForm() {
   const [state, formAction, pending] = useActionState(
-    async (_prev: typeof initialState, formData: FormData) => inviteAdmin(formData),
+    async (_prev: InviteState, formData: FormData): Promise<InviteState> => inviteAdmin(formData),
     initialState
   );
 
@@ -22,7 +23,7 @@ export function AdminInviteForm() {
       )}
       {state.success && (
         <p className="sm:col-span-2" style={{ fontSize: 13, color: "var(--green)" }}>
-          Einladung verschickt — sobald sich die Person anmeldet, hat sie vollen Admin-Zugriff.
+          {state.message ?? "Einladung verschickt. Sobald sich die Person anmeldet, hat sie vollen Admin-Zugriff."}
         </p>
       )}
       <button type="submit" disabled={pending} className="btn btn-primary sm:col-span-2" style={{ width: "fit-content" }}>

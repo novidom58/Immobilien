@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OpenSectionOnHash } from "@/components/portal/OpenSectionOnHash";
 import { PolicyOverview } from "@/components/portal/PolicyOverview";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
@@ -11,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { MyDocuments } from "@/components/MyDocuments";
-import { DocChecklist, FINANZ_UNTERLAGEN, POLICEN } from "@/components/DocChecklist";
+import { DocChecklist, FINANZ_UNTERLAGEN } from "@/components/DocChecklist";
 import { SaleStepper } from "@/components/SaleStepper";
 import { Logo } from "@/components/ui/Logo";
 import { SearchProfileForm, type SearchProfile } from "@/components/portal/SearchProfileForm";
@@ -117,16 +118,42 @@ const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
  * Link (?fokus=umbauen aus dem Kontaktformular), sonst nach den Rollen in
  * der Kundenakte. Verkäufer mit Inserat sehen ihr Cockpit ohnehin zuoberst.
  */
-function sectionOrder(fokus: string | undefined, rollen: string[], hasListing: boolean): PortalSection[] {
-  if (isAnliegen(fokus)) return ORDER[fokus];
-  if (!hasListing && rollen.includes("verkaeufer")) return ORDER.verkaufen;
-  if (rollen.includes("trennung")) return ORDER.trennung;
-  if (rollen.includes("umbau")) return ORDER.umbauen;
-  if (rollen.includes("finanzierung") && !rollen.includes("kaeufer")) return ORDER.finanzieren;
-  if (rollen.includes("versicherung") && !rollen.includes("kaeufer")) return ORDER.versichern;
-  if (rollen.includes("eigentuemer") && !rollen.includes("kaeufer")) return ORDER.eigentum;
-  return ORDER.kaufen;
+function portalFocus(fokus: string | undefined, rollen: string[], hasListing: boolean): keyof typeof ORDER {
+  if (isAnliegen(fokus)) return fokus;
+  if (!hasListing && rollen.includes("verkaeufer")) return "verkaufen";
+  if (rollen.includes("trennung")) return "trennung";
+  if (rollen.includes("umbau")) return "umbauen";
+  if (rollen.includes("finanzierung") && !rollen.includes("kaeufer")) return "finanzieren";
+  if (rollen.includes("versicherung") && !rollen.includes("kaeufer")) return "versichern";
+  if (rollen.includes("eigentuemer") && !rollen.includes("kaeufer")) return "eigentum";
+  return "kaufen";
 }
+
+/**
+ * Was offen angezeigt wird. Alles andere liegt eingeklappt unter «Weitere
+ * Bereiche», damit niemand durch Themen scrollen muss, die ihn nicht
+ * betreffen (z.B. sieht ein Eigentümer im Hypothekenwächter keine Kaufkraft).
+ */
+const MAIN: Record<keyof typeof ORDER, PortalSection[]> = {
+  kaufen: ["weg", "suchprofil", "objekte", "finanzierung"],
+  verkaufen: ["verkaufen", "eigentum"],
+  finanzieren: ["finanzierung", "eigentum"],
+  umbauen: ["umbau", "finanzierung"],
+  versichern: ["versicherung"],
+  eigentum: ["eigentum", "versicherung"],
+  trennung: ["finanzierung", "eigentum", "verkaufen"],
+};
+
+const MORE_HINT: Record<PortalSection, string> = {
+  weg: "Ihr Weg zum Eigenheim in Schritten",
+  suchprofil: "Suchprofil hinterlegen und neue Objekte zuerst sehen",
+  objekte: "Passende Objekte, Favoriten und Grundriss-Planer",
+  finanzierung: "Kaufkraft prüfen und Unterlagen für die Bank",
+  versicherung: "Policen an einem Ort, Lücken-Check und Schaden melden",
+  umbau: "Ideen am Grundriss ausprobieren und Kosten abschätzen",
+  eigentum: "Wertmonitor und Hypothekenwächter für Ihre Immobilie",
+  verkaufen: "Was ist Ihr Zuhause wert? Verkauf starten",
+};
 
 const INTRO: Record<Anliegen | "eigentum", string> = {
   kaufen: "Suchprofil, Finanzierung und Versicherung an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
@@ -353,6 +380,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section id="versicherung" className={sectionClass}>
           <h2 className={sectionHead}>Meine Versicherungen</h2>
           <div className="mt-5">
+            <div id="policen" className="scroll-mt-28" />
             <PolicyOverview user={portalUser} isOwner={Boolean(plan?.eigentum)} />
           </div>
           <details className="mt-5 rounded-2xl border border-line bg-white p-5">
@@ -361,13 +389,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
             </div>
           </details>
-          <div id="policen" className="mt-5 scroll-mt-28">
-            <DocChecklist
-              title="Weitere Unterlagen hochladen"
-              intro="Fotos oder PDFs genügen, z.B. die letzte Prämienrechnung. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
-              items={POLICEN}
-            />
-          </div>
         </section>
     ),
     umbau: (
@@ -475,7 +496,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </section>
     ),
   };
-  const order = sectionOrder(fokus, crm?.rollen ?? [], Boolean(listing));
+  const focus = portalFocus(fokus, crm?.rollen ?? [], Boolean(listing));
+  const order = ORDER[focus];
+  // Mit eigenem Inserat steht das Verkaufs-Cockpit oben, alles andere eingeklappt
+  const main = listing ? [] : MAIN[focus].filter((k) => portalSections[k]);
+  const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
 
   return (
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
@@ -500,10 +525,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <p className="mt-3 max-w-2xl text-ivory-dim">
           {listing
             ? "Ihr Verkauf auf einen Blick: Schritt für Schritt, mit allen Zahlen und Dokumenten. Darunter planen Sie gleich Ihr nächstes Zuhause."
-            : INTRO[(Object.keys(ORDER) as (keyof typeof ORDER)[]).find((k) => ORDER[k] === order) ?? "kaufen"]}
+            : INTRO[focus]}
         </p>
         <nav className="mt-6 flex flex-wrap gap-2 text-sm">
-          {[...(listing ? (["verkauf"] as const) : []), ...order.filter((k) => k !== "weg" && portalSections[k])].map((key) => (
+          {[...(listing ? (["verkauf"] as const) : []), ...main.filter((k) => k !== "weg")].map((key) => (
             <a key={key} href={`#${key}`} className="rounded-full border border-line bg-white px-4 py-2 text-ivory hover:border-ivory">
               {SECTION_LABEL[key]}
             </a>
@@ -663,18 +688,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </div>
             </section>
 
-            <h2 className="mt-16 font-display text-3xl text-ivory lg:text-4xl">
-              Und Ihr <em>nächstes Zuhause?</em>
-            </h2>
-            <p className="mt-2 max-w-2xl text-ivory-dim">
-              Viele Verkäufer kaufen gleich wieder. Hinterlegen Sie Ihr Suchprofil, dann sind Sie bei neuen Objekten zuerst dran.
-            </p>
           </>
         )}
 
-        {order.map((key) => (
+        <OpenSectionOnHash />
+        {main.map((key) => (
           <Fragment key={key}>{portalSections[key]}</Fragment>
         ))}
+
+        {more.length > 0 && (
+          <section className="mt-16">
+            <h2 className={sectionHead}>Weitere Bereiche</h2>
+            <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
+              {listing
+                ? "Und Ihr nächstes Zuhause? Viele Verkäufer kaufen gleich wieder: Suchprofil, Finanzierung und mehr bei Bedarf aufklappen."
+                : "Bei Bedarf aufklappen. Alles, was Sie hier eingeben, sieht nur Ihr NoviDom-Team."}
+            </p>
+            <div className="mt-5 grid gap-3">
+              {more.map((key) => (
+                <details key={key} id={`mehr-${key}`} className="group rounded-2xl border border-line bg-white px-5 py-4 open:pb-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                    <span>
+                      <span className="block font-display text-lg text-ivory">{key === "weg" ? "Mein Weg" : SECTION_LABEL[key]}</span>
+                      <span className="block text-sm text-ivory-dim">{MORE_HINT[key]}</span>
+                    </span>
+                    <span aria-hidden className="text-2xl leading-none text-amber transition-transform group-open:rotate-45">+</span>
+                  </summary>
+                  <div className="[&>section]:mt-5 [&>section>h2]:hidden">{portalSections[key]}</div>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

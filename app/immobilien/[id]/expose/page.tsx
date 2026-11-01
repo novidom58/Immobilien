@@ -105,6 +105,7 @@ export default async function ListingExposePage({
     ["Objektart", TYPE_LABEL[listing.property_type as string] ?? (listing.property_type as string)],
     ["Zimmer", listing.rooms ? String(listing.rooms) : null],
     ["Wohnfläche", listing.living_area ? `ca. ${listing.living_area} m²` : null],
+    ["Grundstück", details.grundstueck ? `ca. ${details.grundstueck.replace(/\s*m2?²?$/i, "")} m²` : null],
     ["Badezimmer", details.badezimmer],
     ["Etage", details.etage],
     ["Baujahr", details.baujahr],

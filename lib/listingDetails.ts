@@ -7,6 +7,7 @@ export type ListingDetails = {
   etage?: string;
   baujahr?: string;
   renoviert?: string;
+  grundstueck?: string;
   highlights?: string[];
   merkmale?: string[];
 };
@@ -17,6 +18,7 @@ export const DETAIL_FIELDS = [
   { key: "etage", label: "Etage", placeholder: "z.B. EG" },
   { key: "baujahr", label: "Baujahr", placeholder: "z.B. 1965" },
   { key: "renoviert", label: "Letzte Renovation", placeholder: "z.B. 2025" },
+  { key: "grundstueck", label: "Grundstücksfläche m²", placeholder: "z.B. 180" },
 ] as const;
 
 function clean(value: FormDataEntryValue | null) {

@@ -1,10 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ShowcaseItem } from "@/components/hero/HeroShowcase";
 import { publicListingFilter } from "@/lib/offmarket";
-
-function formatChf(value: number) {
-  return `CHF ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}`;
-}
+import { offerTypeOf, priceText } from "@/lib/listingOffer";
 
 /** Aktive und reservierte Inserate mit Titelbild für die Hero-Bildkarte. */
 export async function getShowcase(): Promise<ShowcaseItem[]> {
@@ -13,22 +10,33 @@ export async function getShowcase(): Promise<ShowcaseItem[]> {
 
   const { data } = await supabase
     .from("listings")
-    .select("id, city, rooms, living_area, price_chf, status, listing_photos(url, sort_order)")
+    // "*" statt fester Spalten, damit fehlende neue Spalten nichts brechen
+    .select("*, listing_photos(url, sort_order)")
     .in("status", ["active", "reserved"])
     .or(publicListingFilter())
     .order("created_at", { ascending: false })
-    .limit(6);
+    .limit(8);
 
   return (data ?? []).flatMap((l) => {
     const photos = ((l.listing_photos as { url: string; sort_order: number }[] | null) ?? []).sort(
       (a, b) => a.sort_order - b.sort_order
     );
     if (photos.length === 0) return [];
+    const offer = offerTypeOf(l.offer_type as string | null);
     const facts = [
       l.rooms ? `${l.rooms} Zimmer` : null,
       l.living_area ? `${l.living_area} m²` : null,
-      l.status === "reserved" ? "Reserviert" : l.price_chf ? formatChf(l.price_chf as number) : null,
+      l.status === "reserved" ? "Reserviert" : l.price_chf ? priceText(l.price_chf as number, offer) : null,
     ].filter(Boolean);
-    return [{ id: l.id as string, image: photos[0].url, place: l.city as string, facts: facts.join(" · ") }];
+    return [
+      {
+        id: l.id as string,
+        image: photos[0].url,
+        place: l.city as string,
+        title: (l.title as string | null) || null,
+        offer,
+        facts: facts.join(" · "),
+      },
+    ];
   });
 }

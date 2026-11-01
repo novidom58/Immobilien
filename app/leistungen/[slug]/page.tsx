@@ -142,8 +142,8 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               </div>
             </section>
 
-            {/* Umbau und Verkaufen zeigen weiter unten mehr als der kurze Puzzle-Teil */}
-            {area.id !== "umbau" && area.id !== "kv" && (
+            {/* Umbau, Verkaufen und Versichern zeigen weiter unten mehr als der kurze Puzzle-Teil */}
+            {area.id !== "umbau" && area.id !== "kv" && area.id !== "vers" && (
               <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
                 <AreaInteractive id={area.id} title={area.title} />
               </section>

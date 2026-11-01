@@ -171,19 +171,14 @@ export function KalenderEmbed({ shared = false }: { shared?: boolean }) {
     );
   }
 
-  // Gemeinsamer Firmenkalender (in Vercel hinterlegt), für alle Admins gleich
+  // Firmenkalender läuft über die Kalenderansicht oben; hier nur noch der
+  // optionale eigene Kalender (Outlook/Google) für diesen Browser.
   return (
-    <div className="card" style={{ padding: 16 }}>
-      <div className="field-label" style={{ marginBottom: 10 }}>
-        Firmenkalender (für alle im Team)
-      </div>
-      <Agenda endpoint="/api/admin/calendar?shared=1" />
-      <details style={{ marginTop: 18 }}>
-        <summary className="td-light" style={{ cursor: "pointer", fontSize: 12.5 }}>
-          Zusätzlich eigenen Kalender anzeigen (nur in diesem Browser)
-        </summary>
-        <div style={{ marginTop: 12 }}>{personal}</div>
-      </details>
-    </div>
+    <details className="card" style={{ padding: 16 }}>
+      <summary className="td-light" style={{ cursor: "pointer", fontSize: 12.5 }}>
+        Zusätzlich eigenen Outlook- oder Google-Kalender anzeigen (nur in diesem Browser)
+      </summary>
+      <div style={{ marginTop: 12 }}>{personal}</div>
+    </details>
   );
 }

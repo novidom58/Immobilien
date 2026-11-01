@@ -46,9 +46,9 @@ export default function ExposeBeispielPage() {
       {/* Das "Papier" */}
       <div className="mx-auto max-w-3xl bg-white shadow-xl print:shadow-none">
         {/* Kopf */}
-        <div className="flex items-center justify-between px-10 pt-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-8 sm:px-10">
           <Logo className="h-10 w-auto" />
-          <span className="text-xs uppercase tracking-[0.25em] text-[#8a8578]">
+          <span className="text-xs uppercase tracking-[0.18em] text-[#8a8578] sm:tracking-[0.25em]">
             Verkaufsdokumentation
           </span>
         </div>

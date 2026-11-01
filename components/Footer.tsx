@@ -77,7 +77,7 @@ export function Footer() {
             Admin
           </Link>
         </div>
-        <a href="#top" className="text-ivory-dim/50 hover:text-ivory-dim">
+        <a href="#" className="text-ivory-dim/50 hover:text-ivory-dim">
           Nach oben ↑
         </a>
       </div>

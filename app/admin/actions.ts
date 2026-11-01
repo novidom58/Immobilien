@@ -1561,6 +1561,7 @@ export type PortalSnapshot = {
     updated_at: string | null;
   } | null;
   favorites: { id: string; label: string }[];
+  policies: { id: string; sparte: string; versicherer: string | null; policennummer: string | null; praemie_jahr: number | null; ablauf: string | null; kuendigungsfrist_monate: number | null; deckung: string | null; storage_path: string | null }[];
 };
 
 /**
@@ -1586,11 +1587,12 @@ export async function getPortalSnapshot(customerId: string): Promise<{ error: st
       await supabase.from("customers").update({ portal_user_id: match.id }).eq("id", customerId);
     }
   }
-  if (!userId) return { error: null, data: { linked: false, email, profile: null, plan: null, favorites: [] } };
+  if (!userId) return { error: null, data: { linked: false, email, profile: null, plan: null, favorites: [], policies: [] } };
 
   const account = list.find((a) => a.id === userId) ?? null;
   email = account?.email ?? email;
   const { data: plan } = await supabase.from("customer_plans").select("*").eq("user_id", userId).maybeSingle();
+  const { data: policyRows } = await supabase.from("customer_policies").select("*").eq("user_id", userId).order("sparte");
 
   const favIds = ((plan?.favorites as string[] | null) ?? []).slice(0, 30);
   const { data: favListings } = favIds.length
@@ -1618,6 +1620,7 @@ export async function getPortalSnapshot(customerId: string): Promise<{ error: st
           }
         : null,
       favorites: (favListings ?? []).map((l) => ({ id: l.id, label: l.title || `${l.address}, ${l.city}` })),
+      policies: (policyRows ?? []) as PortalSnapshot["policies"],
     },
   };
 }

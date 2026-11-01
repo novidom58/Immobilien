@@ -892,3 +892,32 @@ create policy "listing_deals_admin_all" on listing_deals for all using (public.i
 drop policy if exists "listing_deals_staff_own" on listing_deals;
 create policy "listing_deals_staff_own" on listing_deals for select
   using (exists (select 1 from listings l where l.id = listing_id and l.berater = public.my_berater()));
+
+-- ---------------------------------------------------------------------
+-- Meine Versicherungen im Kundenportal: Policen pro Kunde (PDF im Bucket
+-- kunden-dokumente). Kunde sieht und pflegt seine eigenen, Partner alle,
+-- Mitarbeitende die ihrer Kunden.
+-- ---------------------------------------------------------------------
+create table if not exists customer_policies (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  sparte text not null,
+  versicherer text,
+  policennummer text,
+  praemie_jahr numeric,
+  ablauf date,
+  kuendigungsfrist_monate integer,
+  deckung text,
+  storage_path text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table customer_policies enable row level security;
+drop policy if exists "customer_policies_own" on customer_policies;
+create policy "customer_policies_own" on customer_policies for all
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "customer_policies_admin" on customer_policies;
+create policy "customer_policies_admin" on customer_policies for all using (public.is_admin());
+drop policy if exists "customer_policies_staff_select" on customer_policies;
+create policy "customer_policies_staff_select" on customer_policies for select
+  using (exists (select 1 from customers c where c.portal_user_id = customer_policies.user_id and c.berater = public.my_berater()));

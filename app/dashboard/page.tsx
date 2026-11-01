@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PolicyOverview } from "@/components/portal/PolicyOverview";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
@@ -350,14 +351,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     ),
     versicherung: (
         <section id="versicherung" className={sectionClass}>
-          <h2 className={sectionHead}>Richtig versichert?</h2>
+          <h2 className={sectionHead}>Meine Versicherungen</h2>
           <div className="mt-5">
-            <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+            <PolicyOverview user={portalUser} isOwner={Boolean(plan?.eigentum)} />
           </div>
+          <details className="mt-5 rounded-2xl border border-line bg-white p-5">
+            <summary className="cursor-pointer font-display text-lg text-ivory">Bedarfs-Check: Was brauche ich wirklich?</summary>
+            <div className="mt-4">
+              <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+            </div>
+          </details>
           <div id="policen" className="mt-5 scroll-mt-28">
             <DocChecklist
-              title="Policen hochladen, Lücken-Check erhalten"
-              intro="Fotos oder PDFs genügen. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
+              title="Weitere Unterlagen hochladen"
+              intro="Fotos oder PDFs genügen, z.B. die letzte Prämienrechnung. Wir prüfen Deckungen und Prämien und melden uns mit Lücken und Sparpotenzial."
               items={POLICEN}
             />
           </div>

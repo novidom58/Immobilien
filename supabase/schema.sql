@@ -785,3 +785,9 @@ create policy "leads_admin_delete" on leads
 -- ---------------------------------------------------------------------
 alter table listings add column if not exists offer_type text not null default 'kauf'
   check (offer_type in ('kauf', 'miete'));
+
+-- ---------------------------------------------------------------------
+-- Objekt-Eckdaten: Verfügbar ab, Badezimmer, Etage, Baujahr, Renovation,
+-- Highlights und Merkmale für die öffentliche Objektseite
+-- ---------------------------------------------------------------------
+alter table listings add column if not exists details jsonb not null default '{}'::jsonb;

@@ -1,5 +1,6 @@
 "use server";
 
+import { readDetails, type ListingDetails } from "@/lib/listingDetails";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
@@ -53,6 +54,25 @@ function readOfferType(formData: FormData) {
   return formData.get("offer_type") === "miete" ? "miete" : "kauf";
 }
 
+/**
+ * Speichert ein Inserat inkl. Eckdaten (Spalte details). Fehlt die Spalte noch,
+ * wird ohne Eckdaten gespeichert und ein Hinweis aufs SQL zurückgegeben.
+ */
+async function saveListingRow(
+  formData: FormData,
+  run: (extra: { offer_type?: string; details?: ListingDetails }) => PromiseLike<{ error: { message: string } | null }>
+) {
+  const offerType = readOfferType(formData);
+  const details = readDetails(formData);
+  const res = await saveWithOfferType(offerType, (extra) => run({ ...extra, details }));
+  if (res.error?.message.includes("details")) {
+    const retry = await saveWithOfferType(offerType, (extra) => run(extra));
+    if (retry.error) return retry;
+    return { error: { message: "Gespeichert, aber ohne Eckdaten. Bitte in Supabase das SQL «Objekt-Eckdaten» ausführen." }, saved: true };
+  }
+  return res;
+}
+
 /** Rundgang-Link aus Giraffe360 & Co. ohne «https://» kopiert? Dann ergänzen. */
 function normalizeTourUrl(raw: string) {
   const url = raw.trim();
@@ -85,7 +105,7 @@ export async function createListing(formData: FormData) {
   // wird das Inserat trotzdem gespeichert.
   const coords = await geocodeAddress(address, city);
 
-  const { error } = await saveWithOfferType(readOfferType(formData), (extra) => supabase.from("listings").insert({
+  const { error } = await saveListingRow(formData, (extra) => supabase.from("listings").insert({
     ...extra,
     address,
     city,
@@ -135,7 +155,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   // Bei Adress-/Ortsänderung erneut geocodieren, damit der Karten-Pin stimmt.
   const coords = await geocodeAddress(address, city);
 
-  const { error } = await saveWithOfferType(readOfferType(formData), (extra) => supabase
+  const { error } = await saveListingRow(formData, (extra) => supabase
     .from("listings")
     .update({
       ...extra,
@@ -1445,4 +1465,34 @@ export async function saveZinssaetze(formData: FormData) {
   revalidatePath("/admin/hypotheken");
   revalidatePath("/leistungen/finanzieren");
   return { error: null, saved: rows.length };
+}
+
+/**
+ * Registriertes Website-Konto (Kundenlogin) ins CRM übernehmen. Gibt es den
+ * Kunden mit dieser E-Mail schon, wird nur das Konto verknüpft.
+ */
+export async function adoptPortalAccount(userId: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+
+  const { data: accounts } = await supabase.rpc("admin_list_customers");
+  const account = ((accounts ?? []) as { id: string; email: string; full_name: string | null; phone: string | null }[]).find(
+    (a) => a.id === userId
+  );
+  if (!account) return { error: "Konto nicht gefunden." };
+
+  const { data: existing } = await supabase.from("customers").select("id").ilike("email", account.email).limit(1).maybeSingle();
+  const { error } = existing
+    ? await supabase.from("customers").update({ portal_user_id: account.id }).eq("id", existing.id)
+    : await supabase.from("customers").insert({
+        full_name: account.full_name?.trim() || account.email,
+        email: account.email,
+        phone: account.phone || null,
+        portal_user_id: account.id,
+        quelle: "Website-Konto",
+      });
+  if (error) return { error: `Übernahme fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin/kunden");
+  return { error: null };
 }

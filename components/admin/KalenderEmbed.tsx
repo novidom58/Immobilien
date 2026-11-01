@@ -19,12 +19,16 @@ function time(iso: string) {
 
 /** Termine aus einem veröffentlichten Outlook- oder Google-Kalender (ICS-Link). */
 function IcsAgenda({ url }: { url: string }) {
+  return <Agenda endpoint={`/api/admin/calendar?url=${encodeURIComponent(url)}`} />;
+}
+
+function Agenda({ endpoint }: { endpoint: string }) {
   const [events, setEvents] = useState<CalendarEvent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/admin/calendar?url=${encodeURIComponent(url)}`)
+    fetch(endpoint)
       .then(async (res) => {
         const data = await res.json();
         if (cancelled) return;
@@ -35,7 +39,7 @@ function IcsAgenda({ url }: { url: string }) {
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [endpoint]);
 
   if (error) return <p style={{ fontSize: 13, color: "var(--red)" }}>{error}</p>;
   if (!events) return <p className="td-light" style={{ fontSize: 13 }}>Kalender lädt …</p>;
@@ -78,7 +82,7 @@ function IcsAgenda({ url }: { url: string }) {
   );
 }
 
-export function KalenderEmbed() {
+export function KalenderEmbed({ shared = false }: { shared?: boolean }) {
   const [url, setUrl] = useState("");
   const [input, setInput] = useState("");
 
@@ -103,8 +107,8 @@ export function KalenderEmbed() {
     setUrl(input.trim());
   }
 
-  return (
-    <div className="card" style={{ padding: 16 }}>
+  const personal = (
+    <>
       <form onSubmit={handleSave} style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 14, flexWrap: "wrap" }}>
         <div className="field-group" style={{ flex: 1, minWidth: 300, margin: 0 }}>
           <div className="field-label">Kalender-Link (Outlook ICS oder Google)</div>
@@ -141,6 +145,30 @@ export function KalenderEmbed() {
         <br />
         Der Link bleibt nur in diesem Browser gespeichert. Wer ihn kennt, kann den Kalender lesen: nicht weitergeben.
       </div>
+    </>
+  );
+
+  if (!shared) {
+    return (
+      <div className="card" style={{ padding: 16 }}>
+        {personal}
+      </div>
+    );
+  }
+
+  // Gemeinsamer Firmenkalender (in Vercel hinterlegt), für alle Admins gleich
+  return (
+    <div className="card" style={{ padding: 16 }}>
+      <div className="field-label" style={{ marginBottom: 10 }}>
+        Firmenkalender (für alle im Team)
+      </div>
+      <Agenda endpoint="/api/admin/calendar?shared=1" />
+      <details style={{ marginTop: 18 }}>
+        <summary className="td-light" style={{ cursor: "pointer", fontSize: 12.5 }}>
+          Zusätzlich eigenen Kalender anzeigen (nur in diesem Browser)
+        </summary>
+        <div style={{ marginTop: 12 }}>{personal}</div>
+      </details>
     </div>
   );
 }

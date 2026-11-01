@@ -38,10 +38,10 @@ export default async function AdminKalenderPage() {
 
       <div className="card-header" style={{ border: "none", padding: "0 0 10px" }}>
         <div className="card-title" style={{ fontSize: 16 }}>
-          Outlook- / Google-Kalender
+          Kalender (Hostpoint, Outlook oder Google)
         </div>
       </div>
-      <KalenderEmbed />
+      <KalenderEmbed shared={Boolean(process.env.KALENDER_ICS_URL)} />
     </div>
   );
 }

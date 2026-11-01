@@ -98,6 +98,7 @@ export async function getListingsForAdmin(supabase: Supabase) {
     rooms: (l.rooms as number | null) ?? null,
     living_area: (l.living_area as number | null) ?? null,
     description: (l.description as string | null) ?? null,
+    details: (l.details as unknown) ?? null,
     tour_url: (l.tour_url as string | null) ?? null,
     berater: (l.berater as string | null) ?? null,
     activated_at: (l.activated_at as string | null) ?? null,

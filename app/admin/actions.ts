@@ -891,15 +891,45 @@ export async function inviteAdmin(formData: FormData) {
     data: fullName ? { full_name: fullName } : undefined,
     redirectTo: `${siteUrl}/reset-password`,
   });
-  if (error) return { error: authErrorText(error, "admin"), success: false };
 
-  const newUserId = data.user?.id;
-  if (newUserId) {
-    await adminClient.from("profiles").update({ role: "admin" }).eq("id", newUserId);
+  let userId = data?.user?.id ?? null;
+  let existing = false;
+  if (error) {
+    // Konto gibt es schon (z.B. selbst registriert oder in Supabase angelegt):
+    // dann einfach die Admin-Rolle vergeben, ohne neue Einladung.
+    const alreadyThere = error.code === "email_exists" || /already|registered|exists/i.test(error.message ?? "");
+    if (!alreadyThere) return { error: authErrorText(error, "admin"), success: false };
+    userId = await findUserIdByEmail(adminClient, email);
+    if (!userId) return { error: authErrorText(error, "admin"), success: false };
+    existing = true;
   }
+  if (!userId) return { error: "Benutzer konnte nicht angelegt werden.", success: false };
+
+  const { error: roleError } = await adminClient
+    .from("profiles")
+    .upsert({ id: userId, role: "admin", ...(fullName ? { full_name: fullName } : {}) }, { onConflict: "id" });
+  if (roleError) return { error: `Admin-Rolle konnte nicht gesetzt werden: ${roleError.message}`, success: false };
 
   revalidatePath("/admin", "layout");
-  return { error: null, success: true };
+  return {
+    error: null,
+    success: true,
+    message: existing
+      ? "Das Konto bestand schon und hat jetzt Admin-Rechte. Login wie bisher unter /login."
+      : "Einladung verschickt. Nach dem Setzen des Passworts sind die Admin-Rechte aktiv.",
+  };
+}
+
+async function findUserIdByEmail(adminClient: NonNullable<ReturnType<typeof getServiceRoleClient>>, email: string) {
+  const wanted = email.toLowerCase();
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 200 });
+    if (error || !data) return null;
+    const hit = data.users.find((u) => u.email?.toLowerCase() === wanted);
+    if (hit) return hit.id;
+    if (data.users.length < 200) return null;
+  }
+  return null;
 }
 
 type ImportRow = { name: string; email: string; phone: string; message: string };

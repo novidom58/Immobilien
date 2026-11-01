@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ForgotPassword } from "@/components/ForgotPassword";
+import { authErrorText } from "@/lib/authErrors";
 
 type Mode = "login" | "signup";
 
@@ -61,11 +62,7 @@ export function LoginForm() {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (signInError) {
-        setError(
-          signInError.message === "Invalid login credentials"
-            ? "E-Mail oder Passwort ist falsch."
-            : signInError.message
-        );
+        setError(authErrorText(signInError));
         return;
       }
       router.push(searchParams.get("redirect") || "/dashboard");
@@ -78,7 +75,7 @@ export function LoginForm() {
       });
       setLoading(false);
       if (signUpError) {
-        setError(signUpError.message);
+        setError(authErrorText(signUpError));
         return;
       }
       setSignupDone(true);

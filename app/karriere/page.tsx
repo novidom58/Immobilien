@@ -8,17 +8,17 @@ import { BewerbungForm } from "@/components/BewerbungForm";
 export const metadata: Metadata = {
   title: "Karriere: Immobilienberater/in bei NoviDom",
   description:
-    "Verkaufen Sie Immobilien und bauen Sie sich etwas auf: 35–50 % Anteil an der Provision, Bonus für eigene Mandate, Anteil an Hypotheken und ein Weg bis zur Beteiligung. Basel und Zug.",
+    "Verkaufen Sie Immobilien und bauen Sie sich etwas auf: leistungsorientiert beteiligt, mit Bonus für eigene Mandate, Zusatzverdienst bei Hypotheken und einem Weg bis zur Beteiligung. Basel und Zug.",
   alternates: { canonical: "/karriere" },
 };
 
-// Öffentlicher Auszug aus «Karriere bei NoviDom» (ohne interne Folien).
-// Prozente beziehen sich auf die Provision ohne MWST, Sätze für Selbständige.
+// Öffentlicher Auszug aus «Karriere bei NoviDom»: Aufbau des Modells ohne
+// Prozente und Beträge, die besprechen wir im Gespräch (wie im Markt üblich).
 const HIGHLIGHTS = [
-  { value: "35–50 %", label: "Anteil an der Provision" },
-  { value: "+5 %", label: "für selbst gewonnene Mandate" },
-  { value: "30 %", label: "der Hypothekenprovision" },
-  { value: "Aktien", label: "für die Besten" },
+  { value: "Fair", label: "am Erfolg beteiligt, steigend mit dem Umsatz" },
+  { value: "Bonus", label: "für selbst gewonnene Mandate" },
+  { value: "Plus", label: "Zusatzverdienst bei Hypotheken" },
+  { value: "Aktien", label: "Weg bis zur Beteiligung" },
 ];
 
 const OWNER_ARGUMENTS = [
@@ -32,32 +32,38 @@ const OWNER_ARGUMENTS = [
 ];
 
 const BUILDING_BLOCKS = [
-  { icon: TrendingUp, value: "35–50 %", title: "Leistungsstaffel", text: "Ihr Anteil steigt mit Ihrem Provisionsumsatz der letzten 12 Monate." },
-  { icon: Handshake, value: "+5 %", title: "Bonus Eigenakquise", text: "Zusätzlich auf jeder Stufe für jedes selbst gewonnene Mandat." },
-  { icon: Landmark, value: "30 %", title: "Hypothek", text: "Anteil an der Hypothekenprovision, wenn Ihre Käufer über HypoCasa finanzieren." },
-  { icon: Users, value: "bis 20 %", title: "Teamleitung", text: "Auf jeden Verkauf Ihres Teams, zusätzlich zu Ihren eigenen Verkäufen." },
-  { icon: Crown, value: "Aktien", title: "Beteiligung", text: "Die Besten werden Aktionärinnen und Aktionäre der NoviDom Immobilien AG." },
-  { icon: Layers, value: "Flexibel", title: "Ihr Modell", text: "Angestellt oder selbständig, Vollzeit oder nebenberuflich." },
+  { icon: TrendingUp, title: "Leistungsstaffel", text: "Ihr Anteil an der Provision steigt mit Ihrem Umsatz der letzten 12 Monate." },
+  { icon: Handshake, title: "Bonus Eigenakquise", text: "Zusätzlich auf jeder Stufe für jedes Mandat, das Sie selbst gewinnen." },
+  { icon: Landmark, title: "Hypothek", text: "Ein Anteil an der Provision, wenn Ihre Käufer über HypoCasa finanzieren." },
+  { icon: Users, title: "Teamleitung", text: "Als Teamleiter/in verdienen Sie an jedem Verkauf Ihres Teams mit." },
+  { icon: Crown, title: "Beteiligung", text: "Die Besten werden Aktionärinnen und Aktionäre der NoviDom Immobilien AG." },
+  { icon: Layers, title: "Ihr Modell", text: "Angestellt oder selbständig, Vollzeit oder nebenberuflich." },
 ];
 
 const CAREER = [
-  { title: "Immobilienberater/in", rate: "35 %", when: "Einstieg mit Einarbeitung" },
-  { title: "Senior-Berater/in", rate: "45 %", when: "ab CHF 40'000 Provisionsumsatz in 12 Monaten" },
-  { title: "Top-Berater/in", rate: "50 %", when: "ab CHF 80'000 Provisionsumsatz in 12 Monaten" },
-  { title: "Teamleiter/in", rate: "55 % + bis 20 % aufs Team", when: "ab Stufe 2, mit mindestens 2 Maklern im Team" },
-  { title: "Beteiligung", rate: "Aktionär/in", when: "nach 2 Jahren als Top-Berater/in oder Teamleiter/in" },
+  { title: "Immobilienberater/in", when: "Einstieg mit Einarbeitung, Training und Begleitung an die ersten Termine" },
+  { title: "Senior-Berater/in", when: "Höherer Anteil, sobald Ihr Umsatz der letzten 12 Monate die nächste Schwelle erreicht" },
+  { title: "Top-Berater/in", when: "Der höchste Anteil für eigene Verkäufe, gleich wie die Partner" },
+  { title: "Teamleiter/in", when: "Eigenes Team aufbauen und an dessen Verkäufen mitverdienen" },
+  { title: "Beteiligung", when: "Aktien der NoviDom Immobilien AG für die Besten" },
+];
+
+const PROFILES = [
+  { title: "Immobilienberater/in", text: "Sie bewerten, vermarkten und verkaufen, mit Freude am Kontakt und am Abschluss. Erfahrung oder Fachausweis ist ein Plus." },
+  { title: "Finanzierung & Versicherung", text: "Hypotheken, Vorsorge und Versicherungen rund ums Eigenheim. Bank- oder Versicherungshintergrund willkommen." },
+  { title: "Quereinstieg & Nebenberuf", text: "Kaufmännisch, Bau oder Verkauf und Lust auf Immobilien? Starten Sie nebenberuflich, wir bilden Sie im Team weiter." },
 ];
 
 const MODELS = [
   {
     kicker: "Sozial abgesichert",
     title: "Angestellt",
-    items: ["Anstellung bei der NoviDom Immobilien AG", "Pensum nach Vereinbarung", "AHV, Pensionskasse und Unfallversicherung über NoviDom", "Staffel 30 / 40 / 45 %"],
+    items: ["Anstellung bei der NoviDom Immobilien AG", "Pensum nach Vereinbarung", "AHV, Pensionskasse und Unfallversicherung über NoviDom"],
   },
   {
     kicker: "Maximaler Anteil",
     title: "Selbständig",
-    items: ["Volle Staffel 35 / 45 / 50 %", "Freie Zeiteinteilung, auch nebenberuflich", "Eigene AHV und Versicherungen", "Anerkennung durch die AHV-Ausgleichskasse nötig"],
+    items: ["Der höhere Anteil an der Provision", "Freie Zeiteinteilung, auch nebenberuflich", "Eigene AHV und Versicherungen"],
   },
 ];
 
@@ -102,6 +108,22 @@ export default function KarrierePage() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
+          <SectionLabel>Wen wir suchen</SectionLabel>
+          <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
+            Drei Wege <em>ins Team.</em>
+          </h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {PROFILES.map((p) => (
+              <div key={p.title} className="rounded-2xl border border-line bg-white p-6">
+                <div className="font-display text-xl text-ivory">{p.title}</div>
+                <p className="mt-2 text-sm leading-relaxed text-ivory-dim">{p.text}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-ivory-dim">Wichtiger als der Lebenslauf: Freude am Kontakt mit Menschen, Zuverlässigkeit und ein Netzwerk in der Region.</p>
+        </section>
+
         <section className="mx-auto grid max-w-7xl gap-10 px-6 pb-20 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:px-10">
           <div>
             <SectionLabel>Warum Eigentümer zu uns kommen</SectionLabel>
@@ -124,15 +146,12 @@ export default function KarrierePage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <SectionLabel>Das Modell</SectionLabel>
             <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
-              Sechs Bausteine <em>für Ihren Verdienst.</em>
+              So verdienen <em>Sie mit.</em>
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {BUILDING_BLOCKS.map((b) => (
                 <div key={b.title} className="rounded-2xl border border-line bg-white p-6">
-                  <div className="flex items-center justify-between">
-                    <b.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
-                    <span className="font-display text-2xl text-amber">{b.value}</span>
-                  </div>
+                  <b.icon className="h-6 w-6 text-amber" strokeWidth={1.5} />
                   <div className="mt-4 font-display text-xl text-ivory">{b.title}</div>
                   <p className="mt-1 text-sm leading-relaxed text-ivory-dim">{b.text}</p>
                 </div>
@@ -148,13 +167,12 @@ export default function KarrierePage() {
           </h2>
           <ol className="grid gap-3">
             {CAREER.map((c, i) => (
-              <li key={c.title} className="grid items-center gap-2 rounded-2xl border border-line bg-white p-5 sm:grid-cols-[48px_1fr_auto] sm:gap-5">
+              <li key={c.title} className="grid items-center gap-2 rounded-2xl border border-line bg-white p-5 sm:grid-cols-[48px_1fr] sm:gap-5">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber font-display text-lg text-white">{i + 1}</span>
                 <div>
                   <div className="font-display text-xl text-ivory">{c.title}</div>
                   <div className="text-sm text-ivory-dim">{c.when}</div>
                 </div>
-                <div className="font-display text-lg text-amber sm:text-right">{c.rate}</div>
               </li>
             ))}
           </ol>
@@ -225,7 +243,7 @@ export default function KarrierePage() {
           </h2>
           <BewerbungForm />
           <p className="mt-6 px-2 text-xs leading-relaxed text-ivory-dim">
-            Alle Prozente beziehen sich auf die bezahlte Provision ohne MWST. Die Staffel 35 / 45 / 50 % gilt für Selbständige, für Angestellte je 5 Punkte tiefer. Vertragsdetails werden individuell vereinbart.
+            Die Details zur Vergütung besprechen wir persönlich im ersten Gespräch. Ihre Angaben behandeln wir vertraulich.
           </p>
         </section>
       </main>

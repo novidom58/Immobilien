@@ -30,8 +30,16 @@ function addDays(d: Date, n: number) {
  * Kalender mit Monats- und Wochenansicht: Firmenkalender (Hostpoint/Cal.com)
  * und die im CRM erfassten Termine zusammen.
  */
-export function CalendarView({ termine, shared }: { termine: CrmTermin[]; shared: boolean }) {
-  const [view, setView] = useState<"monat" | "woche">("monat");
+export function CalendarView({
+  termine,
+  shared,
+  initialView = "monat",
+}: {
+  termine: CrmTermin[];
+  shared: boolean;
+  initialView?: "monat" | "woche";
+}) {
+  const [view, setView] = useState<"monat" | "woche">(initialView);
   const [anchor, setAnchor] = useState(() => new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");

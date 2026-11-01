@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyUpload } from "@/app/dashboard/actions";
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Circle, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -70,6 +71,7 @@ export function DocChecklist({ title, intro, items }: { title: string; intro?: s
     if (!files?.length || !supabase || !userId || !key) return;
     setBusy(key);
     setError(null);
+    const uploaded: string[] = [];
     for (const file of Array.from(files)) {
       const path = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error: uploadError } = await supabase.storage.from("kunden-dokumente").upload(path, file);
@@ -78,7 +80,9 @@ export function DocChecklist({ title, intro, items }: { title: string; intro?: s
         break;
       }
       await supabase.from("user_documents").insert({ user_id: userId, name: `${key} · ${file.name}`, storage_path: path });
+      uploaded.push(`${key} · ${file.name}`);
     }
+    if (uploaded.length) notifyUpload(uploaded, title).catch(() => null);
     setBusy(null);
     if (fileRef.current) fileRef.current.value = "";
     load();

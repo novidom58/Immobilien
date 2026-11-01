@@ -3,7 +3,7 @@ import { LeadArchiveButtons } from "@/components/admin/LeadArchiveButtons";
 import { suggestRoles } from "@/lib/constants";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { KalenderEmbed } from "@/components/admin/KalenderEmbed";
+import { CalendarView } from "@/components/admin/CalendarView";
 import {
   getLeadsWithActivity,
   getCrmCustomers,
@@ -156,7 +156,11 @@ export default async function AdminHeutePage() {
           Kalender
         </div>
       </div>
-      <KalenderEmbed />
+      <CalendarView
+        initialView="woche"
+        shared={Boolean(process.env.KALENDER_ICS_URL || process.env.KALENDER_CALDAV_URL)}
+        termine={termine.map((t) => ({ id: t.id, title: t.title, typeLabel: t.typeLabel, starts_at: t.starts_at, customerName: t.customerName }))}
+      />
     </div>
   );
 }

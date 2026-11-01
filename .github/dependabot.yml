@@ -1,0 +1,13 @@
+# Update-Hinweise: GitHub schlägt einmal pro Woche Updates für Pakete vor,
+# Sicherheitsupdates sofort. Vor dem Zusammenführen kurz testen.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      kleine-updates:
+        update-types: ["minor", "patch"]

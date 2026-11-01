@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { createResendClient } from "@/lib/resend";
 import { sanitizeItems } from "@/lib/floorplan";
 import { maxPrice } from "@/lib/finance";
 import { parseOwnerInput, ownerValue, upsertOwner } from "@/lib/wertmonitor";
@@ -248,4 +249,32 @@ export async function saveEigentum(raw: Record<string, string>) {
 
   revalidatePath("/dashboard");
   return { error: null, wert };
+}
+
+/**
+ * Meldet dem Team per Mail, dass ein Kunde im Portal Unterlagen oder Policen
+ * hochgeladen hat. Die Dateien selbst bleiben im Portal (Admin → Unterlagen).
+ */
+export async function notifyUpload(fileNames: string[], bereich: string) {
+  const { supabase, user } = await requireUser();
+  if (!supabase || !user || fileNames.length === 0) return { error: null };
+
+  const resend = createResendClient();
+  if (!resend) return { error: null };
+
+  const { data: profile } = await supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle();
+  const name = profile?.full_name || user.email || "Kunde";
+  const list = fileNames.slice(0, 20).map((f) => `• ${f.slice(0, 160)}`).join("\n");
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
+
+  await resend.emails
+    .send({
+      from: process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>",
+      to: process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch",
+      replyTo: user.email ?? undefined,
+      subject: `Neue Unterlagen im Kundenportal: ${name}`,
+      text: `${name} (${user.email ?? "ohne E-Mail"}${profile?.phone ? `, ${profile.phone}` : ""}) hat im Kundenportal ${fileNames.length === 1 ? "eine Datei" : `${fileNames.length} Dateien`} hochgeladen (${bereich}):\n\n${list}\n\nAnsehen: ${site}/admin/unterlagen`,
+    })
+    .catch(() => null);
+  return { error: null };
 }

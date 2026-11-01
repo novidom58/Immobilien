@@ -22,6 +22,8 @@ import { FinanzHero } from "@/components/leistungen/FinanzHero";
 import { ZinsBarometer } from "@/components/leistungen/ZinsBarometer";
 import { BuildUpHero } from "@/components/leistungen/BuildUpHero";
 import { SellFlight } from "@/components/leistungen/SellFlight";
+import { ServiceVideo } from "@/components/leistungen/ServiceVideo";
+import { SERVICE_VIDEOS } from "@/lib/siteMedia";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
@@ -111,9 +113,13 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
         ) : area.id === "umbau" ? (
           <BuildUpHero />
         ) : area.id === "vers" ? (
-          <ProtectionVisual />
+          <>
+            <ServiceVideo src={SERVICE_VIDEOS.versichern} caption="Draussen Sturm und Hagel, drinnen alles sicher. Wir prüfen, ob Ihr Zuhause richtig versichert ist." />
+            <ProtectionVisual />
+          </>
         ) : area.id === "kv" ? (
           <>
+            <ServiceVideo src={SERVICE_VIDEOS.verkaufen} caption="Vom ersten Gespräch bis zur Schlüsselübergabe: Wir verkaufen Ihr Zuhause zum besten Preis." />
             <SellFlight />
             <FeaturedListings limit={6} title="Diese Objekte vermarkten" accent="wir gerade, zum Kauf und zur Miete." />
           </>

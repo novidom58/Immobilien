@@ -94,7 +94,9 @@ export function FinalCta({
   const [trennungInfo, setTrennungInfo] = useState<string[]>([]);
 
   // Kontakt
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const name = `${firstName.trim()} ${lastName.trim()}`.trim();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [kontaktweg, setKontaktweg] = useState<string[]>([]);
@@ -208,6 +210,7 @@ export function FinalCta({
         body: JSON.stringify({
           type: anliegen === "verkaufen" ? "valuation" : "contact",
           name,
+          first_name: firstName.trim(),
           email,
           phone,
           anliegen,
@@ -239,7 +242,7 @@ export function FinalCta({
         <div className="relative mx-auto max-w-2xl px-6 text-center lg:px-10">
           <Reveal>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
-              Vielen Dank, {name.split(" ")[0] || "für Ihre Anfrage"}!
+              Vielen Dank, {firstName.trim() || "für Ihre Anfrage"}!
             </h2>
             <p className="mt-6 text-balance text-lg text-ivory-dim">
               Wir melden uns innert kurzer Zeit{kontaktweg.length ? ` per ${kontaktweg.join(" oder ")}` : " persönlich"}. In der Zwischenzeit:
@@ -426,7 +429,10 @@ export function FinalCta({
                   transition={{ duration: 0.25 }}
                   className="flex flex-col gap-4 text-left"
                 >
-                  <input required placeholder="Ihr Name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className={fieldClasses} />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <input required placeholder="Vorname" autoComplete="given-name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClasses} />
+                    <input required placeholder="Nachname" autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClasses} />
+                  </div>
                   <input required type="email" placeholder="Ihre E-Mail-Adresse" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={fieldClasses} />
                   <input type="tel" placeholder="Telefon (optional)" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={fieldClasses} />
                   <div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -52,29 +53,37 @@ export function AdminPasswordChange() {
       {open && (
         <div className="px-4 pt-2">
           {done ? (
-            <p style={{ fontSize: 12, color: "var(--green)" }}>Passwort geändert.</p>
+            <p style={{ fontSize: 12, color: "var(--green)" }}>
+              Passwort geändert.
+            </p>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-              <input
+              <PasswordInput
                 required
                 minLength={6}
-                type="password"
                 placeholder="Neues Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="field-input"
+                autoComplete="new-password"
               />
-              <input
+              <PasswordInput
                 required
                 minLength={6}
-                type="password"
                 placeholder="Bestätigen"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 className="field-input"
+                autoComplete="new-password"
               />
-              {error && <p style={{ fontSize: 11, color: "var(--red)" }}>{error}</p>}
-              <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
+              {error && (
+                <p style={{ fontSize: 11, color: "var(--red)" }}>{error}</p>
+              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary btn-sm"
+              >
                 {loading ? "…" : "Speichern"}
               </button>
             </form>

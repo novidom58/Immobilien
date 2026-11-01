@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,39 +42,47 @@ export function ChangePasswordForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   if (done) {
-    return <p className="text-sm text-amber-soft">Passwort erfolgreich geändert.</p>;
+    return (
+      <p className="text-sm text-amber-soft">Passwort erfolgreich geändert.</p>
+    );
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="new-password" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+        <label
+          htmlFor="new-password"
+          className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+        >
           Neues Passwort
         </label>
-        <input
+        <PasswordInput
           id="new-password"
           required
           minLength={6}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+          autoComplete="new-password"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="confirm-password" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+        <label
+          htmlFor="confirm-password"
+          className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+        >
           Passwort bestätigen
         </label>
-        <input
+        <PasswordInput
           id="confirm-password"
           required
           minLength={6}
-          type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           placeholder="••••••••"
           className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-sm text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+          autoComplete="new-password"
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}

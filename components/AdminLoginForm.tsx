@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -30,10 +31,16 @@ export function AdminLoginForm() {
     setError(null);
     setLoading(true);
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword(
+      { email, password },
+    );
     if (signInError || !data.user) {
       setLoading(false);
-      setError(signInError ? authErrorText(signInError, "admin") : "E-Mail oder Passwort ist falsch.");
+      setError(
+        signInError
+          ? authErrorText(signInError, "admin")
+          : "E-Mail oder Passwort ist falsch.",
+      );
       return;
     }
 
@@ -47,7 +54,7 @@ export function AdminLoginForm() {
       await supabase.auth.signOut();
       setLoading(false);
       setError(
-        `Anmeldung hat geklappt, aber ${data.user.email ?? "dieses Konto"} hat noch keine Admin-Rechte. Ein Admin kann sie im CRM unter «Admin-Zugang einladen» vergeben (oder in Supabase per SQL).`
+        `Anmeldung hat geklappt, aber ${data.user.email ?? "dieses Konto"} hat noch keine Admin-Rechte. Ein Admin kann sie im CRM unter «Admin-Zugang einladen» vergeben (oder in Supabase per SQL).`,
       );
       return;
     }
@@ -58,48 +65,56 @@ export function AdminLoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
-          E-Mail-Adresse
-        </label>
-        <input
-          id="email"
-          required
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
-          Passwort
-        </label>
-        <input
-          id="password"
-          required
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
-        />
-      </div>
+    <div className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="email"
+            className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+          >
+            E-Mail-Adresse
+          </label>
+          <input
+            id="email"
+            required
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="password"
+            className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+          >
+            Passwort
+          </label>
+          <PasswordInput
+            id="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+            autoComplete="current-password"
+          />
+        </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 rounded-full bg-amber px-6 py-3 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-shadow hover:shadow-[0_0_40px_-8px_rgba(143,106,57,0.28)] disabled:opacity-60"
-      >
-        {loading ? "Einen Moment…" : "Anmelden"}
-      </button>
-
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 rounded-full bg-amber px-6 py-3 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-shadow hover:shadow-[0_0_40px_-8px_rgba(143,106,57,0.28)] disabled:opacity-60"
+        >
+          {loading ? "Einen Moment…" : "Anmelden"}
+        </button>
+      </form>
+      {/* Ausserhalb des Login-Formulars: verschachtelte Formulare lösen sonst beide Submits aus */}
       <div className="mt-1">
         <ForgotPassword initialEmail={email} />
       </div>
-    </form>
+    </div>
   );
 }

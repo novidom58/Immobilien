@@ -5,6 +5,7 @@ import { Loader } from "@/components/Loader";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { StickyContact } from "@/components/StickyContact";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AuthLinkCatcher } from "@/components/AuthLinkCatcher";
 import "./globals.css";
 import { OFFICES } from "@/lib/offices";
 import { SOCIAL_LINKS } from "@/lib/constants";
@@ -124,6 +125,7 @@ export default function RootLayout({
         {children}
         <StickyContact />
         <CookieConsent />
+        <AuthLinkCatcher />
       </body>
     </html>
   );

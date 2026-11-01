@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -25,7 +26,9 @@ export function LoginForm() {
   if (!supabase) {
     return (
       <div className="rounded-xl border border-amber/30 bg-amber/10 p-6 text-center">
-        <p className="text-ivory">Das Kundenlogin ist noch nicht eingerichtet.</p>
+        <p className="text-ivory">
+          Das Kundenlogin ist noch nicht eingerichtet.
+        </p>
         <p className="mt-2 text-sm text-ivory-dim">
           Sobald Ihr Verkaufsmandat startet, erhalten Sie automatisch Zugang.
           Bis dahin erreichen Sie uns direkt über die kostenlose Bewertung.
@@ -45,8 +48,9 @@ export function LoginForm() {
       <div className="rounded-xl border border-amber/30 bg-amber/10 p-6 text-center">
         <p className="text-ivory">Fast geschafft!</p>
         <p className="mt-2 text-sm text-ivory-dim">
-          Wir haben Ihnen einen Bestätigungslink an <span className="text-amber-soft">{email}</span> gesendet.
-          Bitte klicken Sie darauf, um Ihr Konto zu aktivieren.
+          Wir haben Ihnen einen Bestätigungslink an{" "}
+          <span className="text-amber-soft">{email}</span> gesendet. Bitte
+          klicken Sie darauf, um Ihr Konto zu aktivieren.
         </p>
       </div>
     );
@@ -59,7 +63,10 @@ export function LoginForm() {
     setLoading(true);
 
     if (mode === "login") {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       setLoading(false);
       if (signInError) {
         setError(authErrorText(signInError));
@@ -94,7 +101,9 @@ export function LoginForm() {
               setError(null);
             }}
             className={`flex-1 rounded-full py-2 font-mono text-xs uppercase tracking-wide transition-colors ${
-              mode === m ? "bg-amber text-ink" : "text-ivory-dim hover:text-ivory"
+              mode === m
+                ? "bg-amber text-ink"
+                : "text-ivory-dim hover:text-ivory"
             }`}
           >
             {m === "login" ? "Anmelden" : "Registrieren"}
@@ -105,7 +114,10 @@ export function LoginForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {mode === "signup" && (
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="fullName" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+            <label
+              htmlFor="fullName"
+              className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+            >
               Name
             </label>
             <input
@@ -120,7 +132,10 @@ export function LoginForm() {
           </div>
         )}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+          <label
+            htmlFor="email"
+            className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+          >
             E-Mail-Adresse
           </label>
           <input
@@ -134,18 +149,21 @@ export function LoginForm() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="font-mono text-xs uppercase tracking-wide text-ivory-dim">
+          <label
+            htmlFor="password"
+            className="font-mono text-xs uppercase tracking-wide text-ivory-dim"
+          >
             Passwort
           </label>
-          <input
+          <PasswordInput
             id="password"
             required
             minLength={6}
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             className="rounded-xl border border-line bg-ink-2 px-4 py-3 text-ivory placeholder:text-ivory-dim/40 focus:border-amber focus:outline-none"
+            autoComplete="current-password"
           />
         </div>
 
@@ -156,15 +174,18 @@ export function LoginForm() {
           disabled={loading}
           className="mt-2 rounded-full bg-amber px-6 py-3 font-sans text-sm font-semibold uppercase tracking-wide text-ink transition-shadow hover:shadow-[0_0_40px_-8px_rgba(143,106,57,0.28)] disabled:opacity-60"
         >
-          {loading ? "Einen Moment…" : mode === "login" ? "Anmelden" : "Konto erstellen"}
+          {loading
+            ? "Einen Moment…"
+            : mode === "login"
+              ? "Anmelden"
+              : "Konto erstellen"}
         </button>
-
-        {mode === "login" && (
-          <div className="mt-1">
-            <ForgotPassword initialEmail={email} />
-          </div>
-        )}
       </form>
+      {mode === "login" && (
+        <div className="mt-5">
+          <ForgotPassword initialEmail={email} />
+        </div>
+      )}
     </div>
   );
 }

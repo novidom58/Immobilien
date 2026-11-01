@@ -52,6 +52,13 @@ function readOfferType(formData: FormData) {
   return formData.get("offer_type") === "miete" ? "miete" : "kauf";
 }
 
+/** Rundgang-Link aus Giraffe360 & Co. ohne «https://» kopiert? Dann ergänzen. */
+function normalizeTourUrl(raw: string) {
+  const url = raw.trim();
+  if (!url) return "";
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
 export async function createListing(formData: FormData) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError };
@@ -65,7 +72,7 @@ export async function createListing(formData: FormData) {
   const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
-  const tourUrl = String(formData.get("tour_url") || "").trim();
+  const tourUrl = normalizeTourUrl(String(formData.get("tour_url") || ""));
   const beraterRaw = String(formData.get("berater") || "").trim();
   const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
@@ -116,7 +123,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const roomsRaw = String(formData.get("rooms") || "").trim().replace(",", ".");
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
-  const tourUrl = String(formData.get("tour_url") || "").trim();
+  const tourUrl = normalizeTourUrl(String(formData.get("tour_url") || ""));
   const beraterRaw = String(formData.get("berater") || "").trim();
   const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
@@ -148,6 +155,24 @@ export async function updateListing(listingId: string, formData: FormData) {
     .eq("id", listingId));
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  revalidatePath(`/immobilien/${listingId}`);
+  return { error: null };
+}
+
+/** Verkauf oder Vermietung direkt auf der Inseratskarte umstellen. */
+export async function updateListingOffer(listingId: string, offer: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+  if (offer !== "kauf" && offer !== "miete") return { error: "Ungültige Angebotsart." };
+
+  const { error } = await supabase.from("listings").update({ offer_type: offer }).eq("id", listingId);
+  if (error) {
+    return { error: error.message.includes("offer_type") ? "Bitte zuerst das SQL «Leads archivieren und Mietobjekte» in Supabase ausführen." : error.message };
+  }
 
   revalidatePath("/admin", "layout");
   revalidatePath("/");

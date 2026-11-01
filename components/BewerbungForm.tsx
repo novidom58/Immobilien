@@ -3,9 +3,11 @@
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, Paperclip } from "lucide-react";
 
-const BEREICHE = ["Immobilienverkauf", "Vermietung", "Finanzierung & Hypotheken", "Versicherung & Vorsorge", "Umbau & Projekte", "Marketing & Fotografie", "Administration", "Initiativ / anderes"];
-const PENSUM = ["Vollzeit", "Teilzeit", "Selbständig / Partner", "Tippgeber", "Praktikum / Einstieg"];
-const REGIONEN = ["Basel", "Zug", "Zürich", "Aargau / Solothurn", "Luzern", "flexibel"];
+const BEREICHE = ["Immobilienberater/in (Verkauf)", "Teamleitung", "Finanzierung & Hypotheken", "Administration & Marketing", "Initiativ / anderes"];
+const PENSUM = ["Angestellt", "Selbständig", "Nebenberuflich", "Noch offen"];
+const ERFAHRUNG = ["Neu im Immobilienverkauf", "1–3 Jahre", "Über 3 Jahre"];
+const NETZWERK = ["Ja, ich bringe Kontakte oder Mandate mit", "Etwas", "Noch nicht"];
+const REGIONEN = ["Basel", "Zug", "Beide / flexibel", "Andere Region"];
 
 const field =
   "w-full rounded-xl border border-line bg-white px-4 py-3 text-ivory placeholder:text-ivory-dim/60 focus:border-amber focus:outline-none";
@@ -61,7 +63,7 @@ export function BewerbungForm() {
         <input name="phone" type="tel" autoComplete="tel" className={`${field} mt-1`} />
       </label>
       <label className="text-sm text-ivory-dim">
-        Bereich
+        Interesse an
         <select name="bereich" defaultValue="" className={`${field} mt-1`}>
           <option value="">Bitte wählen</option>
           {BEREICHE.map((b) => (
@@ -70,7 +72,7 @@ export function BewerbungForm() {
         </select>
       </label>
       <label className="text-sm text-ivory-dim">
-        Pensum / Form
+        Zusammenarbeit
         <select name="pensum" defaultValue="" className={`${field} mt-1`}>
           <option value="">Bitte wählen</option>
           {PENSUM.map((p) => (
@@ -87,8 +89,26 @@ export function BewerbungForm() {
           ))}
         </select>
       </label>
+      <label className="text-sm text-ivory-dim">
+        Erfahrung im Immobilienverkauf
+        <select name="erfahrung" defaultValue="" className={`${field} mt-1`}>
+          <option value="">Bitte wählen</option>
+          {ERFAHRUNG.map((e) => (
+            <option key={e}>{e}</option>
+          ))}
+        </select>
+      </label>
       <label className="text-sm text-ivory-dim sm:col-span-2">
-        Was bringen Sie mit, und was reizt Sie an NoviDom?
+        Eigenes Netzwerk (für Eigenakquise)
+        <select name="netzwerk" defaultValue="" className={`${field} mt-1`}>
+          <option value="">Bitte wählen</option>
+          {NETZWERK.map((n) => (
+            <option key={n}>{n}</option>
+          ))}
+        </select>
+      </label>
+      <label className="text-sm text-ivory-dim sm:col-span-2">
+        Was bringen Sie mit, und wo möchten Sie in zwei Jahren stehen?
         <textarea name="message" rows={5} className={`${field} mt-1`} />
       </label>
       <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-line px-4 py-4 text-sm text-ivory-dim hover:border-amber sm:col-span-2">
@@ -108,7 +128,7 @@ export function BewerbungForm() {
       {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
       <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
         <button type="submit" disabled={state === "sending"} className="rounded-full bg-night px-7 py-4 text-sm font-semibold text-ink transition-colors hover:bg-amber disabled:opacity-60">
-          {state === "sending" ? "Wird gesendet…" : "Bewerbung senden"}
+          {state === "sending" ? "Wird gesendet…" : "Gespräch anfragen"}
         </button>
         <p className="text-xs text-ivory-dim">Ihre Unterlagen behandeln wir vertraulich und nutzen sie nur für diese Bewerbung.</p>
       </div>

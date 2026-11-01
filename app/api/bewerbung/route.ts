@@ -35,6 +35,8 @@ export async function POST(request: Request) {
   const bereich = field(form, "bereich", 80);
   const pensum = field(form, "pensum", 80);
   const region = field(form, "region", 80);
+  const erfahrung = field(form, "erfahrung", 80);
+  const netzwerk = field(form, "netzwerk", 80);
   const message = field(form, "message", 4000);
 
   if (!name || !EMAIL_RE.test(email)) {
@@ -50,9 +52,11 @@ export async function POST(request: Request) {
   }
 
   const summary = [
-    `Bereich: ${bereich || "—"}`,
-    `Pensum: ${pensum || "—"}`,
+    `Interesse an: ${bereich || "—"}`,
+    `Zusammenarbeit: ${pensum || "—"}`,
     `Region: ${region || "—"}`,
+    `Erfahrung: ${erfahrung || "—"}`,
+    `Eigenes Netzwerk: ${netzwerk || "—"}`,
     `Unterlagen: ${files.length ? files.map((f) => f.name).join(", ") : "keine"}`,
     "",
     message || "—",

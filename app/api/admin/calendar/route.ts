@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parseIcs } from "@/lib/ics";
+import { loadCaldav } from "@/lib/caldav";
 
 // Nur veröffentlichte Kalender der bekannten Anbieter abrufen, damit die
 // Route nicht als offener Proxy missbraucht werden kann.
@@ -56,10 +57,31 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   if (params.get("shared")) {
     const urls = sharedUrls();
-    if (urls.length === 0) return NextResponse.json({ error: "Kein gemeinsamer Kalender hinterlegt." }, { status: 404 });
-    const texts = await Promise.all(urls.map((u) => loadIcs(new URL(u)).catch(() => null)));
+    const caldavUrl = process.env.KALENDER_CALDAV_URL?.trim();
+    const caldavUser = process.env.KALENDER_CALDAV_USER?.trim();
+    const caldavPass = process.env.KALENDER_CALDAV_PASSWORD ?? "";
+    if (urls.length === 0 && !caldavUrl) return NextResponse.json({ error: "Kein gemeinsamer Kalender hinterlegt." }, { status: 404 });
+
+    const loads: Promise<string | null>[] = urls.map((u) => loadIcs(new URL(u)).catch(() => null));
+    let authFailed = false;
+    if (caldavUrl && caldavUser) {
+      loads.push(
+        loadCaldav(caldavUrl, { user: caldavUser, pass: caldavPass }, from, to).catch((e) => {
+          if (e instanceof Error && e.message === "auth") authFailed = true;
+          return null;
+        })
+      );
+    }
+    const texts = await Promise.all(loads);
     if (texts.every((t) => !t)) {
-      return NextResponse.json({ error: "Der gemeinsame Kalender konnte nicht gelesen werden. Link und Zugangsdaten in Vercel prüfen." }, { status: 502 });
+      return NextResponse.json(
+        {
+          error: authFailed
+            ? "Hostpoint lehnt die Anmeldung ab: Benutzer oder Passwort in Vercel prüfen (KALENDER_CALDAV_USER / KALENDER_CALDAV_PASSWORD)."
+            : "Der gemeinsame Kalender konnte nicht gelesen werden. Adresse in Vercel prüfen (dieselbe wie in Cal.com).",
+        },
+        { status: 502 }
+      );
     }
     const events = texts.flatMap((t) => (t ? parseIcs(t, from, to) : [])).sort((a, b) => a.start.localeCompare(b.start));
     return NextResponse.json({ events });

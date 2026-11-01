@@ -41,7 +41,7 @@ export default async function AdminKalenderPage() {
           Kalender (Hostpoint, Outlook oder Google)
         </div>
       </div>
-      <KalenderEmbed shared={Boolean(process.env.KALENDER_ICS_URL)} />
+      <KalenderEmbed shared={Boolean(process.env.KALENDER_ICS_URL || process.env.KALENDER_CALDAV_URL)} />
     </div>
   );
 }

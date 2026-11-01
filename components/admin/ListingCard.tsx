@@ -1,5 +1,7 @@
 "use client";
 
+import { ListingDetailsFields } from "@/components/admin/ListingDetailsFields";
+import { asDetails } from "@/lib/listingDetails";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -35,6 +37,7 @@ type AdminListing = {
   living_area: number | null;
   description: string | null;
   tour_url: string | null;
+  details?: unknown;
   berater: string | null;
   activated_at: string | null;
   sale_deadline_months: number;
@@ -440,6 +443,7 @@ export function ListingCard({
               placeholder="360°-Rundgang-Link (z.B. von Giraffe360)"
               className="field-input sm:col-span-2"
             />
+            <ListingDetailsFields details={asDetails(listing.details)} />
             <div className="sm:col-span-2">
               <div className="field-label" style={{ marginBottom: 6 }}>
                 Auf Portalen aufgeschaltet

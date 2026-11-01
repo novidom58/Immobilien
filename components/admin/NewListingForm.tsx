@@ -1,5 +1,6 @@
 "use client";
 
+import { ListingDetailsFields } from "@/components/admin/ListingDetailsFields";
 import { useActionState } from "react";
 import { createListing } from "@/app/admin/actions";
 
@@ -50,6 +51,7 @@ export function NewListingForm({ beraterOptions }: { beraterOptions: string[] })
         className="field-textarea sm:col-span-2"
       />
       <input name="tour_url" type="url" placeholder="360°-Rundgang-Link (z.B. von Giraffe360)" className="field-input sm:col-span-2" />
+      <ListingDetailsFields />
       {state.error && (
         <p
           className="sm:col-span-2"

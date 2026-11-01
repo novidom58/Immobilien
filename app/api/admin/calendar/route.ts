@@ -5,6 +5,34 @@ import { parseIcs } from "@/lib/ics";
 // Nur veröffentlichte Kalender der bekannten Anbieter abrufen, damit die
 // Route nicht als offener Proxy missbraucht werden kann.
 const ALLOWED_HOSTS = ["outlook.live.com", "outlook.office365.com", "outlook.office.com", "calendar.google.com"];
+const allowedHost = (host: string) => ALLOWED_HOSTS.includes(host) || host.endsWith(".hostpoint.ch");
+
+/**
+ * Lädt eine ICS-Datei. Zugangsdaten im Link (https://user:pass@host/…) werden
+ * als Basic-Auth gesendet, z.B. für den CalDAV-Kalender bei Hostpoint.
+ */
+async function loadIcs(target: URL) {
+  const headers: Record<string, string> = { Accept: "text/calendar" };
+  if (target.username) {
+    const user = decodeURIComponent(target.username);
+    const pass = decodeURIComponent(target.password);
+    headers.Authorization = `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`;
+    target = new URL(target.href);
+    target.username = "";
+    target.password = "";
+  }
+  const res = await fetch(target, { cache: "no-store", headers }).catch(() => null);
+  const text = res && res.ok ? await res.text() : null;
+  return text && text.includes("BEGIN:VCALENDAR") ? text : null;
+}
+
+/** Gemeinsame Kalender aus Vercel (KALENDER_ICS_URL, mehrere mit Komma). */
+function sharedUrls() {
+  return (process.env.KALENDER_ICS_URL ?? "")
+    .split(",")
+    .map((u) => u.trim().replace(/^webcals?:\/\//i, "https://"))
+    .filter(Boolean);
+}
 
 /**
  * Liest einen veröffentlichten Kalender (ICS-Link) für die Admin-Kalenderseite
@@ -21,28 +49,40 @@ export async function GET(request: Request) {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return NextResponse.json({ error: "Keine Admin-Rechte." }, { status: 403 });
 
-  const raw = new URL(request.url).searchParams.get("url") ?? "";
+  const now = new Date();
+  const from = new Date(now.getTime() - 24 * 3600 * 1000);
+  const to = new Date(now.getTime() + 60 * 24 * 3600 * 1000);
+
+  const params = new URL(request.url).searchParams;
+  if (params.get("shared")) {
+    const urls = sharedUrls();
+    if (urls.length === 0) return NextResponse.json({ error: "Kein gemeinsamer Kalender hinterlegt." }, { status: 404 });
+    const texts = await Promise.all(urls.map((u) => loadIcs(new URL(u)).catch(() => null)));
+    if (texts.every((t) => !t)) {
+      return NextResponse.json({ error: "Der gemeinsame Kalender konnte nicht gelesen werden. Link und Zugangsdaten in Vercel prüfen." }, { status: 502 });
+    }
+    const events = texts.flatMap((t) => (t ? parseIcs(t, from, to) : [])).sort((a, b) => a.start.localeCompare(b.start));
+    return NextResponse.json({ events });
+  }
+
+  const raw = params.get("url") ?? "";
   let target: URL;
   try {
     target = new URL(raw.replace(/^webcals?:\/\//i, "https://"));
   } catch {
     return NextResponse.json({ error: "Ungültiger Link." }, { status: 400 });
   }
-  if (target.protocol !== "https:" || !ALLOWED_HOSTS.includes(target.hostname)) {
+  if (target.protocol !== "https:" || !allowedHost(target.hostname)) {
     return NextResponse.json({ error: "Bitte den ICS-Link aus Outlook oder Google verwenden." }, { status: 400 });
   }
 
-  const res = await fetch(target, { cache: "no-store", headers: { Accept: "text/calendar" } }).catch(() => null);
-  const text = res && res.ok ? await res.text() : null;
-  if (!text || !text.includes("BEGIN:VCALENDAR")) {
+  const text = await loadIcs(target);
+  if (!text) {
     return NextResponse.json(
       { error: "Der Kalender konnte nicht gelesen werden. Ist es der ICS-Link und ist der Kalender veröffentlicht?" },
       { status: 502 }
     );
   }
 
-  const now = new Date();
-  const from = new Date(now.getTime() - 24 * 3600 * 1000);
-  const to = new Date(now.getTime() + 60 * 24 * 3600 * 1000);
   return NextResponse.json({ events: parseIcs(text, from, to) });
 }

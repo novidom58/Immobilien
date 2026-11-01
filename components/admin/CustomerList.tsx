@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Download, Plus } from "lucide-react";
 import { CustomerDetailModal } from "./CustomerDetailModal";
@@ -41,10 +41,12 @@ export function CustomerList({
   customers,
   listings,
   beraterOptions,
+  topSlot,
 }: {
   customers: CrmCustomer[];
   listings: AdminListing[];
   beraterOptions: string[];
+  topSlot?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [typFilter, setTypFilter] = useState("aktiv");
@@ -115,6 +117,7 @@ export function CustomerList({
         </div>
       </div>
 
+      {topSlot}
       <div className="card">
         <div className="filter-bar">
           <input

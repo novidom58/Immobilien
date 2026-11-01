@@ -3,12 +3,14 @@ import { offerTypeOf, priceText, statusBadge } from "@/lib/listingOffer";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { MapPin, BedDouble, Ruler, Home } from "lucide-react";
+import { MapPin, Home, Check } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
 import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
+import { ListingGallery } from "@/components/listing/ListingGallery";
+import { asDetails } from "@/lib/listingDetails";
 import { createClient } from "@/lib/supabase/server";
 import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
 import { DroneFlight } from "@/components/listing/DroneFlight";
@@ -33,6 +35,7 @@ type ListingDetail = {
   living_area: number | null;
   description: string | null;
   tour_url: string | null;
+  details?: unknown;
   offmarket_until: string | null;
   photos: { url: string; sort_order: number }[];
   clips: string[];
@@ -110,7 +113,7 @@ export default async function ListingDetailPage({
 
   const offer = offerTypeOf(listing.offer_type);
   const status = statusBadge(listing.status, offer);
-  const [main, ...rest] = listing.photos;
+  const main = listing.photos[0];
   const offmarketHours = listing.status === "active" ? offmarketHoursLeft(listing.offmarket_until as string | null) : null;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
 
@@ -118,84 +121,54 @@ export default async function ListingDetailPage({
     return <OffMarketTeaser listing={listing} cover={main?.url ?? null} hours={offmarketHours} />;
   }
 
+  const details = asDetails(listing.details);
+  const facts = [
+    { label: "Objekttyp", value: listing.property_type },
+    { label: "Zimmer", value: listing.rooms ? String(listing.rooms) : null },
+    { label: "Wohnfläche", value: listing.living_area ? `${listing.living_area} m²` : null },
+    { label: "Badezimmer", value: details.badezimmer },
+    { label: "Etage", value: details.etage },
+    { label: "Verfügbar ab", value: details.verfuegbar },
+    { label: "Baujahr", value: details.baujahr },
+    { label: "Letzte Renovation", value: details.renoviert },
+  ].filter((f): f is { label: string; value: string } => Boolean(f.value));
+  const highlights = (details.highlights ?? []).slice(0, 6);
+  const merkmale = details.merkmale ?? [];
+
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-6xl px-6 pb-28 pt-32 lg:px-10">
-        <Link
-          href="/immobilien"
-          className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60 hover:text-ivory"
-        >
+      <main className="mx-auto max-w-6xl px-6 pb-16 pt-32 lg:px-10">
+        <Link href="/immobilien" className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60 hover:text-ivory">
           ← Alle Immobilien
         </Link>
 
-        {/* Galerie */}
+        {/* Galerie: Klick öffnet die Bilder gross */}
         <div className="mt-6">
-          {main ? (
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-ink-2">
-              <Image
-                src={main.url}
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 1000px, 100vw"
-                priority
-                className="object-cover"
-              />
-              <span
-                className={`absolute left-5 top-5 rounded-full border bg-ink/80 px-3 py-1.5 font-mono text-xs uppercase tracking-wide backdrop-blur-sm ${status.classes}`}
-              >
-                {status.label}
-              </span>
-              {offmarketHours && (
-                <span className="absolute right-5 top-5 rounded-full bg-night px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-ink">
-                  Off-Market · exklusiv noch {offmarketHours}h
-                </span>
-              )}
-            </div>
+          {listing.photos.length > 0 ? (
+            <ListingGallery
+              photos={listing.photos}
+              badges={
+                <>
+                  <span className={`absolute left-5 top-5 rounded-full border bg-ink/80 px-3 py-1.5 font-mono text-xs uppercase tracking-wide backdrop-blur-sm ${status.classes}`}>
+                    {status.label}
+                  </span>
+                  {offmarketHours && (
+                    <span className="absolute right-5 top-5 rounded-full bg-night px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-ink">
+                      Off-Market · exklusiv noch {offmarketHours}h
+                    </span>
+                  )}
+                </>
+              }
+            />
           ) : (
             <div className="flex aspect-[16/9] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
               <Home className="h-16 w-16 text-ivory/10" strokeWidth={1} />
             </div>
           )}
-
-          {rest.length > 0 && (
-            <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-              {rest.map((photo) => (
-                <div key={photo.url} className="relative aspect-square overflow-hidden rounded-xl bg-ink-2">
-                  <Image src={photo.url} alt="" fill sizes="200px" className="object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* 3D-Rundgang */}
-        {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
-      </main>
-
-      {/* Drohnenflug, falls Übergangs-Clips da sind; sonst der Foto-Rundgang */}
-      {listing.flight.length > 0 ? (
-        <DroneFlight
-          clips={listing.flight}
-          title={listing.title || listing.city}
-          priceText={listing.price_chf ? priceText(listing.price_chf, offer) : null}
-        />
-      ) : (
-        <ListingFlythrough
-          listing={{
-            title: listing.title,
-            address: listing.address,
-            city: listing.city,
-            price_chf: listing.price_chf,
-            photos: listing.photos,
-            clips: listing.clips,
-          }}
-        />
-      )}
-
-      <main className="mx-auto max-w-6xl px-6 pb-28 pt-16 lg:px-10">
-        {/* Kopf */}
-        <div id="anfragen" className="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
+        <div id="anfragen" className="mt-12 grid scroll-mt-28 gap-12 lg:grid-cols-[1fr_360px]">
           <div>
             <div className="flex items-center gap-2 text-sm text-ivory-dim">
               <MapPin className="h-4 w-4 text-amber" strokeWidth={1.5} />
@@ -207,37 +180,49 @@ export default async function ListingDetailPage({
             </h1>
             <p className="mt-1 text-ivory-dim">{listing.address}</p>
 
-            <div className="mt-6 flex flex-wrap gap-6 border-y border-line py-5">
-              <div>
-                <div className="text-xs uppercase tracking-wide text-ivory-dim/60">Typ</div>
-                <div className="mt-1 text-ivory">{listing.property_type || "—"}</div>
+            {/* Eckdaten */}
+            {facts.length > 0 && (
+              <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
+                {facts.map((f) => (
+                  <div key={f.label} className="bg-white p-4">
+                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ivory-dim/70">{f.label}</dt>
+                    <dd className="mt-1 text-ivory">{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            {highlights.length > 0 && (
+              <div className="mt-10">
+                <h2 className="font-display text-xl font-semibold text-ivory">Highlights</h2>
+                <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                  {highlights.map((h) => (
+                    <li key={h} className="flex gap-2.5 text-ivory">
+                      <Check className="mt-1 h-4 w-4 shrink-0 text-amber" strokeWidth={2} />
+                      {h}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              {listing.rooms && (
-                <div>
-                  <div className="text-xs uppercase tracking-wide text-ivory-dim/60">Zimmer</div>
-                  <div className="mt-1 flex items-center gap-1.5 text-ivory">
-                    <BedDouble className="h-4 w-4 text-amber" strokeWidth={1.5} />
-                    {listing.rooms}
-                  </div>
-                </div>
-              )}
-              {listing.living_area && (
-                <div>
-                  <div className="text-xs uppercase tracking-wide text-ivory-dim/60">Wohnfläche</div>
-                  <div className="mt-1 flex items-center gap-1.5 text-ivory">
-                    <Ruler className="h-4 w-4 text-amber" strokeWidth={1.5} />
-                    {listing.living_area} m²
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
             {listing.description && (
-              <div className="mt-8">
+              <div className="mt-10">
                 <h2 className="font-display text-xl font-semibold text-ivory">Beschreibung</h2>
-                <p className="mt-3 max-w-2xl whitespace-pre-line text-balance leading-relaxed text-ivory-dim">
-                  {listing.description}
-                </p>
+                <p className="mt-3 max-w-2xl whitespace-pre-line leading-relaxed text-ivory-dim">{listing.description}</p>
+              </div>
+            )}
+
+            {merkmale.length > 0 && (
+              <div className="mt-10">
+                <h2 className="font-display text-xl font-semibold text-ivory">Ausstattung</h2>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {merkmale.map((m) => (
+                    <span key={m} className="rounded-full border border-line bg-white px-3.5 py-1.5 text-sm text-ivory">
+                      {m}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -245,31 +230,51 @@ export default async function ListingDetailPage({
           </div>
 
           {/* CTA-Karte */}
-          <div className="h-fit rounded-2xl border border-line bg-ink-2 p-7">
+          <div className="h-fit rounded-2xl border border-line bg-ink-2 p-7 lg:sticky lg:top-28">
             <div className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60">
               {offer === "miete" ? "Miete pro Monat" : "Verkaufspreis"}
             </div>
             <div className="mt-2 font-display text-3xl font-semibold text-amber-soft">
               {priceText(listing.price_chf, offer, "Auf Anfrage")}
             </div>
-            <p className="mt-6 font-mono text-xs uppercase tracking-wide text-ivory-dim/60">
-              Besichtigung anfragen
-            </p>
+            <p className="mt-6 font-mono text-xs uppercase tracking-wide text-ivory-dim/60">Besichtigung anfragen</p>
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
             <ContactChannels title={listing.title || `${listing.address}, ${listing.city}`} url={`${siteUrl}/immobilien/${listing.id}`} />
-            <Link
-              href={`/immobilien/${listing.id}/expose`}
-              target="_blank"
-              className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
-            >
-              Exposé als PDF →
-            </Link>
-            <p className="mt-4 text-xs text-ivory-dim/60">
-              Persönliche Auskunft durch unser Team, NoviDom Immobilien AG.
-            </p>
+            {offer === "kauf" ? (
+              <Link
+                href={`/immobilien/${listing.id}/expose`}
+                target="_blank"
+                className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
+              >
+                Exposé als PDF →
+              </Link>
+            ) : (
+              <p className="mt-4 text-xs text-ivory-dim">Grundriss und Anmeldeformular erhalten Sie nach der Besichtigung.</p>
+            )}
+            <p className="mt-4 text-xs text-ivory-dim/60">Persönliche Auskunft durch unser Team, NoviDom Immobilien AG.</p>
           </div>
         </div>
+
+        {/* 3D-Rundgang */}
+        {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
       </main>
+
+      {/* Video-Elemente nur, wenn wirklich Clips hochgeladen sind */}
+      {listing.flight.length > 0 ? (
+        <DroneFlight clips={listing.flight} title={listing.title || listing.city} priceText={listing.price_chf ? priceText(listing.price_chf, offer) : null} />
+      ) : listing.clips.length > 0 ? (
+        <ListingFlythrough
+          listing={{
+            title: listing.title,
+            address: listing.address,
+            city: listing.city,
+            price_chf: listing.price_chf,
+            photos: listing.photos,
+            clips: listing.clips,
+          }}
+        />
+      ) : null}
+      <div className="pb-16" />
       <Footer />
     </>
   );

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ForgotPassword } from "@/components/ForgotPassword";
+import { authErrorText } from "@/lib/authErrors";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export function AdminLoginForm() {
     const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError || !data.user) {
       setLoading(false);
-      setError("E-Mail oder Passwort ist falsch.");
+      setError(signInError ? authErrorText(signInError, "admin") : "E-Mail oder Passwort ist falsch.");
       return;
     }
 
@@ -45,7 +46,9 @@ export function AdminLoginForm() {
     if (profile?.role !== "admin") {
       await supabase.auth.signOut();
       setLoading(false);
-      setError("Dieses Konto hat keinen Admin-Zugang.");
+      setError(
+        `Anmeldung hat geklappt, aber ${data.user.email ?? "dieses Konto"} hat noch keine Admin-Rechte. Ein Admin kann sie im CRM unter «Admin-Zugang einladen» vergeben (oder in Supabase per SQL).`
+      );
       return;
     }
 

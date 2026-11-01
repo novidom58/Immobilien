@@ -108,6 +108,30 @@ drop policy if exists "profiles_admin_update" on profiles;
 create policy "profiles_admin_update" on profiles
   for update using (public.is_admin());
 
+-- Die Rolle darf nur ein Admin ändern (oder der Server mit Service-Key bzw.
+-- der SQL Editor). Ohne diese Sperre könnte ein angemeldeter Kunde über
+-- "profiles_update_own" seine eigene Rolle auf 'admin' setzen.
+create or replace function public.protect_profile_role()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role
+     and coalesce(auth.role(), '') in ('anon', 'authenticated')
+     and not public.is_admin() then
+    raise exception 'Die Rolle kann nur von einem Admin geändert werden.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_role on profiles;
+create trigger profiles_protect_role
+  before update on profiles
+  for each row execute function public.protect_profile_role();
+
 -- ---------------------------------------------------------------------
 -- listing_photos: Objektfotos (Dateien liegen im Storage-Bucket
 -- "listing-photos", hier nur die öffentlichen URLs + Reihenfolge)

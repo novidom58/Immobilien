@@ -50,11 +50,16 @@ export async function GET(request: Request) {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return NextResponse.json({ error: "Keine Admin-Rechte." }, { status: 403 });
 
-  const now = new Date();
-  const from = new Date(now.getTime() - 24 * 3600 * 1000);
-  const to = new Date(now.getTime() + 60 * 24 * 3600 * 1000);
-
   const params = new URL(request.url).searchParams;
+  // Zeitraum aus der Kalenderansicht (Monat), höchstens 100 Tage
+  const now = new Date();
+  const fromParam = new Date(params.get("from") ?? "");
+  const toParam = new Date(params.get("to") ?? "");
+  const validRange =
+    !Number.isNaN(fromParam.getTime()) && !Number.isNaN(toParam.getTime()) && toParam > fromParam && toParam.getTime() - fromParam.getTime() <= 100 * 864e5;
+  const from = validRange ? fromParam : new Date(now.getTime() - 24 * 3600 * 1000);
+  const to = validRange ? toParam : new Date(now.getTime() + 60 * 24 * 3600 * 1000);
+
   if (params.get("shared")) {
     const urls = sharedUrls();
     const caldavUrl = process.env.KALENDER_CALDAV_URL?.trim();

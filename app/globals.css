@@ -237,28 +237,3 @@ h2.font-display {
   }
 }
 
-/* Tageslauf über dem Hero-Foto (Tagesaufnahme, 16 s): Tag, Abendlicht, Nacht, Morgenrot */
-@keyframes nd-warm {
-  0%, 24%, 60%, 100% { opacity: 0; }
-  38%, 46% { opacity: 1; }
-}
-@keyframes nd-night {
-  0%, 44%, 94%, 100% { opacity: 0; }
-  58%, 84% { opacity: 0.82; }
-}
-@keyframes nd-dawn {
-  0%, 82%, 100% { opacity: 0; }
-  91% { opacity: 1; }
-}
-@keyframes nd-sun {
-  0% { transform: rotate(-40deg); opacity: 1; }
-  40% { transform: rotate(68deg); opacity: 1; }
-  50% { transform: rotate(84deg); opacity: 0; }
-  51%, 86% { transform: rotate(-84deg); opacity: 0; }
-  100% { transform: rotate(-40deg); opacity: 1; }
-}
-@keyframes nd-stars {
-  0%, 50%, 90%, 100% { opacity: 0; }
-  62%, 82% { opacity: 1; }
-}
-

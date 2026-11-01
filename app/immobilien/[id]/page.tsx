@@ -8,12 +8,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
-import { ListingFlythrough } from "@/components/listing/ListingFlythrough";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { asDetails } from "@/lib/listingDetails";
 import { createClient } from "@/lib/supabase/server";
 import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
-import { DroneFlight } from "@/components/listing/DroneFlight";
 import { ContactChannels } from "@/components/listing/ContactChannels";
 import { MonthlyCost } from "@/components/listing/MonthlyCost";
 import { offmarketHoursLeft } from "@/lib/offmarket";
@@ -126,6 +124,7 @@ export default async function ListingDetailPage({
     { label: "Objekttyp", value: listing.property_type },
     { label: "Zimmer", value: listing.rooms ? String(listing.rooms) : null },
     { label: "Wohnfläche", value: listing.living_area ? `${listing.living_area} m²` : null },
+    { label: "Grundstück", value: details.grundstueck ? `${details.grundstueck.replace(/\s*m2?²?$/i, "")} m²` : null },
     { label: "Badezimmer", value: details.badezimmer },
     { label: "Etage", value: details.etage },
     { label: "Verfügbar ab", value: details.verfuegbar },
@@ -133,6 +132,7 @@ export default async function ListingDetailPage({
     { label: "Letzte Renovation", value: details.renoviert },
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
   const highlights = (details.highlights ?? []).slice(0, 6);
+  const videos = [...listing.flight, ...listing.clips.map((url, i) => ({ url, label: `Video ${i + 1}` }))].slice(0, 4);
   const merkmale = details.merkmale ?? [];
 
   return (
@@ -180,13 +180,13 @@ export default async function ListingDetailPage({
             </h1>
             <p className="mt-1 text-ivory-dim">{listing.address}</p>
 
-            {/* Eckdaten */}
+            {/* Eckdaten: Felder verteilen sich immer auf die ganze Breite */}
             {facts.length > 0 && (
-              <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
+              <dl className="mt-8 flex flex-wrap overflow-hidden rounded-2xl border border-line bg-white">
                 {facts.map((f) => (
-                  <div key={f.label} className="bg-white p-4">
-                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ivory-dim/70">{f.label}</dt>
-                    <dd className="mt-1 text-ivory">{f.value}</dd>
+                  <div key={f.label} className="min-w-[130px] flex-1 border-b border-r border-line px-5 py-4 last:border-r-0">
+                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber">{f.label}</dt>
+                    <dd className="mt-1.5 font-display text-lg leading-tight text-ivory">{f.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -257,23 +257,29 @@ export default async function ListingDetailPage({
 
         {/* 3D-Rundgang */}
         {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
+
+        {/* Hochgeladene Videos als normale Player, ohne Scroll-Effekt */}
+        {videos.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-display text-2xl font-semibold text-ivory">Video</h2>
+            <div className={`mt-5 grid gap-4 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}>
+              {videos.map((v) => (
+                <video
+                  key={v.url}
+                  src={v.url}
+                  controls
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="aspect-video w-full rounded-2xl bg-ink-2 object-cover"
+                  aria-label={v.label}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
-      {/* Video-Elemente nur, wenn wirklich Clips hochgeladen sind */}
-      {listing.flight.length > 0 ? (
-        <DroneFlight clips={listing.flight} title={listing.title || listing.city} priceText={listing.price_chf ? priceText(listing.price_chf, offer) : null} />
-      ) : listing.clips.length > 0 ? (
-        <ListingFlythrough
-          listing={{
-            title: listing.title,
-            address: listing.address,
-            city: listing.city,
-            price_chf: listing.price_chf,
-            photos: listing.photos,
-            clips: listing.clips,
-          }}
-        />
-      ) : null}
       <div className="pb-16" />
       <Footer />
     </>

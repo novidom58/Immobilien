@@ -129,6 +129,21 @@ export function KalenderEmbed({ shared = false }: { shared?: boolean }) {
           <div className="empty-icon">🗓️</div>
           <div className="empty-text">Noch kein Kalender hinterlegt</div>
         </div>
+      ) : /caldav|carddav/i.test(url) ? (
+        <div className="empty" style={{ textAlign: "left", padding: 16 }}>
+          <div className="empty-text" style={{ lineHeight: 1.6 }}>
+            Das ist eine CalDAV-Adresse (z.B. Hostpoint). Die braucht Benutzername und Passwort und gehört deshalb nicht hierher,
+            sondern einmal in Vercel unter Settings → Environment Variables:
+            <br />
+            <code>KALENDER_CALDAV_URL</code> = {url}
+            <br />
+            <code>KALENDER_CALDAV_USER</code> = verkaufen@novidom-immo.ch
+            <br />
+            <code>KALENDER_CALDAV_PASSWORD</code> = Passwort des Postfachs
+            <br />
+            Danach neu deployen: Der Firmenkalender erscheint dann hier für alle im Team.
+          </div>
+        </div>
       ) : isIcs(url) ? (
         <IcsAgenda url={url} />
       ) : (

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { DayNightOverlay } from "./DayNightOverlay";
 
 // Gezackter Siegelrand mit 28 Zacken, einmal beim Laden berechnet.
 const STAR_PATH = (() => {
@@ -22,6 +21,8 @@ export type ShowcaseItem = {
   id: string;
   image: string;
   place: string;
+  title?: string | null;
+  offer?: "kauf" | "miete";
   facts: string;
 };
 
@@ -37,9 +38,10 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
 
   useEffect(() => {
     if (items.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % items.length), SLIDE_MS);
-    return () => clearInterval(id);
-  }, [items.length]);
+    // Nach einem Klick auf einen Punkt läuft die volle Zeit neu
+    const id = setTimeout(() => setIndex((i) => (i + 1) % items.length), SLIDE_MS);
+    return () => clearTimeout(id);
+  }, [items.length, index]);
 
   const current = items[index];
 
@@ -66,13 +68,14 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
             />
           </motion.div>
         </AnimatePresence>
-        <DayNightOverlay />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-5 pt-20 text-white lg:px-8">
           {current ? (
             <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/80">Aktuell bei NoviDom</div>
-              <div className="mt-1 font-display text-2xl lg:text-3xl">{current.place}</div>
+              <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/80">
+                {current.offer === "miete" ? "Zu vermieten" : "Zu verkaufen"} · {current.place}
+              </div>
+              <div className="mt-1 max-w-xl text-balance font-display text-2xl leading-tight lg:text-3xl">{current.title || current.place}</div>
               <div className="text-sm text-white/85">{current.facts}</div>
             </div>
           ) : (
@@ -80,9 +83,15 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
           )}
           <div className="flex items-center gap-3">
             {items.length > 1 && (
-              <div className="flex gap-1.5" aria-hidden>
+              <div className="flex gap-1.5">
                 {items.map((item, i) => (
-                  <span key={item.id} className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-1.5 bg-white/50"}`} />
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setIndex(i)}
+                    aria-label={`Objekt ${i + 1} von ${items.length} zeigen`}
+                    className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"}`}
+                  />
                 ))}
               </div>
             )}

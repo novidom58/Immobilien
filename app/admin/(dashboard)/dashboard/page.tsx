@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePartnerPage } from "@/lib/roles";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeadsWithActivity, getListingsForAdmin, getCrmCustomers, getUpcomingTermine } from "@/lib/admin-data";
@@ -24,6 +25,7 @@ function formatChf(n: number) {
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   if (!supabase) return null;
+  await requirePartnerPage(supabase);
 
   const [leads, listings, customers, termine] = await Promise.all([
     getLeadsWithActivity(supabase),

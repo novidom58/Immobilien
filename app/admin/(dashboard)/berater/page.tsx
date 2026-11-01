@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePartnerPage } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 import { BeraterManager } from "@/components/admin/BeraterManager";
 import { AdminInviteForm } from "@/components/admin/AdminInviteForm";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default async function AdminBeraterPage() {
   const supabase = await createClient();
   if (!supabase) return null;
+  await requirePartnerPage(supabase);
 
   const berater = await getBeraterNames(supabase);
 
@@ -28,12 +30,15 @@ export default async function AdminBeraterPage() {
       <div className="card" style={{ maxWidth: 560, marginTop: 20 }}>
         <div className="card-header">
           <div>
-            <div className="card-title">Admin-Zugang einladen</div>
-            <div className="card-sub">Voller Zugriff auf diesen Admin-Bereich (nicht nur die Auswahlliste oben)</div>
+            <div className="card-title">Zugang zum CRM einladen</div>
+            <div className="card-sub">
+              Partner sehen alles. Mitarbeitende sehen nur ihre zugeteilten Leads, Kunden, Objekte und Termine, keine Firmenzahlen und
+              keine Einstellungen.
+            </div>
           </div>
         </div>
         <div style={{ padding: 20 }}>
-          <AdminInviteForm />
+          <AdminInviteForm beraterOptions={berater.map((b) => b.name)} />
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePartnerPage } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 import { getAllLeadsForStats } from "@/lib/admin-data";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default async function AdminKanaelePage() {
   const supabase = await createClient();
   if (!supabase) return null;
+  await requirePartnerPage(supabase);
 
   const leads = await getAllLeadsForStats(supabase);
 

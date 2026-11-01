@@ -94,7 +94,7 @@ export function FloorPlanner({
 
   function add(t: FurnitureTemplate | { key: string; label: string; w: number; d: number; kind: "custom" }) {
     // Neues Möbel in die Mitte des Wohnbereichs, dann verschieben.
-    const living = plan.rooms[0];
+    const living = plan.rooms[0] ?? { x: 0, y: 0, w: plan.width, h: plan.height };
     const offset = (items.length % 6) * 30; // nicht alles auf denselben Punkt
     const item: PlacedItem = {
       id: newId(),
@@ -189,6 +189,9 @@ export function FloorPlanner({
               <path d="M0 10 H20" stroke="#ddd5c6" strokeWidth="2" />
             </pattern>
           </defs>
+          {plan.background && (
+            <image href={plan.background} x={0} y={0} width={plan.width} height={plan.height} preserveAspectRatio="none" style={{ pointerEvents: "none" }} />
+          )}
           {plan.rooms.map((r) => (
             <g key={r.name}>
               <rect
@@ -328,7 +331,8 @@ export function FloorPlanner({
         {saveState === "error" && <span className="text-sm text-red-700">Speichern fehlgeschlagen.</span>}
         {dirty && saveState === "idle" && <span className="text-sm text-ivory-dim">Nicht gespeicherte Änderungen</span>}
         <span className="ml-auto text-sm text-ivory-dim">
-          {livingArea(plan).toFixed(0)} m² Wohnfläche · {items.length} Möbel
+          {plan.rooms.length > 0 ? `${livingArea(plan).toFixed(0)} m² Wohnfläche · ` : ""}
+          {items.length} Möbel
         </span>
       </div>
 

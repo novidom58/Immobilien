@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { LeadArchiveButtons } from "./LeadArchiveButtons";
 import { LEAD_STATUS_OPTIONS, suggestRoles } from "@/lib/constants";
 import { LeadActivityPanel } from "./LeadActivityPanel";
+import { LeadAssign } from "./LeadAssign";
 
 type AdminLead = {
   id: string;
@@ -21,6 +22,7 @@ type AdminLead = {
   source: string | null;
   listing_id?: string | null;
   archived_at?: string | null;
+  berater?: string | null;
   activity: { id: string; type: string; text: string; created_at: string }[];
 };
 
@@ -34,7 +36,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 
-export function LeadRow({ lead }: { lead: AdminLead }) {
+export function LeadRow({ lead, beraterOptions }: { lead: AdminLead; beraterOptions?: string[] }) {
   const [open, setOpen] = useState(false);
 
   const referralHref = PARTNER_EMAIL
@@ -78,6 +80,11 @@ export function LeadRow({ lead }: { lead: AdminLead }) {
           <span className={`badge ${STATUS_BADGE[lead.status] ?? "badge-muted"}`}>
             {LEAD_STATUS_OPTIONS.find((o) => o.value === lead.status)?.label ?? lead.status}
           </span>
+          {beraterOptions ? (
+            <LeadAssign leadId={lead.id} value={lead.berater ?? ""} options={beraterOptions} />
+          ) : (
+            lead.berater && <div className="td-light" style={{ fontSize: 11, marginTop: 4 }}>{lead.berater}</div>
+          )}
         </td>
         <td style={{ minWidth: 300 }}>
           <LeadArchiveButtons leadId={lead.id} name={lead.name} archived={Boolean(lead.archived_at)} roles={roles} />

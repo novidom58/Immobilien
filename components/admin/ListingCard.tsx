@@ -1,5 +1,6 @@
 "use client";
 
+import { DealPanel } from "@/components/admin/DealPanel";
 import { PhotoManager } from "@/components/admin/PhotoManager";
 import { ListingDetailsFields } from "@/components/admin/ListingDetailsFields";
 import { asDetails } from "@/lib/listingDetails";
@@ -80,10 +81,12 @@ export function ListingCard({
   listing,
   customerEmails = [],
   beraterOptions,
+  isPartner = true,
 }: {
   listing: AdminListing;
   customerEmails?: string[];
   beraterOptions: string[];
+  isPartner?: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -323,6 +326,11 @@ export function ListingCard({
         <div style={{ marginTop: 10 }}>
           <PhotoManager listingId={listing.id} count={listing.photoCount} />
         </div>
+        {isPartner && (
+          <div style={{ marginTop: 8 }}>
+            <DealPanel listingId={listing.id} offerType={listing.offer_type} />
+          </div>
+        )}
 
         {(listing.status === "active" || listing.status === "reserved") && (
           <div className="mt-3" style={{ maxWidth: 320 }}>

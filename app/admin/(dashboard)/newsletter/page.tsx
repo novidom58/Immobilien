@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePartnerPage } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 import { getNewsletterSubscribers } from "@/lib/admin-data";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default async function AdminNewsletterPage() {
   const supabase = await createClient();
   if (!supabase) return null;
+  await requirePartnerPage(supabase);
 
   const subscribers = await getNewsletterSubscribers(supabase);
 

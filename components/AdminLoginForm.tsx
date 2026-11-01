@@ -50,7 +50,7 @@ export function AdminLoginForm() {
       .eq("id", data.user.id)
       .single();
 
-    if (profile?.role !== "admin") {
+    if (profile?.role !== "admin" && profile?.role !== "mitarbeiter") {
       await supabase.auth.signOut();
       setLoading(false);
       setError(

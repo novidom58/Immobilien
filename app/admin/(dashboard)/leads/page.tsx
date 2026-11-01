@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LeadRow } from "@/components/admin/LeadRow";
-import { getLeadsWithActivity } from "@/lib/admin-data";
+import { getLeadsWithActivity, getBeraterNames } from "@/lib/admin-data";
+import { getStaff } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "Leads — Admin",
@@ -15,7 +16,13 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const leads = await getLeadsWithActivity(supabase, { archived: archiv });
+  const [leads, staff, beraterRows] = await Promise.all([
+    getLeadsWithActivity(supabase, { archived: archiv }),
+    getStaff(supabase),
+    getBeraterNames(supabase),
+  ]);
+  const isPartner = staff?.role === "admin";
+  const beraterOptions = isPartner ? beraterRows.map((b) => b.name) : undefined;
 
   return (
     <div>
@@ -27,9 +34,11 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
           </div>
         </div>
         <div className="flex gap-2">
-          <a href={`/api/admin/leads-export${archiv ? "?archiv=1" : ""}`} className="btn btn-ghost btn-sm">
-            Als Excel/CSV exportieren
-          </a>
+          {isPartner && (
+            <a href={`/api/admin/leads-export${archiv ? "?archiv=1" : ""}`} className="btn btn-ghost btn-sm">
+              Als Excel/CSV exportieren
+            </a>
+          )}
           <Link href={archiv ? "/admin/leads" : "/admin/leads?ansicht=archiv"} className="btn btn-ghost btn-sm">
             {archiv ? "← Aktive Leads" : "Archiv ansehen"}
           </Link>
@@ -56,7 +65,7 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
               </thead>
               <tbody>
                 {leads.map((lead) => (
-                  <LeadRow key={lead.id} lead={lead} />
+                  <LeadRow key={lead.id} lead={lead} beraterOptions={beraterOptions} />
                 ))}
               </tbody>
             </table>

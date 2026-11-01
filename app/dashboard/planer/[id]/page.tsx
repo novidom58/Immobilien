@@ -4,7 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FloorPlanner } from "@/components/portal/FloorPlanner";
 import { Logo } from "@/components/ui/Logo";
-import { planFor, sanitizeItems } from "@/lib/floorplan";
+import { planFor, planFromImage, sanitizeItems, type FloorPlan } from "@/lib/floorplan";
+import { asDetails } from "@/lib/listingDetails";
 
 export const metadata: Metadata = {
   title: "Grundriss-Planer",
@@ -28,15 +29,22 @@ export default async function PlanerPage({ params }: { params: Promise<{ id: str
     price: null as number | null,
     isDemo: true,
   };
+  let floorPlan: FloorPlan = planFor(id);
+  let realPlan = false;
   if (id !== "demo" && id !== "rundgang") {
     const { data } = await supabase
       .from("listings")
-      .select("id, title, address, city, price_chf")
+      .select("*")
       .eq("id", id)
       .in("status", ["active", "reserved"])
       .maybeSingle();
     if (!data) notFound();
     listing = { id, title: data.title || `${data.address}, ${data.city}`, price: data.price_chf ?? null, isDemo: false };
+    const g = asDetails(data.details).grundriss;
+    if (g?.url && g.breite_m > 0 && g.ratio > 0) {
+      floorPlan = planFromImage(g.url, g.breite_m, g.ratio);
+      realPlan = true;
+    }
   }
 
   const { data: plan } = await supabase.from("customer_plans").select("layouts").eq("user_id", user.id).maybeSingle();
@@ -58,10 +66,10 @@ export default async function PlanerPage({ params }: { params: Promise<{ id: str
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
           Alle Masse stimmen. Ziehen Sie Möbel an ihren Platz und sehen Sie, wie Ihr Leben hier aussehen würde.
-          {" "}Der Grundriss ist ein Beispielplan, bis der echte Giraffe360-Plan des Objekts hinterlegt ist.
+          {realPlan ? " Massstabsgetreu auf dem echten Grundriss des Objekts." : " Dies ist ein Beispielplan."}
         </p>
         <div className="mt-6">
-          <FloorPlanner plan={planFor(id)} listing={listing} initialItems={sanitizeItems(saved)} />
+          <FloorPlanner plan={floorPlan} listing={listing} initialItems={sanitizeItems(saved)} />
         </div>
       </div>
     </main>

@@ -46,6 +46,7 @@ export async function getLeadsWithActivity(supabase: Supabase, { archived = fals
     source: string | null;
     created_at: string;
     archived_at?: string | null;
+    berater?: string | null;
   };
   return ((leadsRes.data ?? []) as LeadRowData[])
     .filter((l) => Boolean(l.archived_at) === archived)
@@ -64,6 +65,7 @@ export async function getLeadsWithActivity(supabase: Supabase, { archived = fals
       source: l.source,
       created_at: l.created_at,
       archived_at: l.archived_at ?? null,
+      berater: l.berater ?? null,
       daysOpen: daysSince(l.created_at),
       activity: activityByLead.get(l.id) ?? [],
     }));

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useScrollProgress } from "@/lib/useScrollProgress";
 import {
   Activity,
   AppWindow,
@@ -64,65 +65,30 @@ const RADIUS = [27, 37, 47]; // in % der Bühne
 
 /**
  * Schutz von innen nach aussen: zuerst Hab & Gut, dann das Gebäude, dann
- * die Menschen. Die Ringe bauen sich nacheinander auf und lassen sich
- * danach antippen; die Liste daneben erklärt den aktiven Ring.
+ * die Menschen. Die Ringe bauen sich beim Scrollen auf (und beim
+ * Zurückscrollen wieder ab) und lassen sich antippen; die Liste daneben
+ * erklärt den aktiven Ring.
  */
 export function ProtectionVisual() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(0);
-  const [active, setActive] = useState(0);
-  const [manual, setManual] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  const progress = useScrollProgress(ref);
+  // Beim Scrollen kommt Ring um Ring dazu, beim Zurückscrollen verschwinden sie wieder
+  const scrolled = progress < 0.12 ? 0 : progress < 0.38 ? 1 : progress < 0.62 ? 2 : RINGS.length;
+  // Angetippter Ring gilt, bis die Scroll-Stufe wechselt
+  const [picked, setPicked] = useState<{ ring: number; at: number } | null>(null);
+  const pick = picked && picked.at === scrolled ? picked.ring : null;
+  const shown = Math.max(scrolled, pick !== null ? pick + 1 : 0);
+  const active = pick ?? Math.max(0, scrolled - 1);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- ohne Bewegung alle Ringe sofort zeigen
-      setShown(RINGS.length);
-      return;
-    }
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting || timer) return;
-        let step = 0;
-        timer = setInterval(() => {
-          step++;
-          if (step <= RINGS.length) {
-            setShown(step);
-            setActive(step - 1);
-          } else if (timer) {
-            clearInterval(timer);
-          }
-        }, 1400);
-      },
-      { threshold: 0.2 }
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      if (timer) clearInterval(timer);
-    };
-  }, []);
-
-  // Nach dem Aufbau wandert die Hervorhebung weiter, bis jemand tippt
-  useEffect(() => {
-    if (manual || shown < RINGS.length) return;
-    const t = setInterval(() => setActive((a) => (a + 1) % RINGS.length), 4200);
-    return () => clearInterval(t);
-  }, [manual, shown]);
-
-  function pick(i: number) {
-    setManual(true);
-    setShown(RINGS.length);
-    setActive(i);
+  function choose(i: number) {
+    setPicked({ ring: i, at: scrolled });
   }
 
   const ring = RINGS[active];
 
   return (
-    <section className="mx-auto max-w-7xl px-4 lg:px-10">
-      <div ref={ref} className="overflow-hidden rounded-[28px] border border-line bg-gradient-to-br from-[#f3efe7] via-white to-[#eef2f6] p-5 sm:p-10">
+    <section ref={ref} className="relative mx-auto max-w-7xl px-4 lg:h-[230vh] lg:px-10">
+      <div className="overflow-hidden rounded-[28px] border lg:sticky lg:top-20 border-line bg-gradient-to-br from-[#f3efe7] via-white to-[#eef2f6] p-5 sm:p-10">
         <div className="text-center">
           <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Rundum-Schutz · von innen nach aussen</div>
           <h2 className="mx-auto mt-3 max-w-2xl text-balance font-display text-3xl text-ivory lg:text-4xl">
@@ -139,7 +105,7 @@ export function ProtectionVisual() {
                 <button
                   key={r.name}
                   type="button"
-                  onClick={() => pick(i)}
+                  onClick={() => choose(i)}
                   aria-label={r.name}
                   className="absolute left-1/2 top-1/2 rounded-full transition-all duration-700 ease-out"
                   style={{
@@ -195,7 +161,7 @@ export function ProtectionVisual() {
                   type="button"
                   role="tab"
                   aria-selected={i === active}
-                  onClick={() => pick(i)}
+                  onClick={() => choose(i)}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${i === active ? "bg-night text-ink" : "border border-line bg-white text-ivory-dim hover:text-ivory"}`}
                 >
                   {i + 1}. {r.name}

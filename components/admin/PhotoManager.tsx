@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Images, Star, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, Ruler, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Photo = { id: string; url: string; sort_order: number };
@@ -19,6 +19,7 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [grundriss, setGrundriss] = useState<{ url: string; breite_m: number; ratio: number } | null>(null);
 
   const load = useCallback(async () => {
     if (!supabase) return;
@@ -30,6 +31,9 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
       .order("created_at", { ascending: true });
     if (loadError) setError(loadError.message);
     setPhotos((data ?? []) as Photo[]);
+    const { data: row } = await supabase.from("listings").select("*").eq("id", listingId).maybeSingle();
+    const g = (row?.details as { grundriss?: { url: string; breite_m: number; ratio: number } } | null)?.grundriss;
+    setGrundriss(g ?? null);
     // supabase ist pro Render neu, die Liste soll nur bei Inserat-Wechsel neu laden
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingId]);
@@ -69,6 +73,58 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
     saveOrder(next);
   }
 
+  /** Foto als Grundriss für den Planer im Kundenportal setzen (mit Breite in Metern). */
+  async function setAsPlan(photo: Photo) {
+    if (!supabase) return;
+    if (grundriss?.url === photo.url) {
+      if (!window.confirm("Diesen Grundriss im Planer nicht mehr verwenden?")) return;
+      await saveDetails(null);
+      return;
+    }
+    const answer = window.prompt(
+      "Wie breit ist der Grundriss auf dem Bild in Metern? (von der linken bis zur rechten Aussenwand, z.B. 12.4)",
+      grundriss?.breite_m ? String(grundriss.breite_m) : ""
+    );
+    const breite = Number(String(answer ?? "").replace(",", "."));
+    if (!answer || !Number.isFinite(breite) || breite < 3 || breite > 80) {
+      if (answer) setError("Bitte eine Breite zwischen 3 und 80 Metern angeben.");
+      return;
+    }
+    const ratio = await new Promise<number>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img.naturalWidth / img.naturalHeight || 1.5);
+      img.onerror = () => resolve(1.5);
+      img.src = photo.url;
+    });
+    await saveDetails({ url: photo.url, breite_m: breite, ratio: Math.round(ratio * 1000) / 1000 });
+  }
+
+  async function saveDetails(next: { url: string; breite_m: number; ratio: number } | null) {
+    if (!supabase) return;
+    setBusy(true);
+    setError(null);
+    const { data: row, error: readError } = await supabase.from("listings").select("*").eq("id", listingId).maybeSingle();
+    if (readError || !row) {
+      setBusy(false);
+      setError("Inserat konnte nicht gelesen werden.");
+      return;
+    }
+    const details = { ...((row.details as Record<string, unknown> | null) ?? {}) };
+    if (next) details.grundriss = next;
+    else delete details.grundriss;
+    const { error: saveError } = await supabase.from("listings").update({ details }).eq("id", listingId);
+    setBusy(false);
+    if (saveError) {
+      setError(
+        saveError.message.includes("details")
+          ? "Bitte zuerst in Supabase das SQL «Objekt-Eckdaten» ausführen."
+          : `Grundriss nicht gespeichert: ${saveError.message}`
+      );
+      return;
+    }
+    setGrundriss(next);
+  }
+
   async function remove(photo: Photo) {
     if (!supabase || !window.confirm("Dieses Foto wirklich löschen?")) return;
     setBusy(true);
@@ -100,8 +156,8 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
         <div style={{ marginTop: 12 }}>
           <p className="td-light" style={{ fontSize: 12, marginBottom: 10 }}>
             Das erste Foto ist das <b>Titelbild</b>: auf der Objektseite, der Startseite, im Exposé und im Flyer. Mit dem Stern
-            machst du ein Foto zum Titelbild, mit den Pfeilen änderst du die Reihenfolge. Im Exposé folgen danach die Bilder in
-            dieser Reihenfolge.
+            machst du ein Foto zum Titelbild, mit den Pfeilen änderst du die Reihenfolge. Mit dem <b>Massstab</b> markierst du den
+            Grundriss: Kunden können ihn dann im Kundenportal massstabsgetreu einrichten (dafür die Breite in Metern angeben).
           </p>
           {error && <p style={{ fontSize: 12, color: "var(--red)", marginBottom: 8 }}>{error}</p>}
           {!photos ? (
@@ -137,6 +193,11 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
                     >
                       {i === 0 ? "Titelbild" : i + 1}
                     </span>
+                    {grundriss?.url === p.url && (
+                      <span style={{ position: "absolute", right: 6, top: 6, fontSize: 10.5, padding: "2px 7px", borderRadius: 99, background: "#3b5b8c", color: "#fff" }}>
+                        Grundriss {grundriss.breite_m} m
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between" style={{ padding: "5px 6px" }}>
                     <button
@@ -149,6 +210,17 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
                       style={{ padding: "3px 6px" }}
                     >
                       <Star className="h-3.5 w-3.5" strokeWidth={1.75} fill={i === 0 ? "#8f6a39" : "none"} color="#8f6a39" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setAsPlan(p)}
+                      title="Als Grundriss für den Planer im Kundenportal"
+                      aria-label="Als Grundriss für den Planer"
+                      className="btn btn-ghost btn-sm"
+                      style={{ padding: "3px 6px", color: grundriss?.url === p.url ? "#3b5b8c" : undefined }}
+                    >
+                      <Ruler className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </button>
                     <span className="flex">
                       <button type="button" disabled={busy || i === 0} onClick={() => move(i, -1)} aria-label="Nach vorne" className="btn btn-ghost btn-sm" style={{ padding: "3px 5px" }}>

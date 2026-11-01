@@ -4,6 +4,7 @@ import { NewListingForm } from "@/components/admin/NewListingForm";
 import { ListingCard } from "@/components/admin/ListingCard";
 import { getListingsForAdmin, getCustomers, getBeraterNames } from "@/lib/admin-data";
 import { BERATER_OPTIONS } from "@/lib/constants";
+import { getStaff } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "Inserate — Admin",
@@ -14,11 +15,13 @@ export default async function AdminInseratePage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const [listings, customers, beraterRows] = await Promise.all([
+  const [listings, customers, beraterRows, staff] = await Promise.all([
     getListingsForAdmin(supabase),
     getCustomers(supabase),
     getBeraterNames(supabase),
+    getStaff(supabase),
   ]);
+  const isPartner = staff?.role === "admin";
   const customerEmails = customers.filter((c) => c.role !== "admin").map((c) => c.email);
   const beraterOptions = beraterRows.length > 0 ? beraterRows.map((b) => b.name) : [...BERATER_OPTIONS];
 
@@ -50,7 +53,7 @@ export default async function AdminInseratePage() {
           </div>
         ) : (
           listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} customerEmails={customerEmails} beraterOptions={beraterOptions} />
+            <ListingCard key={listing.id} listing={listing} customerEmails={customerEmails} beraterOptions={beraterOptions} isPartner={isPartner} />
           ))
         )}
       </div>

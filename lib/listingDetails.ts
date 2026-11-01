@@ -8,6 +8,8 @@ export type ListingDetails = {
   baujahr?: string;
   renoviert?: string;
   grundstueck?: string;
+  /** Grundriss für den Planer im Kundenportal (im CRM unter «Fotos & Titelbild» gesetzt) */
+  grundriss?: { url: string; breite_m: number; ratio: number };
   highlights?: string[];
   merkmale?: string[];
 };

@@ -38,6 +38,30 @@ async function requireAdmin() {
 }
 
 /**
+ * Partner (role admin) und Mitarbeitende (role mitarbeiter). Was Mitarbeitende
+ * sehen und ändern dürfen, regelt die Datenbank (RLS nach Zuteilung «Berater»);
+ * hier wird nur geprüft, dass jemand zum Team gehört.
+ */
+async function requireStaff() {
+  const supabase = await createClient();
+  if (!supabase) return { supabase: null, error: "Supabase ist nicht eingerichtet.", role: null, berater: null };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { supabase: null, error: "Nicht angemeldet.", role: null, berater: null };
+
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const role = (profile?.role as string | undefined) ?? null;
+  if (role !== "admin" && role !== "mitarbeiter") return { supabase: null, error: "Keine Berechtigung.", role: null, berater: null };
+  const berater = role === "mitarbeiter" ? ((profile?.berater_name as string | null) ?? null) : null;
+  if (role === "mitarbeiter" && !berater) {
+    return { supabase: null, error: "Ihrem Login ist noch kein Berater zugeordnet. Bitte bei einem Partner melden.", role, berater };
+  }
+  return { supabase, error: null, role, berater };
+}
+
+/**
  * offer_type (Verkauf/Miete) gibt es erst nach dem SQL-Update. Fehlt die
  * Spalte noch, wird ein Verkaufsobjekt ohne das Feld gespeichert.
  */
@@ -60,10 +84,12 @@ function readOfferType(formData: FormData) {
  */
 async function saveListingRow(
   formData: FormData,
-  run: (extra: { offer_type?: string; details?: ListingDetails }) => PromiseLike<{ error: { message: string } | null }>
+  run: (extra: { offer_type?: string; details?: ListingDetails }) => PromiseLike<{ error: { message: string } | null }>,
+  current?: ListingDetails | null
 ) {
   const offerType = readOfferType(formData);
-  const details = readDetails(formData);
+  // Grundriss für den Planer wird unter «Fotos & Titelbild» gesetzt und hier nicht überschrieben
+  const details: ListingDetails = { ...(current?.grundriss ? { grundriss: current.grundriss } : {}), ...readDetails(formData) };
   const res = await saveWithOfferType(offerType, (extra) => run({ ...extra, details }));
   if (res.error?.message.includes("details")) {
     const retry = await saveWithOfferType(offerType, (extra) => run(extra));
@@ -81,7 +107,7 @@ function normalizeTourUrl(raw: string) {
 }
 
 export async function createListing(formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const address = String(formData.get("address") || "").trim();
@@ -94,7 +120,7 @@ export async function createListing(formData: FormData) {
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
   const tourUrl = normalizeTourUrl(String(formData.get("tour_url") || ""));
-  const beraterRaw = String(formData.get("berater") || "").trim();
+  const beraterRaw = staffBerater ?? String(formData.get("berater") || "").trim();
   const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
@@ -132,7 +158,7 @@ export async function createListing(formData: FormData) {
 }
 
 export async function updateListing(listingId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const address = String(formData.get("address") || "").trim();
@@ -145,7 +171,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   const areaRaw = String(formData.get("living_area") || "").replace(/[^\d]/g, "");
   const description = String(formData.get("description") || "").trim();
   const tourUrl = normalizeTourUrl(String(formData.get("tour_url") || ""));
-  const beraterRaw = String(formData.get("berater") || "").trim();
+  const beraterRaw = staffBerater ?? String(formData.get("berater") || "").trim();
   const postedPortals = formData.getAll("posted_portals").map(String).filter(Boolean);
 
   if (!address || !city) return { error: "Adresse und Ort sind Pflichtfelder." };
@@ -154,6 +180,9 @@ export async function updateListing(listingId: string, formData: FormData) {
 
   // Bei Adress-/Ortsänderung erneut geocodieren, damit der Karten-Pin stimmt.
   const coords = await geocodeAddress(address, city);
+
+  const { data: currentRow } = await supabase.from("listings").select("*").eq("id", listingId).maybeSingle();
+  const currentDetails = (currentRow?.details as ListingDetails | null) ?? null;
 
   const { error } = await saveListingRow(formData, (extra) => supabase
     .from("listings")
@@ -173,7 +202,7 @@ export async function updateListing(listingId: string, formData: FormData) {
       posted_portals: postedPortals,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     })
-    .eq("id", listingId));
+    .eq("id", listingId), currentDetails);
 
   if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
 
@@ -186,7 +215,7 @@ export async function updateListing(listingId: string, formData: FormData) {
 
 /** Verkauf oder Vermietung direkt auf der Inseratskarte umstellen. */
 export async function updateListingOffer(listingId: string, offer: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
   if (offer !== "kauf" && offer !== "miete") return { error: "Ungültige Angebotsart." };
 
@@ -203,7 +232,7 @@ export async function updateListingOffer(listingId: string, offer: string) {
 }
 
 export async function updateListingStatus(listingId: string, status: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   if (!(VALID_STATUS as readonly string[]).includes(status)) {
@@ -268,7 +297,7 @@ async function notifyNewsletterSubscribers(
 const VALID_LEAD_STATUS = ["neu", "kontaktiert", "termin", "abgeschlossen", "irrelevant"] as const;
 
 export async function updateLeadStatus(leadId: string, status: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   if (!(VALID_LEAD_STATUS as readonly string[]).includes(status)) {
@@ -284,7 +313,7 @@ export async function updateLeadStatus(leadId: string, status: string) {
 
 /** Lead archivieren (Fake, Test, anderweitig erledigt) oder zurückholen. */
 export async function archiveLead(leadId: string, archive: boolean) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase
@@ -314,7 +343,7 @@ export async function deleteLead(leadId: string) {
 }
 
 export async function updateLeadNote(leadId: string, note: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase
@@ -328,7 +357,7 @@ export async function updateLeadNote(leadId: string, note: string) {
 }
 
 export async function updateLeadFollowUp(leadId: string, followUpAt: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase
@@ -344,7 +373,7 @@ export async function updateLeadFollowUp(leadId: string, followUpAt: string) {
 const VALID_ACTIVITY_TYPES = ["email", "anruf", "besuch", "notiz"] as const;
 
 export async function addLeadActivity(leadId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const text = String(formData.get("text") || "").trim();
@@ -361,7 +390,7 @@ export async function addLeadActivity(leadId: string, formData: FormData) {
 }
 
 export async function deleteLeadActivity(activityId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("lead_activity").delete().eq("id", activityId);
@@ -413,7 +442,7 @@ export async function deleteListing(listingId: string) {
 }
 
 export async function updateCustomerDetails(customerId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const fullName = String(formData.get("full_name") || "").trim();
@@ -438,7 +467,7 @@ export async function updateCustomerDetails(customerId: string, formData: FormDa
 const VALID_LEAD_TYPES = ["contact", "valuation", "access_request"] as const;
 
 export async function createLeadManually(formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const name = String(formData.get("name") || "").trim();
@@ -454,6 +483,7 @@ export async function createLeadManually(formData: FormData) {
   const type = (VALID_LEAD_TYPES as readonly string[]).includes(typeRaw) ? typeRaw : "contact";
 
   const { error } = await supabase.from("leads").insert({
+    ...(staffBerater ? { berater: staffBerater } : {}),
     type,
     name,
     email,
@@ -507,7 +537,7 @@ function getServiceRoleClient() {
  * jeder manuell erfasste Kontakt landet direkt im Kundenstamm.
  */
 export async function createCustomer(formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const vorname = String(formData.get("vorname") || "").trim();
@@ -516,7 +546,7 @@ export async function createCustomer(formData: FormData) {
   const phone = String(formData.get("phone") || "").trim();
   const address = String(formData.get("address") || "").trim();
   const ziel = String(formData.get("ziel") || "").trim();
-  const berater = String(formData.get("berater") || "").trim();
+  const berater = staffBerater ?? String(formData.get("berater") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
   const rollen = cleanRoles(formData.getAll("rollen").map(String));
   const quelle = String(formData.get("quelle") || "").trim().slice(0, 60);
@@ -543,7 +573,7 @@ export async function createCustomer(formData: FormData) {
 }
 
 export async function updateCustomer(customerId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const fullName = String(formData.get("full_name") || "").trim();
@@ -601,12 +631,12 @@ function cleanRoles(roles: string[]) {
  * Nachricht und Kontakthistorie des Leads wandern als Notizen mit.
  */
 export async function convertLeadToCustomer(leadId: string, roles: string[]) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError, customerId: null };
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("id, type, name, email, phone, message, source, listing_id, wants_financing")
+    .select("*")
     .eq("id", leadId)
     .maybeSingle();
   if (!lead) return { error: "Lead nicht gefunden.", customerId: null };
@@ -638,6 +668,7 @@ export async function convertLeadToCustomer(leadId: string, roles: string[]) {
         rollen,
         quelle: lead.source || "Website",
         source_lead_id: lead.id,
+        berater: staffBerater ?? ((lead.berater as string | null) || null),
       })
       .select("id")
       .single();
@@ -658,7 +689,7 @@ export async function convertLeadToCustomer(leadId: string, roles: string[]) {
 }
 
 export async function setCustomerRoles(customerId: string, roles: string[]) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("customers").update({ rollen: cleanRoles(roles) }).eq("id", customerId);
@@ -669,7 +700,7 @@ export async function setCustomerRoles(customerId: string, roles: string[]) {
 }
 
 export async function setCustomerFinanzStatus(customerId: string, status: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
   const value = status === "vorgeprueft" || status === "bestaetigt" ? status : null;
 
@@ -685,7 +716,7 @@ export async function setCustomerFinanzStatus(customerId: string, status: string
 
 /** Hypothekenwächter: Eckdaten der laufenden Hypothek in der Kundenakte. */
 export async function updateCustomerHypo(customerId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const ablauf = String(formData.get("hypo_ablauf") || "").trim();
@@ -710,7 +741,7 @@ export async function updateCustomerHypo(customerId: string, formData: FormData)
 }
 
 export async function markHypoContacted(customerId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("customers").update({ hypo_erinnert_at: new Date().toISOString() }).eq("id", customerId);
@@ -724,7 +755,7 @@ export async function markHypoContacted(customerId: string) {
 const VALID_CUSTOMER_TYPES = ["neukunde", "bestand", "ex"] as const;
 
 export async function setCustomerTyp(customerId: string, typ: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   if (!(VALID_CUSTOMER_TYPES as readonly string[]).includes(typ)) {
@@ -739,7 +770,7 @@ export async function setCustomerTyp(customerId: string, typ: string) {
 }
 
 export async function updateCustomerFollowUp(customerId: string, followUpAt: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase
@@ -764,7 +795,7 @@ export async function deleteCustomer(customerId: string) {
 }
 
 export async function addCustomerActivity(customerId: string, formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const text = String(formData.get("text") || "").trim();
@@ -791,7 +822,7 @@ export async function addCustomerActivity(customerId: string, formData: FormData
  * (den sehen wir ja nicht, da die Mail extern verschickt wird).
  */
 export async function logCustomerEmailActivity(customerId: string, text: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("customer_activity").insert({ customer_id: customerId, type: "email", text });
@@ -802,7 +833,7 @@ export async function logCustomerEmailActivity(customerId: string, text: string)
 }
 
 export async function deleteCustomerActivity(activityId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("customer_activity").delete().eq("id", activityId);
@@ -820,7 +851,7 @@ export async function deleteCustomerActivity(activityId: string) {
  * Sicht darauf.
  */
 export async function assignCustomerListing(customerId: string, listingId: string | null) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { data: customer, error: fetchError } = await supabase
@@ -899,7 +930,12 @@ export async function inviteAdmin(formData: FormData) {
 
   const email = String(formData.get("email") || "").trim();
   const fullName = String(formData.get("full_name") || "").trim();
+  const role = formData.get("role") === "mitarbeiter" ? "mitarbeiter" : "admin";
+  const beraterName = String(formData.get("berater_name") || "").trim();
   if (!email) return { error: "E-Mail-Adresse erforderlich.", success: false };
+  if (role === "mitarbeiter" && !beraterName) {
+    return { error: "Für Mitarbeitende bitte einen Berater-Namen wählen (zuerst oben als Berater anlegen).", success: false };
+  }
 
   const adminClient = getServiceRoleClient();
   if (!adminClient) {
@@ -927,16 +963,27 @@ export async function inviteAdmin(formData: FormData) {
 
   const { error: roleError } = await adminClient
     .from("profiles")
-    .upsert({ id: userId, role: "admin", ...(fullName ? { full_name: fullName } : {}) }, { onConflict: "id" });
-  if (roleError) return { error: `Admin-Rolle konnte nicht gesetzt werden: ${roleError.message}`, success: false };
+    .upsert(
+      { id: userId, role, ...(fullName ? { full_name: fullName } : {}), ...(beraterName ? { berater_name: beraterName } : {}) },
+      { onConflict: "id" }
+    );
+  if (roleError) {
+    const needsSql = /berater_name|profiles_role_check|violates check/i.test(roleError.message);
+    return {
+      error: needsSql
+        ? "Für Mitarbeitende bitte zuerst in Supabase das SQL «Rollen und Mitarbeitende» ausführen."
+        : `Rolle konnte nicht gesetzt werden: ${roleError.message}`,
+      success: false,
+    };
+  }
 
   revalidatePath("/admin", "layout");
   return {
     error: null,
     success: true,
     message: existing
-      ? "Das Konto bestand schon und hat jetzt Admin-Rechte. Login wie bisher unter /login."
-      : "Einladung verschickt. Nach dem Setzen des Passworts sind die Admin-Rechte aktiv.",
+      ? `Das Konto bestand schon und ist jetzt ${role === "admin" ? "Partner" : `Mitarbeiter/in (${beraterName})`}. Login unter /admin/login.`
+      : `Einladung verschickt. Nach dem Setzen des Passworts ist der Zugang als ${role === "admin" ? "Partner" : "Mitarbeiter/in"} aktiv.`,
   };
 }
 
@@ -983,7 +1030,7 @@ export async function bulkImportCustomers(rows: ImportRow[]) {
  * Verkaufsfall. Braucht RESEND_API_KEY, meldet sonst sauber einen Fehler.
  */
 export async function sendExposeEmail(customerId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { data: customer, error: fetchError } = await supabase
@@ -1032,7 +1079,7 @@ const REQUIRED_DOCUMENTS = [
  * mehr gehört hat - Gegenstück zur kalten Akquise-E-Mail.
  */
 export async function sendFollowUpEmail(customerId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { data: customer, error: fetchError } = await supabase
@@ -1068,7 +1115,7 @@ export async function sendFollowUpEmail(customerId: string) {
  * Fordert die üblichen Verkaufsunterlagen per E-Mail an.
  */
 export async function sendDocumentRequestEmail(customerId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { data: customer, error: fetchError } = await supabase
@@ -1104,7 +1151,7 @@ export async function sendDocumentRequestEmail(customerId: string) {
 const VALID_TERMIN_TYPES = ["erstgespraech", "besichtigung", "notartermin", "sonstiges"] as const;
 
 export async function createTermin(formData: FormData) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError, berater: staffBerater } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const title = String(formData.get("title") || "").trim();
@@ -1112,7 +1159,7 @@ export async function createTermin(formData: FormData) {
   const date = String(formData.get("date") || "").trim();
   const time = String(formData.get("time") || "09:00").trim();
   const customerId = String(formData.get("customer_id") || "").trim();
-  const berater = String(formData.get("berater") || "").trim();
+  const berater = staffBerater ?? String(formData.get("berater") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
 
   if (!title || !date) return { error: "Titel und Datum sind Pflichtfelder." };
@@ -1137,7 +1184,7 @@ export async function createTermin(formData: FormData) {
 }
 
 export async function deleteTermin(terminId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("termine").delete().eq("id", terminId);
@@ -1260,7 +1307,7 @@ function isValidDate(value: string | null): value is string {
 }
 
 export async function logTemplateMail(target: MailTarget, label: string, followUpAt: string | null) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const error = await recordMail(supabase, target, label.slice(0, 200), isValidDate(followUpAt) ? followUpAt : null);
@@ -1275,7 +1322,7 @@ export async function sendTemplateMail(
   mail: { to: string; subject: string; body: string; label: string },
   followUpAt: string | null
 ) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const to = mail.to.trim();
@@ -1310,7 +1357,7 @@ export async function sendTemplateMail(
 // ---------------------------------------------------------------------
 
 export async function startOffMarket(listingId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError, sent: 0 };
 
   const { data: before } = await supabase.from("listings").select("status, activated_at").eq("id", listingId).single();
@@ -1333,7 +1380,7 @@ export async function startOffMarket(listingId: string) {
 }
 
 export async function endOffMarket(listingId: string) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError };
 
   const { error } = await supabase.from("listings").update({ offmarket_until: null }).eq("id", listingId);
@@ -1350,7 +1397,7 @@ export async function endOffMarket(listingId: string) {
 // ---------------------------------------------------------------------
 
 export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError, matches: 0, sent: 0 };
 
   const { data: listing } = await supabase
@@ -1521,7 +1568,7 @@ export type PortalSnapshot = {
  * Portal-Tabellen gelesen. So sieht das Team immer genau dasselbe wie der Kunde.
  */
 export async function getPortalSnapshot(customerId: string): Promise<{ error: string | null; data: PortalSnapshot | null }> {
-  const { supabase, error: authError } = await requireAdmin();
+  const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError, data: null };
 
   const { data: customer } = await supabase.from("customers").select("portal_user_id, email").eq("id", customerId).maybeSingle();
@@ -1573,4 +1620,21 @@ export async function getPortalSnapshot(customerId: string): Promise<{ error: st
       favorites: (favListings ?? []).map((l) => ({ id: l.id, label: l.title || `${l.address}, ${l.city}` })),
     },
   };
+}
+
+
+/** Lead einer Person zuteilen (nur Partner). Mitarbeitende sehen danach nur ihre Leads. */
+export async function assignLead(leadId: string, berater: string) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+  const { error } = await supabase.from("leads").update({ berater: berater.trim() || null }).eq("id", leadId);
+  if (error) {
+    return {
+      error: error.message.includes("berater")
+        ? "Bitte zuerst in Supabase das SQL «Rollen und Mitarbeitende» ausführen."
+        : `Zuteilen fehlgeschlagen: ${error.message}`,
+    };
+  }
+  revalidatePath("/admin", "layout");
+  return { error: null };
 }

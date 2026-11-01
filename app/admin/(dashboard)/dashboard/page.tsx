@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeadsWithActivity, getListingsForAdmin, getCrmCustomers, getUpcomingTermine } from "@/lib/admin-data";
 import { saleDeadlineProgress, isWithinNextDays } from "@/lib/dates";
+import { CalendarView } from "@/components/admin/CalendarView";
 
 export const metadata: Metadata = {
   title: "Dashboard — Admin",
@@ -99,6 +100,15 @@ export default async function AdminDashboardPage() {
           <div className="kpi-label">Termine</div>
           <div className="kpi-sub">Nächste 7 Tage</div>
         </Link>
+      </div>
+
+      {/* Kalender: Wochenansicht, Monat per Klick */}
+      <div style={{ marginBottom: 20 }}>
+        <CalendarView
+          initialView="woche"
+          shared={Boolean(process.env.KALENDER_ICS_URL || process.env.KALENDER_CALDAV_URL)}
+          termine={termine.map((t) => ({ id: t.id, title: t.title, typeLabel: t.typeLabel, starts_at: t.starts_at, customerName: t.customerName }))}
+        />
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>

@@ -16,7 +16,7 @@ const FIELDS = [
 /** Richtzinsen fürs öffentliche Zinsbarometer auf /leistungen/finanzieren. */
 export function ZinsEditor({ rates }: { rates: Rate[] }) {
   const [state, formAction, pending] = useActionState(
-    async (_: { error: string | null; saved?: number } | null, formData: FormData) => saveZinssaetze(formData),
+    async (_: { error: string | null; saved?: number; alarm?: number } | null, formData: FormData) => saveZinssaetze(formData),
     null
   );
   const byKey = new Map(rates.map((r) => [r.laufzeit, r]));
@@ -44,7 +44,8 @@ export function ZinsEditor({ rates }: { rates: Rate[] }) {
         </div>
       </div>
       {state?.error && <p style={{ fontSize: 13, color: "var(--red)", padding: "0 20px 16px" }}>{state.error}</p>}
-      {state && !state.error && <p style={{ fontSize: 13, color: "var(--green)", padding: "0 20px 16px" }}>{state.saved ? `${state.saved} Zinssatz/-sätze gespeichert.` : "Keine Änderung."}</p>}
+      {state && !state.error && <p style={{ fontSize: 13, color: "var(--green)", padding: "0 20px 16px" }}>{state.saved ? `${state.saved} Zinssatz/-sätze gespeichert.` : "Keine Änderung."}
+          {state.alarm ? ` SARON-Alarm an ${state.alarm} Abonnent${state.alarm === 1 ? "" : "en"} verschickt.` : ""}</p>}
     </form>
   );
 }

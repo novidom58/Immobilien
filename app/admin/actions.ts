@@ -8,9 +8,10 @@ import { createClient } from "@/lib/supabase/server";
 import { geocodeAddress } from "@/lib/geocode";
 import { createResendClient } from "@/lib/resend";
 import { STARTER_TEMPLATES } from "@/lib/emailTemplates";
-import { matchesPlan } from "@/lib/planMatching";
 import { CUSTOMER_ROLES } from "@/lib/constants";
 import { OFFMARKET_HOURS } from "@/lib/offmarket";
+import { sendBuyerAlerts } from "@/lib/buyerAlert";
+import { sendSaronAlarm } from "@/lib/saronAlarm";
 import { authErrorText } from "@/lib/authErrors";
 
 const VALID_STATUS = ["active", "reserved", "sold", "draft"] as const;
@@ -1399,88 +1400,9 @@ export async function endOffMarket(listingId: string) {
 export async function notifyMatchingBuyers(listingId: string, dryRun: boolean) {
   const { supabase, error: authError } = await requireStaff();
   if (!supabase) return { error: authError, matches: 0, sent: 0 };
-
-  const { data: listing } = await supabase
-    .from("listings")
-    .select("id, title, address, city, price_chf, rooms, living_area, property_type, status, offmarket_until")
-    .eq("id", listingId)
-    .single();
-  if (!listing) return { error: "Inserat nicht gefunden.", matches: 0, sent: 0 };
-  const exclusive = listing.offmarket_until && new Date(listing.offmarket_until).getTime() > Date.now();
-  if (listing.status !== "active" && listing.status !== "reserved") {
-    return { error: "Nur aktive Inserate können gemeldet werden.", matches: 0, sent: 0 };
-  }
-
-  const [{ data: buyers }, { data: alreadySent }] = await Promise.all([
-    supabase
-      .from("customers")
-      .select("id, full_name, email, wunsch_ort, objekt_typ, zimmer_min, budget_max")
-      .eq("ziel", "kaufen")
-      .eq("alarm_opt_in", true)
-      .neq("typ", "ex")
-      .not("email", "is", null),
-    supabase.from("listing_alerts").select("customer_id").eq("listing_id", listingId),
-  ]);
-  const done = new Set((alreadySent ?? []).map((a) => a.customer_id));
-  const targets = (buyers ?? []).filter(
-    (b) =>
-      !done.has(b.id) &&
-      matchesPlan(b, {
-        city: listing.city,
-        property_type: listing.property_type,
-        rooms: listing.rooms,
-        price_chf: listing.price_chf,
-      })
-  );
-  if (dryRun) return { error: null, matches: targets.length, sent: 0 };
-  if (targets.length === 0) return { error: null, matches: 0, sent: 0 };
-
-  const resend = createResendClient();
-  if (!resend) return { error: "RESEND_API_KEY ist nicht gesetzt - E-Mail-Versand ist noch nicht eingerichtet.", matches: targets.length, sent: 0 };
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.novidom-immo.ch";
-  const from = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
-  const name = listing.title || `${listing.address}, ${listing.city}`;
-  const price = listing.price_chf ? `CHF ${listing.price_chf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")}` : "Preis auf Anfrage";
-  const facts = [listing.rooms ? `${listing.rooms} Zimmer` : null, listing.living_area ? `${listing.living_area} m²` : null, price]
-    .filter(Boolean)
-    .join(" · ");
-
-  let sent = 0;
-  for (const buyer of targets) {
-    const firstName = (buyer.full_name || "").split(" ")[0] || "Guten Tag";
-    const { error: sendError } = await resend.emails.send({
-      from,
-      to: buyer.email as string,
-      subject: exclusive ? `Exklusiv vorab für Sie: ${name}` : `Neu für Sie: ${name}`,
-      text: [
-        `Hallo ${firstName}`,
-        "",
-        `Ein neues Objekt passt zu Ihrem Suchprofil: ${name}, ${listing.city}`,
-        facts,
-        "",
-        exclusive
-          ? `Off-Market: Sie sehen dieses Objekt ${OFFMARKET_HOURS} Stunden vor allen anderen. Melden Sie sich im Kundenportal an, um alle Details zu sehen und eine Besichtigung anzufragen.\n`
-          : null,
-        `Objekt ansehen: ${siteUrl}/immobilien/${listing.id}`,
-        listing.price_chf ? `Finanzierung gleich prüfen: ${siteUrl}/dashboard?preis=${listing.price_chf}#finanzierung` : "",
-        "",
-        "Möchten Sie keine Käufer-Alarme mehr? Im Kundenportal unter «Suchprofil» abmelden oder kurz antworten.",
-        "",
-        "Freundliche Grüsse",
-        "NoviDom Immobilien AG",
-      ]
-        .filter((line) => line !== null)
-        .join("\n"),
-    });
-    if (sendError) continue;
-    sent++;
-    await supabase.from("listing_alerts").insert({ listing_id: listing.id, customer_id: buyer.id });
-    await supabase.from("customer_activity").insert({ customer_id: buyer.id, type: "email", text: `Käufer-Alarm: ${name}` });
-  }
-
-  revalidatePath("/admin", "layout");
-  return { error: sent < targets.length ? `${targets.length - sent} Mail(s) konnten nicht verschickt werden.` : null, matches: targets.length, sent };
+  const result = await sendBuyerAlerts(supabase, listingId, dryRun);
+  if (!dryRun) revalidatePath("/admin", "layout");
+  return result;
 }
 
 const ZINS_LAUFZEITEN = ["saron", "3", "5", "7", "10"] as const;
@@ -1509,9 +1431,17 @@ export async function saveZinssaetze(formData: FormData) {
     if (error) return { error: `Speichern fehlgeschlagen: ${error.message}` };
   }
 
+  // SARON-Alarm: bei einer deutlichen Bewegung (ab 0.10 Prozentpunkten) alle Abonnenten informieren
+  const moved = rows.filter((r) => r.vorwoche !== null && Math.abs(r.zins - (r.vorwoche as number)) >= 0.1);
+  let alarm = 0;
+  if (moved.length) {
+    const { data: all } = await supabase.from("zinssaetze").select("laufzeit, zins, vorwoche");
+    alarm = await sendSaronAlarm(supabase, (all ?? []) as { laufzeit: string; zins: number; vorwoche: number | null }[], moved.map((m) => m.laufzeit));
+  }
+
   revalidatePath("/admin/hypotheken");
   revalidatePath("/leistungen/finanzieren");
-  return { error: null, saved: rows.length };
+  return { error: null, saved: rows.length, alarm };
 }
 
 /**

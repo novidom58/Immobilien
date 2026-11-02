@@ -921,3 +921,8 @@ create policy "customer_policies_admin" on customer_policies for all using (publ
 drop policy if exists "customer_policies_staff_select" on customer_policies;
 create policy "customer_policies_staff_select" on customer_policies for select
   using (exists (select 1 from customers c where c.portal_user_id = customer_policies.user_id and c.berater = public.my_berater()));
+
+-- ---------------------------------------------------------------------
+-- Nachfassen: Feedback-Mail nach Besichtigung nur einmal pro Termin
+-- ---------------------------------------------------------------------
+alter table termine add column if not exists feedback_sent_at timestamptz;

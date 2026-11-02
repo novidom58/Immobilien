@@ -2,14 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { playKeyClick, playDoorChime } from "@/lib/unlockSound";
 
 // Echtes gefilmtes Intro (Schlüssel gleitet ins Schloss, dreht sich, Tür
 // öffnet sich in eine grosse Eingangshalle) statt der früheren WebGL-Szene.
 // Zeitpunkte sind auf public/videos/key-unlock.mp4 abgestimmt (9.5s,
 // Türöffnung bei ~6.3s) - volle Länge, ungeschnitten.
-const CLICK_DELAY_MS = 300;
-const CHIME_DELAY_MS = 6300;
 const SKIP_VISIBLE_DELAY_MS = 1500;
 const FADE_MS = 550;
 // Reiner Sicherheitsnetz-Timer, deutlich länger als die 9.5s Videolänge -
@@ -33,16 +30,12 @@ export function HeroKeyUnlock({ start, onDone }: { start: boolean; onDone: () =>
     const video = videoRef.current;
     video?.play().catch(() => finish());
 
-    const clickTimer = setTimeout(playKeyClick, CLICK_DELAY_MS);
-    const chimeTimer = setTimeout(playDoorChime, CHIME_DELAY_MS);
     const skipTimer = setTimeout(() => setShowSkip(true), SKIP_VISIBLE_DELAY_MS);
     const fallbackTimer = setTimeout(finish, FALLBACK_DONE_MS);
 
     video?.addEventListener("ended", finish);
 
     return () => {
-      clearTimeout(clickTimer);
-      clearTimeout(chimeTimer);
       clearTimeout(skipTimer);
       clearTimeout(fallbackTimer);
       video?.removeEventListener("ended", finish);

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { requirePartnerPage } from "@/lib/roles";
 
 export const metadata: Metadata = {
@@ -153,7 +154,11 @@ export default async function AdminMitarbeiterPage() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.name}>
-                  <td className="td-name">{r.name}</td>
+                  <td className="td-name">
+                    <Link href={`/admin/karriere?berater=${encodeURIComponent(r.name)}`} style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>
+                      {r.name}
+                    </Link>
+                  </td>
                   <td>{r.bestand}</td>
                   <td>{r.selfAcquired}</td>
                   <td>{r.abschluesse}</td>

@@ -8,6 +8,10 @@ export type ListingDetails = {
   baujahr?: string;
   renoviert?: string;
   grundstueck?: string;
+  /** Nur bei verkauften Objekten: kurze Zeile auf der Referenz-Kachel */
+  referenz?: string;
+  /** Objekt-Film (scrollgesteuert), Link auf die MP4-Datei */
+  film?: string;
   /** Grundriss für den Planer im Kundenportal (im CRM unter «Fotos & Titelbild» gesetzt) */
   grundriss?: { url: string; breite_m: number; ratio: number };
   highlights?: string[];
@@ -21,6 +25,8 @@ export const DETAIL_FIELDS = [
   { key: "baujahr", label: "Baujahr", placeholder: "z.B. 1965" },
   { key: "renoviert", label: "Letzte Renovation", placeholder: "z.B. 2025" },
   { key: "grundstueck", label: "Grundstücksfläche m²", placeholder: "z.B. 180" },
+  { key: "film", label: "Objekt-Film (Link)", placeholder: "z.B. /videos/objektfilm/allschwil-1280.mp4" },
+  { key: "referenz", label: "Referenz-Zeile (nur bei Verkauft)", placeholder: "z.B. 2024 · in 6 Wochen verkauft" },
 ] as const;
 
 function clean(value: FormDataEntryValue | null) {

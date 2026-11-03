@@ -926,3 +926,36 @@ create policy "customer_policies_staff_select" on customer_policies for select
 -- Nachfassen: Feedback-Mail nach Besichtigung nur einmal pro Termin
 -- ---------------------------------------------------------------------
 alter table termine add column if not exists feedback_sent_at timestamptz;
+
+-- ---------------------------------------------------------------------
+-- Karriere: Anstellungsart pro Berater/in und Erträge aus Versicherungen
+-- und Hypotheken. Mitarbeitende erfassen ihre eigenen, ein Partner
+-- bestätigt sie; erst bestätigte zählen für die Leistungsstaffel.
+-- ---------------------------------------------------------------------
+alter table berater add column if not exists anstellung text not null default 'freelancer'
+  check (anstellung in ('freelancer', 'angestellt'));
+
+create table if not exists staff_ertraege (
+  id uuid primary key default gen_random_uuid(),
+  berater text not null,
+  art text not null check (art in ('versicherung', 'hypothek')),
+  kunde text,
+  volumen_chf numeric,
+  ertrag_chf numeric,
+  abgeschlossen_am date not null default current_date,
+  notiz text,
+  bestaetigt_am timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table staff_ertraege enable row level security;
+drop policy if exists "staff_ertraege_admin_all" on staff_ertraege;
+create policy "staff_ertraege_admin_all" on staff_ertraege for all using (public.is_admin());
+drop policy if exists "staff_ertraege_staff_select" on staff_ertraege;
+create policy "staff_ertraege_staff_select" on staff_ertraege for select
+  using (public.my_berater() is not null and berater = public.my_berater());
+drop policy if exists "staff_ertraege_staff_insert" on staff_ertraege;
+create policy "staff_ertraege_staff_insert" on staff_ertraege for insert
+  with check (public.my_berater() is not null and berater = public.my_berater() and bestaetigt_am is null);
+drop policy if exists "staff_ertraege_staff_delete" on staff_ertraege;
+create policy "staff_ertraege_staff_delete" on staff_ertraege for delete
+  using (public.my_berater() is not null and berater = public.my_berater() and bestaetigt_am is null);

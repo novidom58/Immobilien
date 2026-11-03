@@ -3,6 +3,9 @@ import { LeadArchiveButtons } from "@/components/admin/LeadArchiveButtons";
 import { suggestRoles } from "@/lib/constants";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getStaff } from "@/lib/roles";
+import { loadKarriere } from "@/lib/karriereData";
+import { chf } from "@/lib/karriere";
 import { CalendarView } from "@/components/admin/CalendarView";
 import {
   getLeadsWithActivity,
@@ -24,11 +27,19 @@ export default async function AdminHeutePage() {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const [leads, customers, termine] = await Promise.all([
+  const [leads, customers, termine, staff] = await Promise.all([
     getLeadsWithActivity(supabase),
     getCrmCustomers(supabase),
     getUpcomingTermine(supabase),
+    getStaff(supabase),
   ]);
+
+  // Mitarbeitende sehen oben ihren Karrierestand
+  let karriere: Awaited<ReturnType<typeof loadKarriere>>["stand"] | null = null;
+  if (staff?.role === "mitarbeiter" && staff.berater) {
+    const { data: b } = await supabase.from("berater").select("*").eq("name", staff.berater).maybeSingle();
+    karriere = (await loadKarriere(supabase, staff.berater, b?.anstellung === "angestellt" ? "angestellt" : "freelancer")).stand;
+  }
 
   const dueTodayL = dueTodayLeads(leads);
   const overdueL = overdueLeads(leads);
@@ -53,6 +64,22 @@ export default async function AdminHeutePage() {
           + Kunde erfassen
         </Link>
       </div>
+
+      {karriere && (
+        <Link href="/admin/karriere" className="card" style={{ display: "flex", gap: 16, alignItems: "center", padding: "14px 18px", marginBottom: 16, flexWrap: "wrap" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, color: "var(--gold)" }}>{karriere.anteil} %</span>
+          <span style={{ fontSize: 13, lineHeight: 1.5 }}>
+            <strong>
+              Stufe {karriere.stufe.nr} · {karriere.stufe.titel}
+            </strong>
+            <br />
+            {karriere.naechste
+              ? `Noch ${chf(karriere.fehltImmo)} bis ${karriere.anteilNaechste} % (Immobilien) oder ${chf(karriere.fehltGesamt)} gesamt`
+              : "Höchste Stufe erreicht"}
+          </span>
+          <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink-light)" }}>Mein Stand →</span>
+        </Link>
+      )}
 
       <div className="kpi-grid">
         <Link href="/admin/leads" className="kpi blue">

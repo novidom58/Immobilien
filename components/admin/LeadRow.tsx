@@ -6,6 +6,7 @@ import { LeadArchiveButtons } from "./LeadArchiveButtons";
 import { LEAD_STATUS_OPTIONS, suggestRoles } from "@/lib/constants";
 import { LeadActivityPanel } from "./LeadActivityPanel";
 import { LeadAssign } from "./LeadAssign";
+import { eigentuemerText, parseWunschtermine } from "@/lib/wunschtermine";
 
 type AdminLead = {
   id: string;
@@ -38,6 +39,10 @@ const PARTNER_EMAIL = process.env.NEXT_PUBLIC_PARTNER_REFERRAL_EMAIL;
 
 export function LeadRow({ lead, beraterOptions }: { lead: AdminLead; beraterOptions?: string[] }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const wuensche = parseWunschtermine(lead.message);
+  const objekt = lead.message?.match(/^Besichtigungsanfrage für (.+)$/m)?.[1] ?? "das Objekt";
+  const ownerText = wuensche.length ? eigentuemerText(objekt, wuensche) : "";
 
   const referralHref = PARTNER_EMAIL
     ? `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(
@@ -101,6 +106,40 @@ export function LeadRow({ lead, beraterOptions }: { lead: AdminLead; beraterOpti
           </div>
         </td>
       </tr>
+      {wuensche.length > 0 && (
+        <tr>
+          <td colSpan={5} style={{ background: "var(--bg)", padding: "10px 20px", borderTop: "none" }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center", fontSize: 13 }}>
+              <strong>Wunschtermine:</strong>
+              {wuensche.map((w, i) => (
+                <span key={i} className="badge badge-gold">
+                  {i + 1}. {w}
+                </span>
+              ))}
+              <span style={{ display: "inline-flex", gap: 6, marginLeft: "auto" }}>
+                <a
+                  className="btn btn-ghost btn-sm"
+                  href={`mailto:?subject=${encodeURIComponent(`Besichtigung ${objekt}: welcher Termin passt?`)}&body=${encodeURIComponent(ownerText)}`}
+                >
+                  Eigentümer per Mail fragen
+                </a>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(ownerText).then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    });
+                  }}
+                >
+                  {copied ? "Kopiert ✓" : "Text für WhatsApp kopieren"}
+                </button>
+              </span>
+            </div>
+          </td>
+        </tr>
+      )}
       {open && (
         <tr>
           <td colSpan={5} style={{ background: "var(--bg)", padding: "16px 20px" }}>

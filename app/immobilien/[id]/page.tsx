@@ -138,10 +138,45 @@ export default async function ListingDetailPage({
   const videos = [...listing.flight, ...listing.clips.map((url, i) => ({ url, label: `Video ${i + 1}` }))].slice(0, 4);
   const merkmale = details.merkmale ?? [];
 
+  // Infokarten für den Objekt-Film (nur was beim Inserat erfasst ist)
+  const filmCards = [
+    {
+      title: "Das Objekt",
+      lines: [
+        listing.property_type,
+        listing.rooms ? `${listing.rooms} Zimmer` : null,
+        listing.living_area ? `${listing.living_area} m² Wohnfläche` : null,
+        details.etage ? `Etage: ${details.etage}` : null,
+      ].filter((l): l is string => Boolean(l)),
+    },
+    { title: "Highlights", lines: highlights.slice(0, 3) },
+    { title: "Wohnen", lines: highlights.slice(3, 6) },
+    { title: "Ausstattung", lines: merkmale.slice(0, 5) },
+    {
+      title: "Eckdaten",
+      lines: [
+        details.badezimmer ? `${details.badezimmer} Badezimmer` : null,
+        details.baujahr ? `Baujahr ${details.baujahr}` : null,
+        details.renoviert ? `Renoviert ${details.renoviert}` : null,
+        details.verfuegbar ? `Verfügbar ab ${details.verfuegbar}` : null,
+      ].filter((l): l is string => Boolean(l)),
+    },
+  ].filter((c) => c.lines.length > 0);
+
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-6xl px-6 pb-16 pt-32 lg:px-10">
+      {details.film && (
+        <ObjektFilm
+          src={details.film}
+          poster={/-1280\.mp4$/.test(details.film) ? details.film.replace(/-1280\.mp4$/, "-poster.webp") : undefined}
+          kicker={`${listing.postal_code ? `${listing.postal_code} ` : ""}${listing.city}`}
+          title={listing.title || listing.address}
+          price={listing.price_chf ? priceText(listing.price_chf, offer) : null}
+          cards={filmCards}
+        />
+      )}
+      <main id="details" className={`mx-auto max-w-6xl scroll-mt-20 px-6 pb-16 lg:px-10 ${details.film ? "pt-16" : "pt-32"}`}>
         <Link href="/immobilien" className="font-mono text-xs uppercase tracking-wide text-ivory-dim/60 hover:text-ivory">
           ← Alle Immobilien
         </Link>
@@ -257,11 +292,6 @@ export default async function ListingDetailPage({
             <p className="mt-4 text-xs text-ivory-dim/60">Persönliche Auskunft durch unser Team, NoviDom Immobilien AG.</p>
           </div>
         </div>
-
-        {/* Objekt-Film (scrollgesteuert, KI-Übergänge zwischen echten Fotos) */}
-        {details.film && (
-          <ObjektFilm src={details.film} poster={/-1280\.mp4$/.test(details.film) ? details.film.replace(/-1280\.mp4$/, "-poster.webp") : undefined} />
-        )}
 
         {/* 3D-Rundgang */}
         {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}

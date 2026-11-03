@@ -49,6 +49,7 @@ export function AdminShell({
       title: "Übersicht",
       items: [
         { href: "/admin", label: "Heute", icon: "☀️" },
+        { href: "/admin/karriere", label: "Karriere", icon: "🏆" },
         { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
         { href: "/admin/mitarbeiter", label: "Mitarbeitende", icon: "📈" },
         { href: "/admin/leads", label: "Leads", icon: "⚡", badge: counts.leads, badgeTone: "red" },

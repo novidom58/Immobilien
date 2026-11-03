@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/ui/Logo";
@@ -88,6 +88,7 @@ export default async function ListingExposePage({
   const { format } = await searchParams;
   const listing = await getListing(id);
   if (!listing) notFound();
+  if (listing.status === "sold") redirect("/immobilien#referenzen");
 
   const offer = offerTypeOf(listing.offer_type as string | null);
   const details = asDetails(listing.details);

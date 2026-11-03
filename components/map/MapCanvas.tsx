@@ -15,6 +15,7 @@ export type MapListing = {
   title?: string | null;
   property_type?: string | null;
   price_chf?: number | null;
+  status?: string | null;
 };
 
 
@@ -23,6 +24,13 @@ const listingIcon = L.divIcon({
   html: `<span class="block h-3.5 w-3.5 rounded-full border-2 border-ink bg-amber shadow-[0_0_14px_2px_rgba(143,106,57,0.28)]"></span>`,
   iconSize: [14, 14],
   iconAnchor: [7, 7],
+});
+
+const soldIcon = L.divIcon({
+  className: "",
+  html: `<span class="block h-3 w-3 rounded-full border-2 border-ink bg-ivory-dim/60"></span>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
 });
 
 const officeIcon = L.divIcon({
@@ -64,17 +72,23 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
         </Marker>
       ))}
       {listings.map((listing) => (
-        <Marker key={listing.id} position={[listing.lat, listing.lng]} icon={listingIcon}>
+        <Marker key={listing.id} position={[listing.lat, listing.lng]} icon={listing.status === "sold" ? soldIcon : listingIcon}>
           <Popup>
             <div className="min-w-[160px]">
               <div className="font-medium">{listing.title || listing.address}</div>
               <div className="text-xs opacity-70">{listing.city}</div>
-              <a
-                href={`/immobilien/${listing.id}`}
-                className="mt-1 inline-block text-xs font-medium underline underline-offset-2"
-              >
-                Details ansehen →
-              </a>
+              {listing.status === "sold" ? (
+                <Link href="/immobilien#referenzen" className="mt-1 inline-block text-xs font-medium underline underline-offset-2">
+                  Verkauft · Referenzen ansehen →
+                </Link>
+              ) : (
+                <a
+                  href={`/immobilien/${listing.id}`}
+                  className="mt-1 inline-block text-xs font-medium underline underline-offset-2"
+                >
+                  Details ansehen →
+                </a>
+              )}
             </div>
           </Popup>
         </Marker>

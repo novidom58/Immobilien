@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 import { publicListingFilter } from "@/lib/offmarket";
+import { asDetails } from "@/lib/listingDetails";
 
 export const metadata: Metadata = {
   title: "Immobilien",
@@ -30,6 +31,7 @@ type PublicListing = {
   created_at: string;
   offer: OfferType;
   cover: string | null;
+  referenz: string | null;
 };
 
 
@@ -66,6 +68,7 @@ export default async function ImmobilienPage() {
         created_at: l.created_at as string,
         offer: offerTypeOf(l.offer_type),
         cover,
+        referenz: asDetails(l.details).referenz ?? null,
       };
     });
   }
@@ -164,49 +167,58 @@ export default async function ImmobilienPage() {
         )}
 
         {sold.length > 0 && (
-          <div className="mt-20">
+          <div id="referenzen" className="mt-20 scroll-mt-28">
             <span className="font-mono text-xs uppercase tracking-[0.3em] text-blueprint">
               Referenzen
             </span>
             <h2 className="mt-3 font-display text-2xl font-semibold text-ivory">
               Erfolgreich verkauft
             </h2>
+            <p className="mt-2 max-w-xl text-sm text-ivory-dim">
+              Eine Auswahl der Objekte, die wir für unsere Kundinnen und Kunden verkauft haben.
+            </p>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {sold.map((listing) => (
-                <Link
-                  key={listing.id}
-                  href={`/immobilien/${listing.id}`}
-                  className="group overflow-hidden rounded-2xl border border-line bg-ink-2 opacity-80 transition-all duration-300 hover:-translate-y-1 hover:border-amber/40 hover:opacity-100"
-                >
-                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
-                    {listing.cover ? (
-                      <Image
-                        src={listing.cover}
-                        alt=""
-                        aria-hidden
-                        fill
-                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover grayscale-[0.3] transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
-                    )}
-                    <span className="absolute left-4 top-4 rounded-full border border-line bg-ink/80 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/70 backdrop-blur-sm">
-                      Verkauft
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 text-sm text-ivory-dim">
-                      <MapPin className="h-3.5 w-3.5 text-amber" strokeWidth={1.5} />
-                      {listing.postal_code ? `${listing.postal_code} ` : ""}
-                      {listing.city}
+              {sold.map((listing) => {
+                const facts = [
+                  listing.property_type,
+                  listing.rooms ? `${listing.rooms} Zimmer` : null,
+                  listing.living_area ? `${listing.living_area} m²` : null,
+                ].filter(Boolean);
+                return (
+                  <div key={listing.id} className="overflow-hidden rounded-2xl border border-line bg-ink-2">
+                    <div className="relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
+                      {listing.cover ? (
+                        <Image
+                          src={listing.cover}
+                          alt={`Verkauft: ${listing.title || listing.city}`}
+                          fill
+                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          className="object-cover grayscale-[0.25]"
+                        />
+                      ) : (
+                        <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
+                      )}
+                      <span className="absolute left-4 top-4 rounded-full border border-line bg-ink/80 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/80 backdrop-blur-sm">
+                        {listing.offer === "miete" ? "Vermietet" : "Verkauft"}
+                      </span>
                     </div>
-                    <div className="mt-2 font-display text-lg font-semibold text-ivory">
-                      {listing.title || listing.address}
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 text-sm text-ivory-dim">
+                        <MapPin className="h-3.5 w-3.5 text-amber" strokeWidth={1.5} />
+                        {listing.postal_code ? `${listing.postal_code} ` : ""}
+                        {listing.city}
+                      </div>
+                      <div className="mt-2 font-display text-lg font-semibold text-ivory">
+                        {listing.title || facts[0] || listing.city}
+                      </div>
+                      {facts.length > 0 && <div className="mt-1 text-sm text-ivory-dim">{facts.join(" · ")}</div>}
+                      {listing.referenz && (
+                        <div className="mt-3 font-mono text-xs uppercase tracking-wide text-amber-soft">{listing.referenz}</div>
+                      )}
                     </div>
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

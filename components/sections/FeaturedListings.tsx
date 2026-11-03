@@ -33,7 +33,7 @@ export async function FeaturedListings({ limit = 3, title, accent }: { limit?: n
       .select(
         "*, listing_photos(url, sort_order)"
       )
-      .in("status", ["active", "reserved", "sold"])
+      .in("status", ["active", "reserved"])
       .or(publicListingFilter())
       .order("created_at", { ascending: false })
       .limit(limit);

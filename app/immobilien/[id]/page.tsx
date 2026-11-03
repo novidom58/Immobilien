@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { offerTypeOf, priceText, statusBadge } from "@/lib/listingOffer";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MapPin, Home, Check } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
 import { ListingGallery } from "@/components/listing/ListingGallery";
+import { ObjektFilm } from "@/components/listing/ObjektFilm";
 import { asDetails } from "@/lib/listingDetails";
 import { createClient } from "@/lib/supabase/server";
 import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
@@ -108,6 +109,8 @@ export default async function ListingDetailPage({
   const { id } = await params;
   const listing = await getListing(id);
   if (!listing) notFound();
+  // Verkaufte Objekte haben keine eigene Seite mehr, sie stehen als Referenz in der Übersicht
+  if (listing.status === "sold") redirect("/immobilien#referenzen");
 
   const offer = offerTypeOf(listing.offer_type);
   const status = statusBadge(listing.status, offer);
@@ -255,6 +258,11 @@ export default async function ListingDetailPage({
           </div>
         </div>
 
+        {/* Objekt-Film (scrollgesteuert, KI-Übergänge zwischen echten Fotos) */}
+        {details.film && (
+          <ObjektFilm src={details.film} poster={/-1280\.mp4$/.test(details.film) ? details.film.replace(/-1280\.mp4$/, "-poster.webp") : undefined} />
+        )}
+
         {/* 3D-Rundgang */}
         {listing.tour_url && <ListingTour listingId={listing.id} tourUrl={listing.tour_url} />}
 
@@ -298,7 +306,7 @@ function OffMarketTeaser({
   const facts = [listing.property_type, listing.rooms ? `${listing.rooms} Zimmer` : null, listing.living_area ? `${listing.living_area} m²` : null]
     .filter(Boolean)
     .join(" · ");
-  const redirect = encodeURIComponent(`/immobilien/${listing.id}`);
+  const loginTarget = encodeURIComponent(`/immobilien/${listing.id}`);
   return (
     <>
       <Header />
@@ -320,10 +328,10 @@ function OffMarketTeaser({
             registrieren, Suchprofil anlegen und sofort alles sehen.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href={`/login?redirect=${redirect}`} className="rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink hover:bg-amber">
+            <Link href={`/login?redirect=${loginTarget}`} className="rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink hover:bg-amber">
               Kostenlos registrieren
             </Link>
-            <Link href={`/login?redirect=${redirect}`} className="rounded-full border border-line px-6 py-3.5 text-sm text-ivory hover:border-ivory">
+            <Link href={`/login?redirect=${loginTarget}`} className="rounded-full border border-line px-6 py-3.5 text-sm text-ivory hover:border-ivory">
               Anmelden
             </Link>
           </div>

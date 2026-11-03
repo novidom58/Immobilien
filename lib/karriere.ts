@@ -4,12 +4,18 @@
 // Zwei Wege zur nächsten Stufe, es zählt der bessere:
 // - nur Immobilien-Provision (Verkäufe/Vermietungen aus «Abschluss & Provision»)
 // - Gesamtumsatz: Immobilien plus bestätigte Versicherungs- und
-//   Hypothekar-Erträge. Weil das mehr Quellen sind, liegen die Ziele höher.
+//   Hypothekar-Erträge. Weil das mehr Quellen sind, liegt das Ziel 40 %
+//   über dem Immobilien-Ziel (40k → 56k, 80k → 112k).
+
+/** Zuschlag auf das Ziel, wenn Versicherungen und Hypotheken mitzählen. */
+export const GESAMT_ZUSCHLAG_PCT = 40;
+
+const gesamtZiel = (immo: number) => Math.round((immo * (100 + GESAMT_ZUSCHLAG_PCT)) / 100);
 
 export const STUFEN = [
   { nr: 1, titel: "Immobilienberater", anteil: 35, abImmo: 0, abGesamt: 0 },
-  { nr: 2, titel: "Senior-Berater", anteil: 45, abImmo: 40_000, abGesamt: 50_000 },
-  { nr: 3, titel: "Top-Berater", anteil: 50, abImmo: 80_000, abGesamt: 100_000 },
+  { nr: 2, titel: "Senior-Berater", anteil: 45, abImmo: 40_000, abGesamt: gesamtZiel(40_000) },
+  { nr: 3, titel: "Top-Berater", anteil: 50, abImmo: 80_000, abGesamt: gesamtZiel(80_000) },
 ] as const;
 
 /** Angestellte erhalten je Stufe so viele Prozentpunkte weniger als Freelancer. */

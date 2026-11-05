@@ -198,7 +198,8 @@ export default async function ImmobilienPage() {
                       ) : (
                         <BedDouble className="h-10 w-10 text-ivory/10" strokeWidth={1} />
                       )}
-                      <span className="absolute left-4 top-4 rounded-full border border-line bg-ink/80 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-ivory-dim/80 backdrop-blur-sm">
+                      {/* Schräges Band über die Ecke */}
+                      <span className="pointer-events-none absolute -left-11 top-5 w-44 -rotate-45 bg-amber py-1.5 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-white shadow-lg">
                         {listing.offer === "miete" ? "Vermietet" : "Verkauft"}
                       </span>
                     </div>

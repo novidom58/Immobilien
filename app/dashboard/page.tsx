@@ -6,6 +6,9 @@ import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { CollapseRemembered, RememberOpenSections } from "@/components/portal/RememberOpenSections";
+import { PortalOverview, type OverviewTile } from "@/components/portal/PortalOverview";
 import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare, Users } from "lucide-react";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -181,13 +184,25 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   if (!user) redirect("/login?redirect=/dashboard");
 
-  const { data: listings } = await supabase
-    .from("listings")
-    .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type, living_area, postal_code")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const listing = (listings as Listing[] | null)?.[0];
+  // Alles, was nicht voneinander abhängt, gleichzeitig laden (schnellerer Einstieg)
+  const [listingsRes, planRes, profileRes, publicRes, crm, policiesRes] = await Promise.all([
+    supabase
+      .from("listings")
+      .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type, living_area, postal_code")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false }),
+    supabase.from("customer_plans").select("*").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("listings")
+      .select("*, listing_photos(url, sort_order)")
+      .in("status", ["active", "reserved"])
+      .order("created_at", { ascending: false })
+      .limit(40),
+    getCrmProfile(user.id, user.email),
+    supabase.from("customer_policies").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
+  const listing = (listingsRes.data as Listing[] | null)?.[0];
 
   let activity: { text: string; created_at: string }[] = [];
   let documents: { name: string; url: string }[] = [];
@@ -196,14 +211,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   let feedback: ViewingFeedback[] = [];
 
   if (listing) {
-    matchingBuyers = await countMatchingBuyers(listing);
-    const { data: feedbackRows } = await supabase
-      .from("viewing_feedback")
-      .select("*")
-      .eq("listing_id", listing.id)
-      .order("created_at", { ascending: false });
-    feedback = (feedbackRows as ViewingFeedback[] | null) ?? [];
-    const [activityRes, documentsRes, photosRes] = await Promise.all([
+    const [buyers, feedbackRes, activityRes, documentsRes, photosRes] = await Promise.all([
+      countMatchingBuyers(listing),
+      supabase.from("viewing_feedback").select("*").eq("listing_id", listing.id).order("created_at", { ascending: false }),
       supabase
         .from("listing_activity")
         .select("text, created_at")
@@ -217,6 +227,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         .eq("listing_id", listing.id)
         .order("sort_order", { ascending: true }),
     ]);
+    matchingBuyers = buyers;
+    feedback = (feedbackRes.data as ViewingFeedback[] | null) ?? [];
     activity = activityRes.data ?? [];
     photos = photosRes.data ?? [];
 
@@ -237,17 +249,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }
 
   // «Mein Immobilienplan»: Suchprofil, Finanzierung, Versicherung, Favoriten
-  const [planRes, profileRes, publicRes, crm] = await Promise.all([
-    supabase.from("customer_plans").select("*").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-    supabase
-      .from("listings")
-      .select("*, listing_photos(url, sort_order)")
-      .in("status", ["active", "reserved"])
-      .order("created_at", { ascending: false })
-      .limit(40),
-    getCrmProfile(user.id, user.email),
-  ]);
   const plan = planRes.data as
     | (SearchProfile & {
         finanz: { income: number; savings: number; pension: number; price: number; max_price?: number; saved_at?: string } | null;
@@ -499,8 +500,43 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const focus = portalFocus(fokus, crm?.rollen ?? [], Boolean(listing));
   const order = ORDER[focus];
   // Mit eigenem Inserat steht das Verkaufs-Cockpit oben, alles andere eingeklappt
-  const main = listing ? [] : MAIN[focus].filter((k) => portalSections[k]);
+  // Bereiche, die die Person zuletzt aufgeklappt hat, stehen beim nächsten Besuch offen oben
+  const remembered = ((await cookies()).get("portal_offen")?.value ?? "")
+    .split(",")
+    .filter((k): k is PortalSection => (order as string[]).includes(k));
+  const baseMain = listing ? [] : MAIN[focus].filter((k) => portalSections[k]);
+  const main = [...baseMain, ...remembered.filter((k) => !baseMain.includes(k) && portalSections[k] && !(listing && k === "verkaufen"))];
   const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
+
+  // Übersicht: alle Bereiche als Kacheln mit dem aktuellen Stand
+  const policyCount = policiesRes.count ?? 0;
+  const matchCount = portalListings.filter((l) => l.match).length;
+  const status: Record<PortalSection | "verkauf", string> = {
+    verkauf: listing ? `${listing.views} Aufrufe · ${listing.viewing_requests} Anfragen` : "",
+    weg: `${Object.values(journey).filter(Boolean).length} von 4 Schritten erledigt`,
+    suchprofil: plan?.wunsch_ort ? `${plan.wunsch_ort}${plan.budget_max ? ` · bis ${formatChf(plan.budget_max)}` : ""}` : "Noch nicht ausgefüllt",
+    objekte: `${matchCount} passend · ${favorites.size} Favoriten`,
+    finanzierung:
+      crm?.finanz_status === "bestaetigt"
+        ? "Von der Bank bestätigt"
+        : plan?.finanz?.max_price
+          ? `Kaufkraft bis ${formatChf(plan.finanz.max_price)}`
+          : "Noch nicht geprüft",
+    versicherung: policyCount ? `${policyCount} ${policyCount === 1 ? "Police" : "Policen"} erfasst` : "Policen hinzufügen",
+    umbau: "Grundriss-Planer und Richtpreise",
+    eigentum: eigentum ? `Richtwert ${formatChf(eigentum.wert.mid)}` : "Wertmonitor einrichten",
+    verkaufen: "Gratis-Bewertung anfragen",
+  };
+  const tiles: OverviewTile[] = [
+    ...(listing ? [{ key: "verkauf", label: SECTION_LABEL.verkauf, status: status.verkauf, href: "#verkauf", highlight: true }] : []),
+    ...[...main, ...more].map((k) => ({
+      key: k,
+      label: k === "weg" ? "Mein Weg" : SECTION_LABEL[k],
+      status: status[k],
+      href: `#${k}`,
+      highlight: main.includes(k),
+    })),
+  ];
 
   return (
     <main className="min-h-svh bg-ink px-6 py-10 lg:px-10">
@@ -527,13 +563,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ? "Ihr Verkauf auf einen Blick: Schritt für Schritt, mit allen Zahlen und Dokumenten. Darunter planen Sie gleich Ihr nächstes Zuhause."
             : INTRO[focus]}
         </p>
-        <nav className="mt-6 flex flex-wrap gap-2 text-sm">
-          {[...(listing ? (["verkauf"] as const) : []), ...main.filter((k) => k !== "weg")].map((key) => (
-            <a key={key} href={`#${key}`} className="rounded-full border border-line bg-white px-4 py-2 text-ivory hover:border-ivory">
-              {SECTION_LABEL[key]}
-            </a>
-          ))}
-        </nav>
+        <PortalOverview tiles={tiles} />
 
         {listing && (
           <>
@@ -692,8 +722,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         )}
 
         <OpenSectionOnHash />
+        <RememberOpenSections />
         {main.map((key) => (
-          <Fragment key={key}>{portalSections[key]}</Fragment>
+          <Fragment key={key}>
+            {portalSections[key]}
+            {!baseMain.includes(key) && (
+              <div className="mt-3 text-right">
+                <CollapseRemembered section={key} />
+              </div>
+            )}
+          </Fragment>
         ))}
 
         {more.length > 0 && (

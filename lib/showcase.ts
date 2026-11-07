@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ShowcaseItem } from "@/components/hero/HeroShowcase";
 import { publicListingFilter } from "@/lib/offmarket";
 import { offerTypeOf, priceText } from "@/lib/listingOffer";
+import { startseiteZuerst } from "@/lib/listingDetails";
 
 /** Aktive und reservierte Inserate mit Titelbild für die Hero-Bildkarte. */
 export async function getShowcase(): Promise<ShowcaseItem[]> {
@@ -17,7 +18,7 @@ export async function getShowcase(): Promise<ShowcaseItem[]> {
     .order("created_at", { ascending: false })
     .limit(8);
 
-  return (data ?? []).flatMap((l) => {
+  return startseiteZuerst(data ?? []).flatMap((l) => {
     const photos = ((l.listing_photos as { url: string; sort_order: number }[] | null) ?? []).sort(
       (a, b) => a.sort_order - b.sort_order
     );

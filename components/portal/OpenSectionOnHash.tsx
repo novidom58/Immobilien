@@ -8,19 +8,21 @@ import { useEffect } from "react";
  */
 export function OpenSectionOnHash() {
   useEffect(() => {
-    function open() {
+    function open(smooth: boolean) {
       const id = decodeURIComponent(window.location.hash.slice(1));
       if (!id) return;
       const el = document.getElementById(id);
       const details = el?.closest("details");
       if (el && details && !details.open) {
         details.open = true;
-        requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+        requestAnimationFrame(() => el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" }));
       }
     }
-    open();
-    window.addEventListener("hashchange", open);
-    return () => window.removeEventListener("hashchange", open);
+    // Beim Laden ohne Animation, damit die Seite nicht sichtbar springt
+    open(false);
+    const onHash = () => open(true);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, []);
   return null;
 }

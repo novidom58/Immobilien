@@ -10,6 +10,8 @@ export type ListingDetails = {
   grundstueck?: string;
   /** Nur bei verkauften Objekten: kurze Zeile auf der Referenz-Kachel */
   referenz?: string;
+  /** Wird auf der Startseite und in der Übersicht zuerst gezeigt (im CRM gesetzt) */
+  startseite?: boolean;
   /** Objekt-Film (scrollgesteuert), Link auf die MP4-Datei */
   film?: string;
   /** Grundriss für den Planer im Kundenportal (im CRM unter «Fotos & Titelbild» gesetzt) */
@@ -55,4 +57,9 @@ export function readDetails(formData: FormData): ListingDetails {
 
 export function asDetails(value: unknown): ListingDetails {
   return value && typeof value === "object" ? (value as ListingDetails) : {};
+}
+
+/** Markierte Objekte zuerst, sonst Reihenfolge beibehalten. */
+export function startseiteZuerst<T extends { details?: unknown }>(list: T[]): T[] {
+  return [...list].sort((a, b) => Number(Boolean(asDetails(b.details).startseite)) - Number(Boolean(asDetails(a.details).startseite)));
 }

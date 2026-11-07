@@ -6,6 +6,7 @@ import { Reveal } from "@/lib/reveal";
 import { createClient } from "@/lib/supabase/server";
 import { publicListingFilter } from "@/lib/offmarket";
 import { offerTypeOf, priceText, statusBadge, type OfferType } from "@/lib/listingOffer";
+import { startseiteZuerst } from "@/lib/listingDetails";
 
 type Listing = {
   id: string;
@@ -36,9 +37,9 @@ export async function FeaturedListings({ limit = 3, title, accent }: { limit?: n
       .in("status", ["active", "reserved"])
       .or(publicListingFilter())
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .limit(limit + 12);
 
-    listings = (data ?? []).map((l) => {
+    listings = startseiteZuerst(data ?? []).slice(0, limit).map((l) => {
       const photos = (l.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
       const cover = photos.length
         ? [...photos].sort((a, b) => a.sort_order - b.sort_order)[0].url

@@ -16,6 +16,7 @@ import {
   assignListingOwner,
   unassignListingOwner,
   deleteListing,
+  setStartseiteZuerst,
 } from "@/app/admin/actions";
 import { PORTAL_OPTIONS } from "@/lib/constants";
 import { SaleDeadlineBar } from "./SaleDeadlineBar";
@@ -312,6 +313,24 @@ export function ListingCard({
           <BuyerAlertButton listingId={listing.id} active={listing.status === "active" || listing.status === "reserved"} />
           <OffMarketControl listingId={listing.id} status={listing.status} until={listing.offmarket_until} />
           <FeedbackShare listingId={listing.id} title={listing.title || `${listing.address}, ${listing.city}`} />
+          {isPartner && (listing.status === "active" || listing.status === "reserved") && (
+            <button
+              type="button"
+              disabled={busy === "startseite"}
+              onClick={async () => {
+                setBusy("startseite");
+                const on = !asDetails(listing.details).startseite;
+                const res = await setStartseiteZuerst(listing.id, on);
+                setBusy(null);
+                if (res.error) setError(res.error);
+                else router.refresh();
+              }}
+              className={`btn btn-sm ${asDetails(listing.details).startseite ? "btn-primary" : "btn-ghost"}`}
+              title="Dieses Objekt auf der Startseite zuerst zeigen"
+            >
+              ★ {asDetails(listing.details).startseite ? "Zuerst auf der Startseite" : "Zuerst auf Startseite zeigen"}
+            </button>
+          )}
           {listing.berater && <span className="bchip">{listing.berater}</span>}
           <span className="td-light">
             Portale: {listing.posted_portals.length > 0 ? listing.posted_portals.join(", ") : "keine"}

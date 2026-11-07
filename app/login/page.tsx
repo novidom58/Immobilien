@@ -31,7 +31,7 @@ export default function LoginPage() {
       {/* Bildseite */}
       <section className="relative isolate overflow-hidden bg-night">
         <Image
-          src="/images/ki/hf_20260721_221242_dc36129e-cfa1-44b7-8b76-e01581d1c775.webp"
+          src="/images/ki/hf_20261020_211922_655cc7b3-9f47-4d64-8be3-d30a2dd67b41.webp"
           alt=""
           fill
           priority

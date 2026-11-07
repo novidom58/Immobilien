@@ -1,9 +1,13 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
+import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
+import { setWorkerUrl } from "maplibre-gl";
 import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { OFFICES, officeAddress } from "@/lib/offices";
 
 export type MapListing = {
@@ -43,7 +47,57 @@ const officeIcon = L.divIcon({
   iconAnchor: [8, 8],
 });
 
+// Farbige Vektorkarte von OpenFreeMap (frei, ohne Schlüssel, auch kommerziell)
+const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+const OPENFREEMAP_ATTRIBUTION =
+  '<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> Daten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>';
+
+function hasWebGL() {
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+// Der Worker liegt unter public/, weil der Bundler den relativen Pfad der
+// Bibliothek nicht auflöst. Bei einem Update von maplibre-gl die Datei neu
+// kopieren (node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs).
+const WORKER_URL = "/maplibre/maplibre-gl-worker-6.14.0.mjs";
+
+/** Legt die OpenFreeMap-Vektorkarte als Grundkarte in die Leaflet-Karte. */
+function VectorBaseLayer({ onFail }: { onFail: () => void }) {
+  const map = useMap();
+  useEffect(() => {
+    setWorkerUrl(WORKER_URL);
+    const layer = maplibreGL({ style: OPENFREEMAP_STYLE, attributionControl: false } as Parameters<typeof maplibreGL>[0]);
+    layer.options.attribution = OPENFREEMAP_ATTRIBUTION;
+    layer.addTo(map);
+    // Lädt die Karte nicht (Dienst nicht erreichbar), zurück zur Rasterkarte
+    let loaded = false;
+    const gl = layer.getMaplibreMap();
+    gl.once("load", () => {
+      loaded = true;
+    });
+    gl.on("error", () => {
+      if (!loaded) onFail();
+    });
+    const timer = window.setTimeout(() => {
+      if (!loaded) onFail();
+    }, 8000);
+    return () => {
+      window.clearTimeout(timer);
+      layer.remove();
+    };
+  }, [map, onFail]);
+  return null;
+}
+
 export default function MapCanvas({ listings }: { listings: MapListing[] }) {
+  // Ohne WebGL (ältere Geräte) bleibt die bisherige graue Rasterkarte
+  const [vector, setVector] = useState(() => typeof window !== "undefined" && hasWebGL());
+  const fallback = useCallback(() => setVector(false), []);
   return (
     <MapContainer
       center={[47.545, 7.63]}
@@ -51,10 +105,14 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
       scrollWheelZoom={false}
       className="h-full w-full"
     >
-      <TileLayer
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-        attribution='&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS'
-      />
+      {vector ? (
+        <VectorBaseLayer onFail={fallback} />
+      ) : (
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          attribution='&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS'
+        />
+      )}
       {OFFICES.map((office) => (
         <Marker key={office.city} position={[office.lat, office.lng]} icon={officeIcon}>
           <Tooltip permanent direction="top" offset={[0, -10]} className="coverage-map-label">

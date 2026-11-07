@@ -64,13 +64,15 @@ function Slider({
 /** Mieten oder kaufen? Monatliche Kosten heute und Vermögen nach X Jahren. */
 export function RentVsBuy() {
   const [price, setPrice] = useState(1_200_000);
-  const [rent, setRent] = useState(3_200);
+  const [rent, setRent] = useState(3_000);
   const [equity, setEquity] = useState(20);
   const [rate, setRate] = useState(1.5);
-  const [appreciation, setAppreciation] = useState(1.5);
+  const [appreciation, setAppreciation] = useState(1);
   const [years, setYears] = useState(10);
   const [rentIncrease, setRentIncrease] = useState(1);
   const [investReturn, setInvestReturn] = useState(3);
+  const [buyingCosts, setBuyingCosts] = useState(3);
+  const [sellingCosts, setSellingCosts] = useState(3);
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const figureRef = useRef<HTMLElement>(null);
@@ -97,7 +99,8 @@ export function RentVsBuy() {
     appreciation: appreciation / 100,
     rentIncrease: rentIncrease / 100,
     investReturn: investReturn / 100,
-    buyingCosts: 0.02,
+    buyingCosts: buyingCosts / 100,
+    sellingCosts: sellingCosts / 100,
   };
   const rows = rentVsBuy(input);
   const owner = monthlyOwnerCost(price, equity / 100, rate / 100);
@@ -151,9 +154,12 @@ export function RentVsBuy() {
           <div className="mt-4 grid gap-4">
             <Slider label="Mietsteigerung pro Jahr" value={rentIncrease} display={`${rentIncrease.toFixed(1)}%`} min={0} max={3} step={0.25} onChange={setRentIncrease} />
             <Slider label="Rendite auf angelegtes Geld" value={investReturn} display={`${investReturn.toFixed(1)}%`} min={0} max={6} step={0.25} onChange={setInvestReturn} />
+            <Slider label="Kaufnebenkosten" value={buyingCosts} display={`${buyingCosts.toFixed(1)}%`} min={0} max={5} step={0.5} onChange={setBuyingCosts} />
+            <Slider label="Kosten bei Wiederverkauf" value={sellingCosts} display={`${sellingCosts.toFixed(1)}%`} min={0} max={5} step={0.5} onChange={setSellingCosts} />
             <p className="text-xs leading-relaxed text-ivory-dim">
-              Fest eingerechnet: 2% Kaufnebenkosten, 1% Unterhalt und Nebenkosten pro Jahr, Amortisation der 2. Hypothek in 15 Jahren. Wer mietet, legt
-              Eigenkapital und Ersparnis an. Steuern sind nicht berücksichtigt.
+              Kaufnebenkosten: Handänderungssteuer, Notar und Grundbuch (in Basel-Stadt rund 3%, im Kanton Zürich deutlich weniger). Das Vermögen beim
+              Kaufen ist netto gerechnet, also nach Verkaufskosten, falls Sie wieder verkaufen. Dazu 1% Unterhalt und Nebenkosten pro Jahr und die
+              Amortisation der 2. Hypothek in 15 Jahren. Wer mietet, legt Eigenkapital und Ersparnis an. Steuern sind nicht berücksichtigt.
             </p>
           </div>
         </details>
@@ -163,8 +169,8 @@ export function RentVsBuy() {
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl bg-ink-2 p-4">
             <div className="text-xs text-ivory-dim">Kaufen pro Monat</div>
-            <div className="mt-1 font-display text-2xl text-ivory tabular-nums">{chf(owner.total)}</div>
-            <div className="mt-1 text-[11px] text-ivory-dim">davon {chf(owner.amortisation)} Amortisation (Sparen)</div>
+            <div className="mt-1 font-display text-2xl text-ivory tabular-nums">{chf(owner.interest + owner.maintenance)}</div>
+            <div className="mt-1 text-[11px] text-ivory-dim">Zins, Unterhalt und Nebenkosten</div>
           </div>
           <div className="rounded-2xl bg-ink-2 p-4">
             <div className="text-xs text-ivory-dim">Mieten pro Monat</div>

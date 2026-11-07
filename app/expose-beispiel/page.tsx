@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
+import { createClient } from "@/lib/supabase/server";
+import { startseiteZuerst } from "@/lib/listingDetails";
+import { publicListingFilter } from "@/lib/offmarket";
 
 export const metadata: Metadata = {
   title: "Beispiel-Exposé",
@@ -32,7 +36,32 @@ const highlights = [
   "Schulen und ÖV in Gehdistanz",
 ];
 
-export default function ExposeBeispielPage() {
+export const dynamic = "force-dynamic";
+
+/**
+ * Zeigt als Beispiel immer ein echtes Exposé von uns: das Objekt, das auf der
+ * Startseite zuerst steht, sonst das neueste Verkaufsobjekt mit Fotos. Nur
+ * wenn es keines gibt, erscheint das Muster unten.
+ */
+async function realExposeId() {
+  const supabase = await createClient();
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("listings")
+    .select("id, details, offer_type, listing_photos(count)")
+    .in("status", ["active", "reserved"])
+    .or(publicListingFilter())
+    .order("created_at", { ascending: false })
+    .limit(30);
+  const candidates = startseiteZuerst(data ?? []).filter(
+    (l) => (l.offer_type ?? "kauf") !== "miete" && ((l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0) > 0
+  );
+  return (candidates[0]?.id as string | undefined) ?? null;
+}
+
+export default async function ExposeBeispielPage() {
+  const id = await realExposeId();
+  if (id) redirect(`/immobilien/${id}/expose`);
   return (
     <main className="min-h-svh bg-[#eceae4] px-4 py-10 font-sans text-[#1c1a16] print:bg-white print:p-0">
       {/* Hinweisleiste - erscheint nicht im Druck */}

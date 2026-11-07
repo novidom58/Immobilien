@@ -90,7 +90,11 @@ async function saveListingRow(
 ) {
   const offerType = readOfferType(formData);
   // Grundriss für den Planer wird unter «Fotos & Titelbild» gesetzt und hier nicht überschrieben
-  const details: ListingDetails = { ...(current?.grundriss ? { grundriss: current.grundriss } : {}), ...readDetails(formData) };
+  const details: ListingDetails = {
+    ...(current?.grundriss ? { grundriss: current.grundriss } : {}),
+    ...(current?.startseite ? { startseite: true } : {}),
+    ...readDetails(formData),
+  };
   const res = await saveWithOfferType(offerType, (extra) => run({ ...extra, details }));
   if (res.error?.message.includes("details")) {
     const retry = await saveWithOfferType(offerType, (extra) => run(extra));
@@ -1569,5 +1573,29 @@ export async function assignLead(leadId: string, berater: string) {
     };
   }
   revalidatePath("/admin", "layout");
+  return { error: null };
+}
+
+/**
+ * Ein Objekt zuerst auf der Startseite zeigen (Hero und «Aktuelle Objekte»).
+ * Es kann immer nur eines zuerst stehen; die Markierung der anderen fällt weg.
+ */
+export async function setStartseiteZuerst(listingId: string, on: boolean) {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+  const { data: rows, error } = await supabase.from("listings").select("id, details");
+  if (error) return { error: error.message };
+  for (const row of rows ?? []) {
+    const details = { ...((row.details as Record<string, unknown> | null) ?? {}) };
+    const want = on && row.id === listingId;
+    if (Boolean(details.startseite) === want) continue;
+    if (want) details.startseite = true;
+    else delete details.startseite;
+    const { error: upError } = await supabase.from("listings").update({ details }).eq("id", row.id);
+    if (upError) return { error: upError.message.includes("details") ? "Bitte zuerst in Supabase das SQL «Objekt-Eckdaten» ausführen." : upError.message };
+  }
+  revalidatePath("/");
+  revalidatePath("/immobilien");
+  revalidatePath("/admin/inserate");
   return { error: null };
 }

@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 import { publicListingFilter } from "@/lib/offmarket";
-import { asDetails } from "@/lib/listingDetails";
+import { asDetails, startseiteZuerst } from "@/lib/listingDetails";
 
 export const metadata: Metadata = {
   title: "Immobilien",
@@ -49,7 +49,7 @@ export default async function ImmobilienPage() {
       .or(publicListingFilter())
       .order("created_at", { ascending: false });
 
-    listings = (data ?? []).map((l) => {
+    listings = startseiteZuerst(data ?? []).map((l) => {
       const photos = (l.listing_photos as { url: string; sort_order: number }[] | null) ?? [];
       const cover = photos.length
         ? [...photos].sort((a, b) => a.sort_order - b.sort_order)[0].url

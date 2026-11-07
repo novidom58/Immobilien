@@ -17,14 +17,13 @@ export function MonthlyCost({ price }: { price: number }) {
 
   const rows = [
     { label: "Hypothekarzins", value: cost.interest },
-    { label: "Amortisation (Sparen)", value: cost.amortisation },
     { label: "Unterhalt & Nebenkosten", value: cost.maintenance },
   ];
 
   return (
     <section className="mt-12 rounded-2xl border border-line bg-white p-6 lg:p-8">
       <h2 className="font-display text-2xl text-ivory">Was kostet es wirklich pro Monat?</h2>
-      <p className="mt-1 text-sm text-ivory-dim">Mit {equity}% Eigenkapital und {rate.toFixed(1)}% Zins. Richtwerte, ohne Steuern.</p>
+      <p className="mt-1 text-sm text-ivory-dim">Mit {equity}% Eigenkapital und {rate.toFixed(1)}% Zins. Richtwerte, ohne Steuern und ohne Amortisation (das ist Sparen ins eigene Zuhause).</p>
 
       <div className="mt-6 grid gap-8 sm:grid-cols-2">
         <div className="grid gap-5">
@@ -52,7 +51,7 @@ export function MonthlyCost({ price }: { price: number }) {
             ))}
             <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-line pt-3">
               <dt className="font-semibold text-ivory">Pro Monat</dt>
-              <dd className="font-display text-3xl text-amber tabular-nums">{chf(cost.total)}</dd>
+              <dd className="font-display text-3xl text-amber tabular-nums">{chf(cost.interest + cost.maintenance)}</dd>
             </div>
           </dl>
           <p className="mt-3 text-xs leading-relaxed text-ivory-dim">

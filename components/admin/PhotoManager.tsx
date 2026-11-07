@@ -143,6 +143,30 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
     await saveOrder(rest);
   }
 
+  async function removeAll() {
+    if (!supabase || !photos?.length) return;
+    if (!window.confirm(`Alle ${photos.length} Fotos dieses Inserats löschen? Das lässt sich nicht rückgängig machen.`)) return;
+    setBusy(true);
+    setError(null);
+    const { error: deleteError } = await supabase
+      .from("listing_photos")
+      .delete()
+      .in(
+        "id",
+        photos.map((p) => p.id)
+      );
+    if (deleteError) {
+      setBusy(false);
+      setError(`Löschen fehlgeschlagen: ${deleteError.message}`);
+      return;
+    }
+    const paths = photos.map((p) => decodeURIComponent(p.url.split("/listing-photos/")[1] ?? "")).filter(Boolean);
+    if (paths.length) await supabase.storage.from("listing-photos").remove(paths);
+    if (grundriss && photos.some((p) => p.url === grundriss.url)) await saveDetails(null);
+    setBusy(false);
+    await saveOrder([]);
+  }
+
   if (!supabase) return null;
 
   return (
@@ -160,6 +184,11 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
             Grundriss: Kunden können ihn dann im Kundenportal massstabsgetreu einrichten (dafür die Breite in Metern angeben).
           </p>
           {error && <p style={{ fontSize: 12, color: "var(--red)", marginBottom: 8 }}>{error}</p>}
+          {photos && photos.length > 1 && (
+            <button type="button" className="btn btn-danger btn-sm" style={{ marginBottom: 10 }} disabled={busy} onClick={removeAll}>
+              Alle {photos.length} Fotos löschen
+            </button>
+          )}
           {!photos ? (
             <p className="td-light" style={{ fontSize: 12 }}>Fotos werden geladen …</p>
           ) : photos.length === 0 ? (

@@ -24,7 +24,8 @@ export type RentVsBuyInput = {
   appreciation: number; // Wertsteigerung Immobilie p.a.
   rentIncrease: number; // Mietsteigerung p.a.
   investReturn: number; // Rendite auf angelegtes Geld p.a.
-  buyingCosts: number; // Kaufnebenkosten (Notar, Grundbuch), Anteil vom Preis
+  buyingCosts: number; // Kaufnebenkosten (Handänderungssteuer, Notar, Grundbuch), Anteil vom Preis
+  sellingCosts: number; // Kosten bei einem Verkauf (Makler, Notar), Anteil vom Wert
 };
 
 export type RentVsBuyYear = { year: number; buyWealth: number; rentWealth: number; buyCost: number; rentCost: number };
@@ -34,6 +35,10 @@ export type RentVsBuyYear = { year: number; buyWealth: number; rentWealth: numbe
  * und Kaufnebenkosten an. Wer pro Jahr weniger ausgibt, legt die Differenz an.
  * «Kosten» meint Geld, das weg ist: Zins, Unterhalt, Nebenkosten bzw. Miete.
  * Amortisation ist keine Ausgabe, sondern Sparen in die eigene Immobilie.
+ * Das Vermögen beim Kaufen ist netto gerechnet: was nach einem Verkauf
+ * (abzüglich Verkaufskosten) übrig bliebe. Darum liegt Mieten in den ersten
+ * Jahren vorne, bis Wertsteigerung und tiefere Wohnkosten die Nebenkosten
+ * wettmachen.
  */
 export function rentVsBuy(input: RentVsBuyInput): RentVsBuyYear[] {
   const equity = input.price * input.equityShare;
@@ -48,7 +53,8 @@ export function rentVsBuy(input: RentVsBuyInput): RentVsBuyYear[] {
   let buyCost = input.price * input.buyingCosts;
   let rentCost = 0;
 
-  const rows: RentVsBuyYear[] = [{ year: 0, buyWealth: equity, rentWealth: upfront, buyCost, rentCost }];
+  const net = (value: number) => value * (1 - input.sellingCosts);
+  const rows: RentVsBuyYear[] = [{ year: 0, buyWealth: net(input.price) - mortgage, rentWealth: upfront, buyCost, rentCost }];
 
   for (let y = 1; y <= input.years; y++) {
     const interest = mortgage * input.rate;
@@ -67,7 +73,7 @@ export function rentVsBuy(input: RentVsBuyInput): RentVsBuyYear[] {
     amortLeft -= amort;
 
     const value = input.price * Math.pow(1 + input.appreciation, y);
-    rows.push({ year: y, buyWealth: value - mortgage + buyDepot, rentWealth: rentDepot, buyCost, rentCost });
+    rows.push({ year: y, buyWealth: net(value) - mortgage + buyDepot, rentWealth: rentDepot, buyCost, rentCost });
     rentYearly *= 1 + input.rentIncrease;
   }
   return rows;

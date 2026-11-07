@@ -34,15 +34,6 @@ export function Hero({ showcase = [] }: { showcase?: ShowcaseItem[] }) {
       {showIntro && <HeroKeyUnlock start={introStart} onDone={() => setShowIntro(false)} />}
 
       <div className="relative mx-auto max-w-5xl px-6 pb-14 pt-36 text-center lg:pt-44">
-        <motion.span
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-8 inline-block rounded-full bg-ink-3 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ivory-dim"
-        >
-          Voller Service · Faire Kosten · Basel &amp; Zug
-        </motion.span>
-
         <HeroHeadline text="Ihr Zuhause verdient" accent="den besten Preis." />
 
         <motion.p

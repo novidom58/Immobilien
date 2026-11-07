@@ -11,6 +11,7 @@ import { PropertyValuationLead } from "@/components/sections/PropertyValuationLe
 import { ServiceMap } from "@/components/sections/ServiceMap";
 import { AboutJana } from "@/components/sections/AboutJana";
 import { Faq } from "@/components/sections/Faq";
+import { RatgeberHome } from "@/components/sections/RatgeberHome";
 import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
 import { getShowcase } from "@/lib/showcase";
@@ -34,6 +35,7 @@ export default async function Home() {
         <PropertyValuationLead />
         <ServiceMap />
         <AboutJana />
+        <RatgeberHome />
         <Faq />
         <BookingSection />
         <FinalCta />

@@ -69,11 +69,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           <Link href="/#leistungen" className="block font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim hover:text-ivory">
             ← NoviDom 360°
           </Link>
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink-3 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ivory-dim">
-            <area.icon className="h-3.5 w-3.5 text-amber" strokeWidth={1.5} />
-            {area.num} · {area.title}
-          </div>
-          <h1 className="mt-7 text-balance font-display text-[clamp(2.4rem,5.5vw,4.8rem)] font-normal leading-[1.05] tracking-[-0.03em] text-ivory">
+          <h1 className="mt-8 text-balance font-display text-[clamp(2.4rem,5.5vw,4.8rem)] font-normal leading-[1.05] tracking-[-0.03em] text-ivory">
             {content.headline}
             <br />
             <em>{content.accent}</em>

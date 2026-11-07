@@ -59,10 +59,7 @@ export default function TrennungPage() {
       <Header />
       <main className="bg-ink">
         <section className="mx-auto max-w-5xl px-6 pb-16 pt-36 text-center lg:pt-44">
-          <div className="inline-flex items-center gap-2 rounded-full bg-ink-3 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ivory-dim">
-            Lebenssituation · Trennung &amp; Scheidung
-          </div>
-          <h1 className="mt-7 text-balance font-display text-[clamp(2.4rem,5.5vw,4.8rem)] font-normal leading-[1.05] tracking-[-0.03em] text-ivory">
+          <h1 className=" text-balance font-display text-[clamp(2.4rem,5.5vw,4.8rem)] font-normal leading-[1.05] tracking-[-0.03em] text-ivory">
             Trennung mit Haus.
             <br />
             <em>Fair und ruhig geregelt.</em>

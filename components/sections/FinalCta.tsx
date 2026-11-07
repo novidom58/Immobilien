@@ -295,7 +295,7 @@ export function FinalCta({
                 >
                   <div>
                     <p className="mb-2 text-sm text-ivory-dim">Worum geht es?</p>
-                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Anliegen">
+                    <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:auto-cols-fr sm:grid-flow-col sm:overflow-visible sm:px-0 sm:pb-0" role="radiogroup" aria-label="Anliegen">
                       {[...ANLIEGEN_CHOICES, ...(preset && !ANLIEGEN_CHOICES.includes(preset) ? [preset] : [])].map((a) => (
                         <button
                           key={a}
@@ -303,7 +303,7 @@ export function FinalCta({
                           role="radio"
                           aria-checked={anliegen === a}
                           onClick={() => setAnliegen(a)}
-                          className={`rounded-full border px-4 py-2.5 font-sans text-sm transition-colors ${
+                          className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2.5 text-center font-sans text-sm transition-colors sm:px-2 ${
                             anliegen === a ? "border-night bg-night text-ink" : "border-line bg-ink text-ivory-dim hover:border-ivory-dim/40"
                           }`}
                         >

@@ -1,5 +1,7 @@
 "use client";
 
+import { AdminPolicyForm } from "@/components/admin/AdminPolicyForm";
+import { BankDocsRequest } from "@/components/admin/BankDocsRequest";
 import { PortalSnapshotPanel } from "@/components/admin/PortalSnapshotPanel";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -61,6 +63,7 @@ export function CustomerDetailModal({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const [snapshotKey, setSnapshotKey] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openPanel, setOpenPanel] = useState<"akquise" | "mail" | null>(null);
@@ -251,12 +254,16 @@ export function CustomerDetailModal({
             <div className="detail-label" style={{ marginBottom: 4 }}>
               Im Kundenportal eingegeben
             </div>
-            <PortalSnapshotPanel customerId={customer.id} />
+            <PortalSnapshotPanel key={snapshotKey} customerId={customer.id} />
+            {customer.portal_user_id && <AdminPolicyForm customerId={customer.id} onSaved={() => setSnapshotKey((k) => k + 1)} />}
           </div>
 
           <div className="modal-section">
             <div className="detail-label" style={{ marginBottom: 8 }}>
               Finanzierung &amp; Hypothek
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <BankDocsRequest email={customer.email} name={customer.full_name} />
             </div>
             <div className="flex flex-wrap items-center gap-3" style={{ fontSize: 13 }}>
               <select

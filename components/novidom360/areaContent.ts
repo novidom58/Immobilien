@@ -62,7 +62,6 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     accent: "Persönlich.",
     intro:
       "Mit unserem Partner HypoCasa vergleichen wir über 50 Banken, Versicherungen und Pensionskassen und finden die beste Lösung für Sie. Von der ersten Anfrage bis zum Notartermin. Persönlich, neutral und kostenlos.",
-    badges: ["Bestätigung innert 24h", "50+ Anbieter", "Persönliche Beratung", "Kostenlos"],
     accentColor: "#c0392b",
     image: "/images/novidom-holzhaus.webp",
     benefits: [

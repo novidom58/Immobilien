@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PasswordSettingsToggle } from "@/components/ui/PasswordSettingsToggle";
 import { MyDocuments } from "@/components/MyDocuments";
-import { DocChecklist, FINANZ_UNTERLAGEN } from "@/components/DocChecklist";
+import { BankUnterlagen } from "@/components/portal/BankUnterlagen";
 import { SaleStepper } from "@/components/SaleStepper";
 import { Logo } from "@/components/ui/Logo";
 import { SearchProfileForm, type SearchProfile } from "@/components/portal/SearchProfileForm";
@@ -105,13 +105,13 @@ const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
 };
 
 const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
-  kaufen: ["weg", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
-  verkaufen: ["verkaufen", "eigentum", "weg", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau"],
-  finanzieren: ["finanzierung", "eigentum", "weg", "suchprofil", "objekte", "versicherung", "umbau", "verkaufen"],
-  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "weg", "suchprofil", "objekte", "verkaufen"],
-  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "weg", "suchprofil", "objekte", "verkaufen"],
-  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "weg", "suchprofil", "objekte"],
-  trennung: ["finanzierung", "eigentum", "verkaufen", "weg", "suchprofil", "objekte", "versicherung", "umbau"],
+  kaufen: ["suchprofil", "objekte", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
+  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau"],
+  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "versicherung", "umbau", "verkaufen"],
+  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "suchprofil", "objekte", "verkaufen"],
+  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "verkaufen"],
+  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "suchprofil", "objekte"],
+  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "versicherung", "umbau"],
 };
 
 /**
@@ -379,11 +379,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <FinanceCheck key={preis ?? "plan"} initial={financeInitial} user={portalUser} priceOptions={priceOptions} />
           </div>
           <div className="mt-5">
-            <DocChecklist
-              title="Unterlagen für die Bank"
-              intro="Laden Sie die Dokumente hier hoch, dann können wir die Finanzierung ohne Papierkram einreichen."
-              items={FINANZ_UNTERLAGEN}
-            />
+            <BankUnterlagen initialVorhaben={plan?.eigentum ? "abloesung" : "kauf"} />
           </div>
         </section>
     ),

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Images, Ruler, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PlanCalibrator } from "@/components/admin/PlanCalibrator";
 
 type Photo = { id: string; url: string; sort_order: number };
 
@@ -17,6 +18,7 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
   const supabase = createClient();
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<Photo[] | null>(null);
+  const [calibrating, setCalibrating] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [grundriss, setGrundriss] = useState<{ url: string; breite_m: number; ratio: number } | null>(null);
@@ -74,29 +76,9 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
   }
 
   /** Foto als Grundriss für den Planer im Kundenportal setzen (mit Breite in Metern). */
-  async function setAsPlan(photo: Photo) {
+  function setAsPlan(photo: Photo) {
     if (!supabase) return;
-    if (grundriss?.url === photo.url) {
-      if (!window.confirm("Diesen Grundriss im Planer nicht mehr verwenden?")) return;
-      await saveDetails(null);
-      return;
-    }
-    const answer = window.prompt(
-      "Wie breit ist der Grundriss auf dem Bild in Metern? (von der linken bis zur rechten Aussenwand, z.B. 12.4)",
-      grundriss?.breite_m ? String(grundriss.breite_m) : ""
-    );
-    const breite = Number(String(answer ?? "").replace(",", "."));
-    if (!answer || !Number.isFinite(breite) || breite < 3 || breite > 80) {
-      if (answer) setError("Bitte eine Breite zwischen 3 und 80 Metern angeben.");
-      return;
-    }
-    const ratio = await new Promise<number>((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img.naturalWidth / img.naturalHeight || 1.5);
-      img.onerror = () => resolve(1.5);
-      img.src = photo.url;
-    });
-    await saveDetails({ url: photo.url, breite_m: breite, ratio: Math.round(ratio * 1000) / 1000 });
+    setCalibrating(photo.url);
   }
 
   async function saveDetails(next: { url: string; breite_m: number; ratio: number } | null) {
@@ -176,6 +158,26 @@ export function PhotoManager({ listingId, count }: { listingId: string; count: n
         {open ? "Fotos schliessen" : `Fotos & Titelbild (${count})`}
       </button>
 
+      {calibrating && (
+        <PlanCalibrator
+          url={calibrating}
+          initialBreite={grundriss?.url === calibrating ? grundriss.breite_m : undefined}
+          onCancel={() => setCalibrating(null)}
+          onRemove={
+            grundriss?.url === calibrating
+              ? async () => {
+                  setCalibrating(null);
+                  await saveDetails(null);
+                }
+              : undefined
+          }
+          onSave={async (breite, ratio) => {
+            const url = calibrating;
+            setCalibrating(null);
+            await saveDetails({ url, breite_m: breite, ratio });
+          }}
+        />
+      )}
       {open && (
         <div style={{ marginTop: 12 }}>
           <p className="td-light" style={{ fontSize: 12, marginBottom: 10 }}>

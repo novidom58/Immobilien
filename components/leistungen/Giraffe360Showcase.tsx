@@ -10,6 +10,9 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 const DEMO_TOUR = process.env.NEXT_PUBLIC_GIRAFFE_DEMO_URL;
 // Symbolbild (KI, Higgsfield): 360°-Kamera beim Fototermin, bis echte Giraffe360-Aufnahmen vorliegen
 const SHOOT_IMAGE = "/images/ki/hf_20261028_215930_11e7f739-e718-48f4-98c6-1e6814f4b75c.webp";
+// Kurzer KI-Schwenk aus diesem Bild (Seedance 2.0), vor- und rückwärts als nahtlose Schlaufe
+const TOUR_VIDEO = "/videos/giraffe360/rundgang-1280.mp4";
+const TOUR_POSTER = "/videos/giraffe360/rundgang-poster.webp";
 
 const TABS = [
   { id: "foto", label: "Profi-Fotos", icon: Camera },
@@ -72,7 +75,8 @@ const BENEFITS = [
 ];
 
 export function Giraffe360Showcase() {
-  const [tab, setTab] = useState<TabId>("foto");
+  // Startet mit dem animierten Rundgang, damit man die Bewegung sofort sieht
+  const [tab, setTab] = useState<TabId>("tour");
 
   return (
     <section id="giraffe360" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 lg:px-10">
@@ -125,21 +129,19 @@ export function Giraffe360Showcase() {
           )}
           {tab === "tour" && (
             <>
-              <Image src={SHOOT_IMAGE} alt="" fill sizes="(min-width: 1024px) 700px, 100vw" className="object-cover" />
-              {/* Rundgang-Punkte wie im echten Viewer */}
-              {[
-                [28, 72],
-                [52, 66],
-                [70, 74],
-              ].map(([left, top]) => (
-                <span
-                  key={`${left}-${top}`}
-                  aria-hidden
-                  className="absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white/30 backdrop-blur-sm motion-safe:animate-pulse"
-                  style={{ left: `${left}%`, top: `${top}%` }}
-                />
-              ))}
-              <div className="absolute inset-0 flex items-center justify-center">
+              {/* KI-Animation (Higgsfield): Kamera dreht sich im Raum wie im 360°-Rundgang */}
+              <video
+                src={TOUR_VIDEO}
+                poster={TOUR_POSTER}
+                autoPlay
+                muted
+                loop
+                playsInline
+                aria-label="Animierter 360°-Rundgang durch ein Wohnzimmer (Visualisierung)"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <span className="absolute bottom-3 right-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] text-night">Visualisierung</span>
+              <div className={`absolute inset-0 flex justify-center ${DEMO_TOUR ? "items-center" : "items-end pb-5"}`}>
                 {DEMO_TOUR ? (
                   <a
                     href={DEMO_TOUR}
@@ -150,7 +152,7 @@ export function Giraffe360Showcase() {
                     Beispiel-Rundgang starten →
                   </a>
                 ) : (
-                  <span className="rounded-full bg-white/90 px-6 py-3 text-sm font-semibold text-night shadow-lg">
+                  <span className="rounded-full bg-white/90 px-5 py-2.5 text-sm font-semibold text-night shadow-lg backdrop-blur-sm">
                     360° · Raum für Raum erleben
                   </span>
                 )}

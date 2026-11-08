@@ -26,6 +26,8 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [claim, setClaim] = useState<"idle" | "open" | "sending" | "sent">("idle");
+  // Privat oder Geschäft (KMU): oben umschalten, alles darunter folgt
+  const [mode, setMode] = useState<"privat" | "kmu">("privat");
 
   async function load() {
     if (!supabase) return;
@@ -51,16 +53,17 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
 
   if (!supabase) return null;
 
-  const list = policies ?? [];
+  const all = policies ?? [];
+  const list = all.filter((p) => (mode === "kmu") === isKmuSparte(p.sparte));
+  const kmuCount = all.filter((p) => isKmuSparte(p.sparte)).length;
   const total = list.reduce((s, p) => s + (Number(p.praemie_jahr) || 0), 0);
   const today = new Date();
   const soon = list
     .map((p) => ({ p, bis: kuendigenBis(p) }))
     .filter(({ bis }) => bis && bis.getTime() > today.getTime() && bis.getTime() - today.getTime() < 120 * 864e5)
     .sort((a, b) => a.bis!.getTime() - b.bis!.getTime());
-  const core = SPARTEN.filter((s) => s.core && (s.key !== "gebaeude" || isOwner));
-  // Geschäftspolicen: eigener Block, sobald eine KMU-Police erfasst ist
-  const hasKmu = list.some((p) => isKmuSparte(p.sparte));
+  const core = mode === "kmu" ? SPARTEN_KMU : SPARTEN.filter((s) => s.core && (s.key !== "gebaeude" || isOwner));
+  const modeSparten = mode === "kmu" ? SPARTEN_KMU : SPARTEN_PRIVAT;
 
   function startEdit(p?: Policy) {
     setError(null);
@@ -76,7 +79,7 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             kuendigungsfrist_monate: String(p.kuendigungsfrist_monate ?? 3),
             deckung: p.deckung ?? "",
           }
-        : { ...EMPTY }
+        : { ...EMPTY, sparte: modeSparten[0].key }
     );
   }
 
@@ -159,11 +162,40 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
   return (
     <div className="grid gap-5">
       {/* Schutz auf einen Blick */}
+      {/* Umschalter Privat / Geschäft */}
+      <div className="inline-flex w-fit rounded-full border border-line bg-white p-1" role="tablist" aria-label="Privat oder Geschäft">
+        {(
+          [
+            { k: "privat", label: "Privat" },
+            { k: "kmu", label: `Geschäft (KMU)${kmuCount ? ` · ${kmuCount}` : ""}` },
+          ] as const
+        ).map((m) => (
+          <button
+            key={m.k}
+            type="button"
+            role="tab"
+            aria-selected={mode === m.k}
+            onClick={() => {
+              setMode(m.k);
+              setForm(null);
+              setEditId(null);
+            }}
+            className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${mode === m.k ? "bg-night text-ink" : "text-ivory-dim hover:text-ivory"}`}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="rounded-2xl border border-line bg-white p-5 lg:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="font-display text-lg text-ivory">Ihr Schutz auf einen Blick</div>
-            <p className="mt-1 text-sm text-ivory-dim">Erfassen Sie Ihre Policen einmal, wir prüfen Deckungen, Prämien und Lücken.</p>
+            <div className="font-display text-lg text-ivory">{mode === "kmu" ? "Ihr Betrieb auf einen Blick" : "Ihr Schutz auf einen Blick"}</div>
+            <p className="mt-1 text-sm text-ivory-dim">
+              {mode === "kmu"
+                ? "Geschäftspolicen Ihrer Firma: wir prüfen sie zusammen mit den privaten, damit nichts doppelt oder gar nicht versichert ist."
+                : "Erfassen Sie Ihre Policen einmal, wir prüfen Deckungen, Prämien und Lücken."}
+            </p>
           </div>
           {total > 0 && (
             <div className="text-right">
@@ -172,14 +204,8 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             </div>
           )}
         </div>
-        {[
-          { title: hasKmu ? "Privat" : null, items: core },
-          ...(hasKmu ? [{ title: "Ihr Betrieb (KMU)", items: SPARTEN_KMU }] : []),
-        ].map((group) => (
-        <div key={group.title ?? "privat"}>
-        {group.title && <div className="mt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-ivory-dim">{group.title}</div>}
-        <div className={`${group.title ? "mt-2" : "mt-5"} grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3`}>
-          {group.items.map((s) => {
+        <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {core.map((s) => {
             const p = list.find((x) => x.sparte === s.key);
             return (
               <div key={s.key} className={`flex gap-3 rounded-xl border p-3.5 ${p ? "border-emerald-200 bg-emerald-50/50" : "border-line"}`}>
@@ -203,8 +229,6 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             );
           })}
         </div>
-        </div>
-        ))}
         {soon.length > 0 && (
           <div className="mt-4 flex gap-2.5 rounded-xl bg-amber/10 p-3.5 text-sm text-ivory">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.75} />
@@ -222,7 +246,7 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
       {/* Policen */}
       <div className="rounded-2xl border border-line bg-white p-5 lg:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="font-display text-lg text-ivory">Meine Policen</div>
+          <div className="font-display text-lg text-ivory">{mode === "kmu" ? "Meine Geschäftspolicen" : "Meine Policen"}</div>
           {!form && (
             <button type="button" onClick={() => startEdit()} className="inline-flex items-center gap-1.5 rounded-full bg-night px-4 py-2 text-sm font-semibold text-ink hover:bg-amber">
               <Plus className="h-4 w-4" /> Police erfassen
@@ -234,20 +258,11 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
         {form && (
           <form onSubmit={save} className="mt-4 grid gap-3 rounded-xl bg-ink-2 p-4 sm:grid-cols-2">
             <select value={form.sparte} onChange={(e) => setForm({ ...form, sparte: e.target.value })} className={input} aria-label="Versicherung">
-              <optgroup label="Privat">
-                {SPARTEN_PRIVAT.map((s) => (
-                  <option key={s.key} value={s.key}>
-                    {s.label}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Geschäft (KMU)">
-                {SPARTEN_KMU.map((s) => (
-                  <option key={s.key} value={s.key}>
-                    {s.label}
-                  </option>
-                ))}
-              </optgroup>
+              {modeSparten.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.label}
+                </option>
+              ))}
             </select>
             <input value={form.versicherer} onChange={(e) => setForm({ ...form, versicherer: e.target.value })} placeholder="Versicherer, z.B. Baloise" className={input} />
             <input value={form.policennummer} onChange={(e) => setForm({ ...form, policennummer: e.target.value })} placeholder="Policennummer" className={input} />
@@ -285,7 +300,7 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
         {policies === null ? (
           <p className="mt-4 text-sm text-ivory-dim">Lädt…</p>
         ) : list.length === 0 && !form ? (
-          <p className="mt-4 text-sm text-ivory-dim">Noch keine Policen erfasst. Tipp: Foto der ersten Seite genügt, den Rest prüfen wir.</p>
+          <p className="mt-4 text-sm text-ivory-dim">{mode === "kmu" ? "Noch keine Geschäftspolicen erfasst." : "Noch keine Policen erfasst."} Tipp: Foto der ersten Seite genügt, den Rest prüfen wir.</p>
         ) : (
           <div className="mt-4 divide-y divide-line">
             {list.map((p) => {

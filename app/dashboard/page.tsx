@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { PortalOverview, type OverviewTile } from "@/components/portal/PortalOverview";
-import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare, Users } from "lucide-react";
+import { Eye, Scan, FileDown, CalendarCheck, FileText, Heart, MessageSquare, Sofa, Users } from "lucide-react";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/ui/LogoutButton";
@@ -90,13 +90,14 @@ async function getCrmProfile(userId: string, email: string | undefined) {
   };
 }
 
-type PortalSection = "weg" | "suchprofil" | "objekte" | "finanzierung" | "versicherung" | "umbau" | "eigentum" | "verkaufen";
+type PortalSection = "weg" | "suchprofil" | "objekte" | "planer" | "finanzierung" | "versicherung" | "umbau" | "eigentum" | "verkaufen";
 
 const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
   verkauf: "Mein Verkauf",
   weg: "Mein Weg",
   suchprofil: "Suchprofil",
   objekte: "Passende Objekte",
+  planer: "Grundriss-Planer",
   finanzierung: "Finanzierung",
   versicherung: "Versicherung",
   umbau: "Umbau",
@@ -105,13 +106,13 @@ const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
 };
 
 const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
-  kaufen: ["suchprofil", "objekte", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
-  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "finanzierung", "versicherung", "umbau"],
-  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "versicherung", "umbau", "verkaufen"],
-  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "suchprofil", "objekte", "verkaufen"],
-  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "verkaufen"],
-  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "suchprofil", "objekte"],
-  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "versicherung", "umbau"],
+  kaufen: ["suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
+  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau"],
+  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "planer", "versicherung", "umbau", "verkaufen"],
+  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "suchprofil", "objekte", "planer", "verkaufen"],
+  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "planer", "verkaufen"],
+  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "suchprofil", "objekte", "planer"],
+  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "planer", "versicherung", "umbau"],
 };
 
 /**
@@ -160,10 +161,11 @@ const TITLE: Record<keyof typeof ORDER, [string, string]> = {
 const MORE_HINT: Record<PortalSection, string> = {
   weg: "Ihr Weg zum Eigenheim in Schritten",
   suchprofil: "Suchprofil hinterlegen und neue Objekte zuerst sehen",
-  objekte: "Passende Objekte, Favoriten und Grundriss-Planer",
+  objekte: "Passende Objekte und Favoriten",
+  planer: "Möbel massstabsgetreu im echten Grundriss platzieren",
   finanzierung: "Kaufkraft prüfen und Unterlagen für die Bank",
   versicherung: "Policen an einem Ort, Lücken-Check und Schaden melden",
-  umbau: "Ideen am Grundriss ausprobieren und Kosten abschätzen",
+  umbau: "Richtpreise, Förderung und Umbau anfragen",
   eigentum: "Wertmonitor und Hypothekenwächter für Ihre Immobilie",
   verkaufen: "Was ist Ihr Zuhause wert? Verkauf starten",
 };
@@ -172,7 +174,7 @@ const INTRO: Record<Anliegen | "eigentum", string> = {
   kaufen: "Suchprofil, Finanzierung und Versicherung an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
   verkaufen: "Was ist Ihr Zuhause wert, und wie verkaufen Sie es am besten? Hier starten Sie Ihren Verkauf und behalten alles im Blick.",
   finanzieren: "Ihre Kaufkraft, Ihr Finanzierungs-Pass und Ihre laufende Hypothek an einem Ort. HypoCasa prüft verbindlich innert 24 Stunden.",
-  umbauen: "Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
+  umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
   versichern: "Prüfen Sie in zwei Minuten, ob Ihr Zuhause richtig versichert ist. Wir zeigen Ihnen, wo Lücken sein könnten.",
   eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
   trennung: "Prüfen Sie, ob Sie das Haus allein finanzieren können, und sehen Sie den aktuellen Richtwert. Vertraulich und nur für Sie sichtbar.",
@@ -282,7 +284,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // Objekte mit hinterlegtem Grundriss: im Planer massstabsgetreu einrichten
   const planOptions = (publicRes.data ?? [])
     .filter((l) => (l.details as { grundriss?: { url?: string } } | null)?.grundriss?.url)
-    .map((l) => ({ id: l.id as string, title: ((l.title as string | null) || `${l.address}, ${l.city}`) as string, rooms: (l.rooms as number | null) ?? null }));
+    .map((l) => ({
+      id: l.id as string,
+      title: ((l.title as string | null) || `${l.address}, ${l.city}`) as string,
+      city: l.city as string,
+      rooms: (l.rooms as number | null) ?? null,
+      favorite: favorites.has(l.id as string),
+    }))
+    // Favoriten zuerst
+    .sort((a, b) => Number(b.favorite) - Number(a.favorite));
   const portalListings: PortalListing[] = (publicRes.data ?? [])
     .map((l) => {
       const photos = ((l.listing_photos as { url: string; sort_order: number }[] | null) ?? []).sort((a, b) => a.sort_order - b.sort_order);
@@ -297,6 +307,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         tour_url: (l.tour_url as string | null) ?? null,
         offmarket_until: (l.offmarket_until as string | null) ?? null,
         favorite: favorites.has(l.id as string),
+        hasPlan: Boolean((l.details as { grundriss?: { url?: string } } | null)?.grundriss?.url),
         match: matchesPlan(plan, {
           city: l.city as string,
           property_type: (l.property_type as string | null) ?? null,
@@ -352,13 +363,47 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section id="objekte" className={sectionClass}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className={sectionHead}>Passende Objekte &amp; Favoriten</h2>
-            <Link href="#umbau" className="text-sm text-amber underline underline-offset-4">
-              Grundriss-Planer ausprobieren →
+            <Link href="#planer" className="text-sm text-amber underline underline-offset-4">
+              Favoriten im Grundriss einrichten →
             </Link>
           </div>
           <div className="mt-5">
             <MatchList listings={portalListings} onCheckPrice="finanzierung" />
           </div>
+        </section>
+    ),
+    planer: (
+        <section id="planer" className={sectionClass}>
+          <h2 className={sectionHead}>Grundriss-Planer</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
+            Möbel massstabsgetreu im echten Grundriss verschieben, am Handy oder Computer. Ihre Einrichtung wird pro Objekt gespeichert. Mit dem
+            Herz bei «Passende Objekte» merken Sie sich ein Objekt, es steht dann hier zuoberst.
+          </p>
+          {planOptions.length === 0 ? (
+            <p className="mt-5 rounded-2xl border border-line bg-ink-2 p-6 text-sm text-ivory-dim">
+              Sobald ein Objekt mit Grundriss online ist, können Sie es hier einrichten.
+            </p>
+          ) : (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {planOptions.map((o) => (
+                <Link
+                  key={o.id}
+                  href={`/dashboard/planer/${o.id}`}
+                  className={`group flex items-start justify-between gap-3 rounded-2xl border bg-white p-4 transition-colors hover:border-amber ${o.favorite ? "border-amber/60" : "border-line"}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block font-display text-lg leading-tight text-ivory">{o.title}</span>
+                    <span className="mt-1 block text-xs text-ivory-dim">{[o.city, o.rooms ? `${o.rooms} Zimmer` : null].filter(Boolean).join(" · ")}</span>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-amber">
+                      <Sofa className="h-3.5 w-3.5" strokeWidth={1.75} />
+                      Einrichten →
+                    </span>
+                  </span>
+                  {o.favorite && <Heart className="h-4 w-4 shrink-0 fill-amber text-amber" strokeWidth={1.75} aria-label="Favorit" />}
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
     ),
     finanzierung: (
@@ -401,26 +446,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     umbau: (
         <section id="umbau" className={sectionClass}>
           <h2 className={sectionHead}>Umbauen &amp; einrichten</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">Ideen am Grundriss ausprobieren, Kosten abschätzen und mit uns planen.</p>
-          <div className="mt-5 rounded-2xl border border-line bg-white p-5">
-            <div className="font-display text-lg text-ivory">Grundriss-Planer: Grundriss wählen</div>
-            <p className="mt-1 text-sm text-ivory-dim">
-              Möbel massstabsgetreu verschieben, am Handy oder Computer. Ihre Einrichtung wird pro Grundriss gespeichert.
-            </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {planOptions.map((o) => (
-                <Link key={o.id} href={`/dashboard/planer/${o.id}`} className="rounded-xl border border-line px-4 py-3 text-sm text-ivory transition-colors hover:border-amber">
-                  <span className="font-medium">{o.title}</span>
-                  {o.rooms ? <span className="block text-xs text-ivory-dim">{o.rooms} Zimmer · echter Grundriss</span> : <span className="block text-xs text-ivory-dim">echter Grundriss</span>}
-                </Link>
-              ))}
-              <Link href="/dashboard/planer/demo" className="rounded-xl border border-dashed border-line px-4 py-3 text-sm text-ivory transition-colors hover:border-amber">
-                <span className="font-medium">Beispielwohnung</span>
-                <span className="block text-xs text-ivory-dim">5.5 Zimmer zum Ausprobieren</span>
-              </Link>
-            </div>
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <p className="mt-2 max-w-2xl text-sm text-ivory-dim">Kosten abschätzen, Förderung prüfen und mit uns planen.</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <Link href="/leistungen/umbauen" className="rounded-2xl border border-line bg-white p-5 hover:border-amber">
               <div className="font-display text-lg text-ivory">Richtpreise &amp; Förderung</div>
               <p className="mt-1 text-sm text-ivory-dim">Was Küche, Bad oder Wärmepumpe kosten und welche Beiträge es gibt.</p>
@@ -430,18 +457,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <p className="mt-1 text-sm text-ivory-dim">Eine erste Einschätzung zu Kosten, Ablauf und Finanzierung.</p>
             </Link>
           </div>
-          {portalListings.some((l) => l.favorite) && (
-            <div className="mt-4 flex flex-wrap gap-2 text-sm">
-              <span className="text-ivory-dim">Ihre Favoriten einrichten:</span>
-              {portalListings
-                .filter((l) => l.favorite)
-                .map((l) => (
-                  <Link key={l.id} href={`/dashboard/planer/${l.id}`} className="text-amber underline underline-offset-4">
-                    {l.title}
-                  </Link>
-                ))}
-            </div>
-          )}
         </section>
     ),
     eigentum: (
@@ -476,7 +491,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               </div>
             </div>
           )}
-          <div className="mt-5 rounded-2xl border border-line bg-white p-5 lg:p-7">
+          <div className="mt-5 max-w-2xl">
             <WertmonitorForm portal initial={eigentum} />
           </div>
         </section>
@@ -510,7 +525,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // Mit eigenem Inserat steht das Verkaufs-Cockpit oben, alles andere eingeklappt
   // Mit «+» angeheftete Bereiche stehen immer offen oben (im Konto gespeichert, auf allen Geräten)
   const pins = (Array.isArray(meta.portal_pins) ? meta.portal_pins : []).filter((k): k is PortalSection => (order as string[]).includes(k));
-  const baseMain = listing ? [] : MAIN[focus].filter((k) => portalSections[k]);
+  // Der Grundriss-Planer ist immer offen sichtbar
+  const baseMain = [...(listing ? [] : MAIN[focus]), "planer" as const].filter((k) => portalSections[k]);
   const main = [...baseMain, ...pins.filter((k) => !baseMain.includes(k) && portalSections[k] && !(listing && k === "verkaufen"))];
   const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
 
@@ -529,7 +545,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           ? `Kaufkraft bis ${formatChf(plan.finanz.max_price)}`
           : "Noch nicht geprüft",
     versicherung: policyCount ? `${policyCount} ${policyCount === 1 ? "Police" : "Policen"} erfasst` : "Policen hinzufügen",
-    umbau: "Grundriss-Planer und Richtpreise",
+    planer: `${planOptions.length} ${planOptions.length === 1 ? "Grundriss" : "Grundrisse"}${planOptions.some((o) => o.favorite) ? ` · ${planOptions.filter((o) => o.favorite).length} Favoriten` : ""}`,
+    umbau: "Richtpreise und Anfrage",
     eigentum: eigentum ? `Richtwert ${formatChf(eigentum.wert.mid)}` : "Wertmonitor einrichten",
     verkaufen: "Gratis-Bewertung anfragen",
   };
@@ -582,7 +599,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <div className="flex items-center gap-2 font-mono text-xs text-ivory-dim/60">
                   {listing.address}, {listing.city}
                   <span className="rounded-full border border-amber/40 px-2 py-0.5 text-amber-soft">
-                    {listing.status}
+                    {({ draft: "Entwurf", active: "Online", reserved: "Reserviert", sold: "Verkauft" } as Record<string, string>)[listing.status] ?? listing.status}
                   </span>
                 </div>
                 {listing.status !== "draft" && (

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { BellRing, Calculator, Check, Hammer, Home, LineChart, Map, Plus, Route, Search, ShieldCheck, Tag, type LucideIcon } from "lucide-react";
+import { BellRing, Calculator, Check, Hammer, Home, LineChart, Map, Plus, Route, Search, ShieldCheck, Sofa, Tag, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export type OverviewTile = {
@@ -21,6 +21,7 @@ const ICONS: Record<string, LucideIcon> = {
   weg: Route,
   suchprofil: Search,
   objekte: BellRing,
+  planer: Sofa,
   finanzierung: Calculator,
   versicherung: ShieldCheck,
   umbau: Hammer,

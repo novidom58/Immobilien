@@ -44,7 +44,15 @@ export async function POST(request: Request) {
     phone: phone || null,
     source: herkunft ? `wertmonitor-${herkunft}` : "wertmonitor",
     message: [
-      `Wertmonitor-Anmeldung: ${input.typ}, ${input.flaeche} m², ${input.region}${input.adresse ? `, ${input.adresse}` : ""}`,
+      `Wertmonitor-Anmeldung: ${input.objektart ?? input.typ}, ${input.flaeche} m², ${input.region}${input.adresse ? `, ${input.adresse}` : ""}`,
+      [
+        input.zimmer ? `${input.zimmer} Zimmer` : null,
+        input.baujahr ? `Baujahr ${input.baujahr}` : null,
+        input.grundstueck ? `Grundstück ${input.grundstueck} m²` : null,
+        input.zustand ? `Zustand: ${input.zustand}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || null,
       `Richtwert: ${formatChf(wert.low)} – ${formatChf(wert.high)}`,
       input.hypo_ablauf ? `Hypothek läuft ab: ${new Date(input.hypo_ablauf).toLocaleDateString("de-CH")}` : null,
     ]

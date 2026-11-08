@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { addCustomerPolicy } from "@/app/admin/actions";
-import { SPARTEN } from "@/lib/policies";
+import { SPARTEN_KMU, SPARTEN_PRIVAT } from "@/lib/policies";
 
 /** Police für den Kunden ins Portal legen (sieht er dann unter «Meine Versicherungen»). */
 export function AdminPolicyForm({ customerId, onSaved }: { customerId: string; onSaved?: () => void }) {
@@ -36,11 +36,20 @@ export function AdminPolicyForm({ customerId, onSaved }: { customerId: string; o
       style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", marginTop: 8 }}
     >
       <select name="sparte" className="field-select" defaultValue="haftpflicht" aria-label="Sparte">
-        {SPARTEN.map((s) => (
-          <option key={s.key} value={s.key}>
-            {s.label}
-          </option>
-        ))}
+        <optgroup label="Privat">
+          {SPARTEN_PRIVAT.map((s) => (
+            <option key={s.key} value={s.key}>
+              {s.label}
+            </option>
+          ))}
+        </optgroup>
+        <optgroup label="Geschäft (KMU)">
+          {SPARTEN_KMU.map((s) => (
+            <option key={s.key} value={s.key}>
+              {s.label}
+            </option>
+          ))}
+        </optgroup>
       </select>
       <input name="versicherer" className="field-input" placeholder="Versicherer" />
       <input name="policennummer" className="field-input" placeholder="Policen-Nr." />

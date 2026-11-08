@@ -46,8 +46,8 @@ export function bankUnterlagen({ erwerb, objekt, vorhaben, objektDocs = "einzeln
     );
   } else {
     personal.push(
-      { key: "AHV-Rente", label: "AHV-Rentenbescheinigung, sofern nicht bereits der Steuererklärung beigelegt" },
-      { key: "PK-Rente", label: "Pensionskassen-Rentenbescheinigung, sofern nicht bereits der Steuererklärung beigelegt" }
+      { key: "AHV-Rente", label: "AHV-Rentenbescheinigung" },
+      { key: "PK-Rente", label: "Pensionskassen-Rentenbescheinigung" }
     );
   }
   if (vorhaben === "kauf") personal.push({ key: "Eigenmittel", label: "Nachweis der Eigenmittel (Kontoauszug, Säule-3a-Guthaben, Vorbezug o. Ä.)" });

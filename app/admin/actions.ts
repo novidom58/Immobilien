@@ -1599,3 +1599,49 @@ export async function setStartseiteZuerst(listingId: string, on: boolean) {
   revalidatePath("/admin/inserate");
   return { error: null };
 }
+
+/**
+ * Police für einen Kunden ins Kundenportal legen (z.B. nach Brokermandat).
+ * Mitarbeitende nur bei eigenen Kunden (RLS beim Lesen der Kundenakte);
+ * geschrieben wird mit dem Service-Key, weil die Policen dem Portal-Konto
+ * des Kunden gehören.
+ */
+export async function addCustomerPolicy(customerId: string, formData: FormData) {
+  const { supabase, error: authError } = await requireStaff();
+  if (!supabase) return { error: authError };
+  const { data: customer } = await supabase.from("customers").select("id, portal_user_id").eq("id", customerId).maybeSingle();
+  if (!customer) return { error: "Kunde nicht gefunden oder keine Berechtigung." };
+  const userId = customer.portal_user_id as string | null;
+  if (!userId) return { error: "Der Kunde hat noch kein Portal-Konto. Zuerst ein Konto anlegen oder verknüpfen." };
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { error: "Service-Key fehlt." };
+  const admin = createSupabaseClient(url, key);
+
+  const text = (k: string) => String(formData.get(k) ?? "").trim();
+  const sparte = text("sparte") || "andere";
+  let storagePath: string | null = null;
+  const file = formData.get("file");
+  if (file instanceof File && file.size > 0) {
+    if (file.size > 15 * 1024 * 1024) return { error: "Datei grösser als 15 MB." };
+    storagePath = `${userId}/police-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const { error: upError } = await admin.storage.from("kunden-dokumente").upload(storagePath, file, { contentType: file.type || undefined });
+    if (upError) return { error: `Upload fehlgeschlagen: ${upError.message}` };
+  }
+  const praemie = Number(text("praemie_jahr").replace(/[^\d.]/g, ""));
+  const { error } = await admin.from("customer_policies").insert({
+    user_id: userId,
+    sparte,
+    versicherer: text("versicherer") || null,
+    policennummer: text("policennummer") || null,
+    praemie_jahr: praemie > 0 ? praemie : null,
+    ablauf: text("ablauf") || null,
+    kuendigungsfrist_monate: Number(text("kuendigungsfrist_monate")) || 3,
+    deckung: text("deckung") || null,
+    storage_path: storagePath,
+  });
+  if (error) return { error: error.message };
+  await supabase.from("customer_activity").insert({ customer_id: customerId, type: "notiz", text: `Police erfasst (${sparte}${text("versicherer") ? `, ${text("versicherer")}` : ""})` });
+  return { error: null };
+}

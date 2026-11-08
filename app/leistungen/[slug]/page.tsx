@@ -27,8 +27,6 @@ import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
 import { VersicherungContent } from "@/components/leistungen/VersicherungContent";
 import { SellVsPrivate } from "@/components/sections/SellVsPrivate";
 import { BuyerSection, OwnerSection } from "@/components/sections/BuyerAndOwnerSections";
-import { RatgeberTeaser } from "@/components/ratgeber/RatgeberCard";
-import { ARTICLES } from "@/lib/ratgeber";
 
 export function generateStaticParams() {
   return AREAS.map((a) => ({ slug: a.slug }));
@@ -165,7 +163,6 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           </>
         )}
 
-        <RatgeberTeaser articles={ARTICLES.filter((a) => a.area === area.id).slice(0, 2)} />
 
         <section id="ansprechpartner" className="mx-auto max-w-5xl scroll-mt-28 px-4 pb-24 lg:px-10">
           <AreaContactCard contact={contact} />

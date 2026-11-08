@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { Check, ChevronLeft } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -35,6 +35,17 @@ export function PropertyValuationLead() {
   const [name, setName] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const sourceRef = useRef<HTMLSelectElement>(null);
+  // Herkunft aus Kurzlinks wie /bewertung?q=instagram
+  const quelleRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("quelle");
+    if (!q) return;
+    quelleRef.current = q;
+    const opt = LEAD_SOURCE_OPTIONS.find((o) => o.toLowerCase() === q.toLowerCase());
+    if (opt && sourceRef.current) sourceRef.current.value = opt;
+  }, []);
 
   function goTo(next: number) {
     setStep(next);
@@ -83,7 +94,10 @@ export function PropertyValuationLead() {
       `Parkplatz: ${form.get("parking") || "—"}`,
       `Renoviert seit: ${form.get("renovationYear") || "—"}`,
       `Zustand: ${form.get("condition") || "—"}`,
-    ].join("\n");
+      quelleRef.current ? `Link: ${quelleRef.current}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     try {
       const res = await fetch("/api/leads", {
@@ -279,7 +293,7 @@ export function PropertyValuationLead() {
                     />
                     <input name="email" type="email" required={step === 4} placeholder="Ihre E-Mail" className={fieldClasses} />
                     <input name="phone" type="tel" placeholder="Telefon (optional)" className={fieldClasses} />
-                    <select name="source" defaultValue="" className={fieldClasses}>
+                    <select ref={sourceRef} name="source" defaultValue="" className={fieldClasses}>
                       <option value="">Wie sind Sie auf uns aufmerksam geworden? (optional)</option>
                       {LEAD_SOURCE_OPTIONS.map((opt) => (
                         <option key={opt} value={opt}>

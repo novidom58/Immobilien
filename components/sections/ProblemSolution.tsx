@@ -32,8 +32,6 @@ const solutions = [
   "100% erfolgsbasiert — kein Verkauf, keine Kosten",
 ];
 
-const pills = ["Unkompliziert", "Transparent", "Keine versteckten Kosten", "Keine Knebelverträge", "Persönlich"];
-
 export function ProblemSolution() {
   return (
     <section className="relative bg-ink-2 py-28 lg:py-36">
@@ -111,18 +109,6 @@ export function ProblemSolution() {
               </div>
             </Reveal>
 
-            <Reveal delay={0.3}>
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {pills.map((p) => (
-                  <span
-                    key={p}
-                    className="rounded-full border border-line px-4 py-1.5 font-mono text-xs uppercase tracking-wide text-ivory-dim"
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </Reveal>
           </div>
         </div>
       </div>

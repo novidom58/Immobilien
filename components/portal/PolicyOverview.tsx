@@ -185,6 +185,11 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
                   <div className="truncate text-xs text-ivory-dim">
                     {p ? [p.versicherer, p.praemie_jahr ? chf(Number(p.praemie_jahr)) : null].filter(Boolean).join(" · ") || "erfasst" : s.hint}
                   </div>
+                  {p && (p.ablauf || kuendigenBis(p)) && (
+                    <div className="truncate text-xs text-ivory">
+                      {[p.ablauf ? `Ablauf ${dateCh(p.ablauf)}` : null, kuendigenBis(p) ? `kündbar bis ${dateCh(kuendigenBis(p)!)}` : null].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -267,23 +272,30 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             {list.map((p) => {
               const bis = kuendigenBis(p);
               return (
-                <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                  <div className="min-w-0">
+                <div key={p.id} className="flex flex-wrap items-start justify-between gap-3 py-4">
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold text-ivory">
                       {sparteLabel(p.sparte)}
                       {p.versicherer ? <span className="font-normal text-ivory-dim"> · {p.versicherer}</span> : null}
+                      {p.policennummer ? <span className="font-normal text-ivory-dim"> · Nr. {p.policennummer}</span> : null}
                     </div>
-                    <div className="text-xs text-ivory-dim">
+                    <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:grid-cols-4">
                       {[
-                        p.policennummer ? `Nr. ${p.policennummer}` : null,
-                        p.praemie_jahr ? `${chf(Number(p.praemie_jahr))} / Jahr` : null,
-                        p.ablauf ? `Ablauf ${dateCh(p.ablauf)}` : null,
-                        bis ? `kündbar bis ${dateCh(bis)}` : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
+                        { k: "Prämie", v: p.praemie_jahr ? `${chf(Number(p.praemie_jahr))} / Jahr` : null },
+                        { k: "Ablauf", v: p.ablauf ? dateCh(p.ablauf) : null },
+                        { k: "Kündigen bis", v: bis ? dateCh(bis) : null, warn: soon.some((x) => x.p.id === p.id) },
+                        { k: "Kündigungsfrist", v: p.kuendigungsfrist_monate ? `${p.kuendigungsfrist_monate} Monate` : null },
+                      ].map((f) => (
+                        <div key={f.k}>
+                          <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ivory-dim">{f.k}</dt>
+                          <dd className={f.warn ? "font-semibold text-amber" : f.v ? "text-ivory" : "text-ivory-dim"}>{f.v ?? "offen"}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <div className="mt-2 text-xs">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ivory-dim">Deckung </span>
+                      <span className={p.deckung ? "text-ivory" : "text-ivory-dim"}>{p.deckung || "noch nicht erfasst"}</span>
                     </div>
-                    {p.deckung && <div className="mt-0.5 text-xs text-ivory">{p.deckung}</div>}
                   </div>
                   <div className="flex items-center gap-1">
                     {p.storage_path && (

@@ -6,8 +6,6 @@ import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { CollapseRemembered, RememberOpenSections } from "@/components/portal/RememberOpenSections";
 import { PortalOverview, type OverviewTile } from "@/components/portal/PortalOverview";
 import { Eye, Scan, FileDown, CalendarCheck, FileText, MessageSquare, Users } from "lucide-react";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
@@ -123,6 +121,7 @@ const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
  */
 function portalFocus(fokus: string | undefined, rollen: string[], hasListing: boolean): keyof typeof ORDER {
   if (isAnliegen(fokus)) return fokus;
+  if (fokus === "eigentum") return "eigentum";
   if (!hasListing && rollen.includes("verkaeufer")) return "verkaufen";
   if (rollen.includes("trennung")) return "trennung";
   if (rollen.includes("umbau")) return "umbauen";
@@ -138,13 +137,24 @@ function portalFocus(fokus: string | undefined, rollen: string[], hasListing: bo
  * betreffen (z.B. sieht ein Eigentümer im Hypothekenwächter keine Kaufkraft).
  */
 const MAIN: Record<keyof typeof ORDER, PortalSection[]> = {
-  kaufen: ["weg", "suchprofil", "objekte", "finanzierung"],
+  kaufen: ["suchprofil", "objekte"],
   verkaufen: ["verkaufen", "eigentum"],
-  finanzieren: ["finanzierung", "eigentum"],
-  umbauen: ["umbau", "finanzierung"],
+  finanzieren: ["finanzierung"],
+  umbauen: ["umbau"],
   versichern: ["versicherung"],
-  eigentum: ["eigentum", "versicherung"],
+  eigentum: ["eigentum"],
   trennung: ["finanzierung", "eigentum", "verkaufen"],
+};
+
+/** Titel oben im Portal, passend zum Anliegen (nicht immer «Immobilienplan»). */
+const TITLE: Record<keyof typeof ORDER, [string, string]> = {
+  kaufen: ["Mein neues", "Zuhause"],
+  verkaufen: ["Mein", "Verkauf"],
+  finanzieren: ["Meine", "Finanzierung"],
+  umbauen: ["Mein", "Umbau"],
+  versichern: ["Meine", "Versicherungen"],
+  eigentum: ["Mein", "Eigentum"],
+  trennung: ["Meine", "Situation"],
 };
 
 const MORE_HINT: Record<PortalSection, string> = {
@@ -497,15 +507,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </section>
     ),
   };
-  const focus = portalFocus(fokus, crm?.rollen ?? [], Boolean(listing));
+  // Anliegen aus dem Link, sonst das bei der Registrierung gewählte, sonst aus der Kundenakte
+  const meta = (user.user_metadata ?? {}) as { anliegen?: string; portal_pins?: string[] };
+  const focus = portalFocus(fokus ?? meta.anliegen, crm?.rollen ?? [], Boolean(listing));
   const order = ORDER[focus];
   // Mit eigenem Inserat steht das Verkaufs-Cockpit oben, alles andere eingeklappt
-  // Bereiche, die die Person zuletzt aufgeklappt hat, stehen beim nächsten Besuch offen oben
-  const remembered = ((await cookies()).get("portal_offen")?.value ?? "")
-    .split(",")
-    .filter((k): k is PortalSection => (order as string[]).includes(k));
+  // Mit «+» angeheftete Bereiche stehen immer offen oben (im Konto gespeichert, auf allen Geräten)
+  const pins = (Array.isArray(meta.portal_pins) ? meta.portal_pins : []).filter((k): k is PortalSection => (order as string[]).includes(k));
   const baseMain = listing ? [] : MAIN[focus].filter((k) => portalSections[k]);
-  const main = [...baseMain, ...remembered.filter((k) => !baseMain.includes(k) && portalSections[k] && !(listing && k === "verkaufen"))];
+  const main = [...baseMain, ...pins.filter((k) => !baseMain.includes(k) && portalSections[k] && !(listing && k === "verkaufen"))];
   const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
 
   // Übersicht: alle Bereiche als Kacheln mit dem aktuellen Stand
@@ -528,13 +538,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     verkaufen: "Gratis-Bewertung anfragen",
   };
   const tiles: OverviewTile[] = [
-    ...(listing ? [{ key: "verkauf", label: SECTION_LABEL.verkauf, status: status.verkauf, href: "#verkauf", highlight: true }] : []),
+    ...(listing ? [{ key: "verkauf", label: SECTION_LABEL.verkauf, status: status.verkauf, href: "#verkauf", highlight: true, base: true }] : []),
     ...[...main, ...more].map((k) => ({
       key: k,
       label: k === "weg" ? "Mein Weg" : SECTION_LABEL[k],
       status: status[k],
       href: `#${k}`,
       highlight: main.includes(k),
+      base: baseMain.includes(k),
+      pinned: pins.includes(k),
     })),
   ];
 
@@ -556,14 +568,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <h1 className="mt-8 font-display text-3xl text-ivory lg:text-5xl">
-          Mein <em>Immobilienplan</em>
+          {listing ? "Mein" : TITLE[focus][0]} <em>{listing ? "Verkauf" : TITLE[focus][1]}</em>
         </h1>
         <p className="mt-3 max-w-2xl text-ivory-dim">
           {listing
             ? "Ihr Verkauf auf einen Blick: Schritt für Schritt, mit allen Zahlen und Dokumenten. Darunter planen Sie gleich Ihr nächstes Zuhause."
             : INTRO[focus]}
         </p>
-        <PortalOverview tiles={tiles} />
+        <PortalOverview tiles={tiles} pins={pins} />
 
         {listing && (
           <>
@@ -722,16 +734,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         )}
 
         <OpenSectionOnHash />
-        <RememberOpenSections />
         {main.map((key) => (
-          <Fragment key={key}>
-            {portalSections[key]}
-            {!baseMain.includes(key) && (
-              <div className="mt-3 text-right">
-                <CollapseRemembered section={key} />
-              </div>
-            )}
-          </Fragment>
+          <Fragment key={key}>{portalSections[key]}</Fragment>
         ))}
 
         {more.length > 0 && (
@@ -740,7 +744,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <p className="mt-2 max-w-2xl text-sm text-ivory-dim">
               {listing
                 ? "Und Ihr nächstes Zuhause? Viele Verkäufer kaufen gleich wieder: Suchprofil, Finanzierung und mehr bei Bedarf aufklappen."
-                : "Bei Bedarf aufklappen. Alles, was Sie hier eingeben, sieht nur Ihr NoviDom-Team."}
+                : "Bei Bedarf aufklappen, oder oben in der Übersicht mit + anheften, dann stehen sie immer offen. Was Sie hier eingeben, sieht nur Ihr NoviDom-Team."}
             </p>
             <div className="mt-5 grid gap-3">
               {more.map((key) => (

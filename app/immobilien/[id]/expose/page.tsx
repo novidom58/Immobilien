@@ -114,6 +114,23 @@ export default async function ListingExposePage({
     ["Verfügbar ab", details.verfuegbar],
     [offer === "miete" ? "Miete pro Monat" : "Verkaufspreis", price],
   ].filter((f): f is [string, string] => Boolean(f[1]));
+  // Für Banken: zusätzliche Angaben (nur was erfasst ist)
+  const chfText = (v?: string) => {
+    if (!v) return null;
+    const n = Number(v.replace(/[^\d.]/g, ""));
+    return Number.isFinite(n) && n > 0 && /^[\d'’.\s]+$/.test(v.trim()) ? `CHF ${Math.round(n).toLocaleString("de-CH")}` : v;
+  };
+  const bankFacts = [
+    ["Kubatur (SIA 416)", details.kubatur ? `${details.kubatur.replace(/\s*m3?³?$/i, "")} m³` : null],
+    ["Gebäudeversicherungswert", chfText(details.gvw)],
+    ["Parzelle / Grundbuch", details.parzelle],
+    ["Heizung", details.heizung],
+    ["Parkplätze", details.parkplaetze],
+    ["Nebenkosten pro Monat", chfText(details.nebenkosten)],
+    ["Wertquote", details.wertquote ? `${details.wertquote.replace(/\s*‰$/, "")} ‰` : null],
+    ["Erneuerungsfonds", chfText(details.erneuerungsfonds)],
+    ["Zustand", details.zustand],
+  ].filter((f): f is [string, string] => Boolean(f[1]));
   const keyFacts = facts.filter(([k]) => ["Zimmer", "Wohnfläche", "Etage", "Verfügbar ab"].includes(k)).slice(0, 4);
   const highlights = (details.highlights ?? []).slice(0, 6);
   const merkmale = details.merkmale ?? [];
@@ -143,12 +160,17 @@ export default async function ListingExposePage({
   const toolbar = (
     <div className="mx-auto mb-6 flex max-w-[210mm] flex-wrap items-center justify-between gap-3 rounded-xl bg-[#191b1d] px-5 py-3 text-sm text-white print:hidden">
       <span>
-        <strong>{format === "flyer" ? "Flyer" : "Exposé"}</strong> · {title}
+        <strong>{format === "flyer" ? "Flyer" : format === "bank" ? "Datenblatt für die Bank" : "Exposé"}</strong> · {title}
       </span>
       <span className="flex items-center gap-4 text-white/70">
         <Link href={format === "flyer" ? `/immobilien/${listing.id}/expose` : `/immobilien/${listing.id}/expose?format=flyer`} className="underline underline-offset-4 hover:text-white">
           {format === "flyer" ? "Zum Exposé" : "Zum Flyer (1 Seite)"}
         </Link>
+        {offer !== "miete" && (
+          <Link href={format === "bank" ? `/immobilien/${listing.id}/expose` : `/immobilien/${listing.id}/expose?format=bank`} className="underline underline-offset-4 hover:text-white">
+            {format === "bank" ? "Zum Exposé" : "Datenblatt für die Bank"}
+          </Link>
+        )}
         <span>Mit Ctrl+P als PDF speichern</span>
       </span>
     </div>
@@ -224,6 +246,91 @@ export default async function ListingExposePage({
     );
   }
 
+  // ------------------------------------------------- Datenblatt für die Bank
+  if (format === "bank") {
+    const all: [string, string][] = [
+      ["Adresse", `${listing.address}, ${place}`],
+      ...facts,
+      ...bankFacts,
+    ];
+    const missing = [
+      ["Kubatur", details.kubatur],
+      ["Gebäudeversicherungswert", details.gvw],
+      ["Parzelle / Grundbuch", details.parzelle],
+      ["Baujahr", details.baujahr],
+      ["Wohnfläche", listing.living_area ? "x" : null],
+    ]
+      .filter(([, v]) => !v)
+      .map(([k]) => k as string);
+    const plan = details.grundriss?.url;
+    return (
+      <main className="min-h-svh bg-[#e9e5de] px-4 py-10 font-sans text-[#191b1d] print:bg-white print:p-0">
+        {printCss}
+        {toolbar}
+        <Sheet>
+          <div className="flex items-center justify-between px-[16mm] pt-[12mm]">
+            <Logo className="h-[11mm] w-auto" />
+            <span className="font-mono text-[7.5pt] uppercase tracking-[0.22em] text-[#7a756b]">Objektdatenblatt für die Finanzierung</span>
+          </div>
+          <div className="grid grid-cols-[1fr_62mm] gap-[8mm] px-[16mm] pt-[8mm]">
+            <div>
+              <h1 className="font-display text-[19pt] leading-tight">{title}</h1>
+              <p className="mt-1 text-[10pt] text-[#7a756b]">
+                {listing.address}, {place}
+              </p>
+            </div>
+            <div className="h-[40mm] overflow-hidden rounded-[2mm] bg-[#ece8e1]">{photos[0] && <Photo url={photos[0].url} />}</div>
+          </div>
+          <div className="grid min-h-0 flex-1 grid-cols-[1fr_1fr] gap-[8mm] px-[16mm] pt-[6mm]">
+            <dl className="h-fit divide-y divide-[#efebe4] rounded-[2mm] bg-white px-[5mm] py-[2mm] text-[9pt]">
+              {all.map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-3 py-[1.6mm]">
+                  <dt className="text-[#7a756b]">{k}</dt>
+                  <dd className="text-right font-medium">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="flex min-h-0 flex-col gap-[5mm]">
+              {plan && (
+                <div className="min-h-0 flex-1 overflow-hidden rounded-[2mm] border border-[#e7e3dc] bg-white p-[3mm]">
+                  <div className="font-mono text-[7pt] uppercase tracking-[0.18em] text-[#8f6a39]">Grundriss</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Druckansicht */}
+                  <img src={plan} alt="Grundriss" className="mt-[2mm] h-[calc(100%-6mm)] w-full object-contain" />
+                </div>
+              )}
+              <div className="rounded-[2mm] border border-[#e7e3dc] p-[5mm] text-[9pt]">
+                <div className="font-mono text-[7pt] uppercase tracking-[0.18em] text-[#8f6a39]">Unterlagen auf Anfrage</div>
+                <ul className="mt-2 space-y-1">
+                  {[
+                    "Aktueller Grundbuchauszug",
+                    "Police der Gebäudeversicherung",
+                    "Grundrisse und Schnitte",
+                    "Entwurf Kaufvertrag",
+                    ...(listing.property_type === "Stockwerkeigentum" ? ["Begründungsakt, Reglement, Stand Erneuerungsfonds"] : []),
+                  ].map((d) => (
+                    <li key={d} className="flex gap-2">
+                      <Check className="mt-[1mm] h-[3mm] w-[3mm] shrink-0 text-[#8f6a39]" strokeWidth={2.5} />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+          {missing.length > 0 && (
+            <p className="mx-[16mm] mt-[4mm] text-[8pt] text-[#7a756b] print:hidden">
+              Noch nicht erfasst (im CRM unter Eckdaten ergänzen): {missing.join(", ")}.
+            </p>
+          )}
+          <div className="mt-[5mm] flex items-center justify-between border-t border-[#e7e3dc] px-[16mm] py-[6mm]">
+            {contactBlock}
+            <span className="text-[8pt] text-[#7a756b]">Stand {stand} · Angaben ohne Gewähr</span>
+          </div>
+        </Sheet>
+      </main>
+    );
+  }
+
   // --------------------------------------------------------------- Exposé
   const galleryPhotos = photos.slice(1);
   const galleryPages: { url: string }[][] = [];
@@ -272,7 +379,7 @@ export default async function ListingExposePage({
           <aside className="h-fit rounded-[2mm] bg-white p-[6mm]">
             <div className="font-mono text-[7.5pt] uppercase tracking-[0.22em] text-[#8f6a39]">Eckdaten</div>
             <dl className="mt-3 divide-y divide-[#efebe4] text-[9pt]">
-              {facts.map(([k, v]) => (
+              {[...facts, ...bankFacts.filter(([k]) => k !== "Parzelle / Grundbuch")].map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-3 py-[1.8mm]">
                   <dt className="text-[#7a756b]">{k}</dt>
                   <dd className="text-right font-medium">{v}</dd>

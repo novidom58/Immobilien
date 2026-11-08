@@ -3,13 +3,6 @@ import { ArrowRight } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
-const certs = [
-  "Eidg. dipl. Kauffrau",
-  "IAZI-zertifiziert",
-  "Giraffe360",
-  "20+ J. Bankerfahrung",
-];
-
 const competences = ["Immobilienverkauf", "Bewertung", "Finanzierung", "Vermarktung"];
 
 const stats = [
@@ -63,17 +56,6 @@ export function AboutJana() {
               Sicherheit für Sie. Persönlich, unkompliziert und immer
               erreichbar, bis zum Notartermin.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-2">
-              {certs.map((cert) => (
-                <span
-                  key={cert}
-                  className="rounded-full border border-amber/30 px-4 py-1.5 font-mono text-xs uppercase tracking-wide text-amber-soft"
-                >
-                  {cert}
-                </span>
-              ))}
-            </div>
 
             <div className="mt-10 flex gap-10">
               {stats.map((stat) => (

@@ -180,13 +180,13 @@ export function RentVsBuy() {
           <div className="rounded-2xl bg-night p-4 text-ink">
             <div className="text-xs text-ink/70">Nach {years} Jahren</div>
             <div className="mt-1 font-display text-2xl tabular-nums">{chf(Math.abs(advantage))}</div>
-            <div className="mt-1 text-[11px] text-ink/70">mehr Vermögen mit {advantage >= 0 ? "Kaufen" : "Mieten"}</div>
+            <div className="mt-1 text-[11px] text-ink/70">bleibt Ihnen mehr mit {advantage >= 0 ? "Kaufen" : "Mieten"}</div>
           </div>
         </div>
 
         <figure ref={figureRef} className="relative mt-6">
           <figcaption id={titleId} className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span className="font-semibold text-ivory">Vermögen über die Jahre</span>
+            <span className="font-semibold text-ivory">Was Ihnen bleibt (Vermögen)</span>
             <span className="flex gap-4 text-xs text-ivory-dim">
               <span className="flex items-center gap-1.5">
                 <span aria-hidden className="h-0.5 w-4 rounded" style={{ background: BUY }} />
@@ -268,6 +268,25 @@ export function RentVsBuy() {
               : ""}
           Bisher ausgegeben (Geld, das weg ist): Kaufen {chf(last.buyCost)}, Mieten {chf(last.rentCost)}.
         </p>
+
+        <div className="mt-4 rounded-2xl bg-ink-2 p-4 text-sm leading-relaxed text-ivory-dim">
+          <div className="font-semibold text-ivory">So rechnen wir</div>
+          <ul className="mt-2 grid gap-1.5">
+            <li>
+              <span className="text-ivory">Beide starten mit dem gleichen Geld:</span> Wer kauft, steckt das Eigenkapital ins Haus und zahlt die
+              Kaufnebenkosten. Wer mietet, legt den gleichen Betrag an.
+            </li>
+            <li>
+              <span className="text-ivory">Das Eigenkapital ist beim Kauf nicht weg,</span> es steckt im Haus. Weg sind Kaufnebenkosten, Zins,
+              Unterhalt und Nebenkosten, beim Mieten die Miete.
+            </li>
+            <li>
+              <span className="text-ivory">Vermögen Kaufen</span> = was nach einem Verkauf bliebe: Hauswert minus Hypothek minus Verkaufskosten,
+              plus was Sie jedes Jahr gegenüber der Miete sparen. <span className="text-ivory">Vermögen Mieten</span> = das angelegte Geld mit
+              Rendite, plus was Sie gegenüber dem Kauf sparen.
+            </li>
+          </ul>
+        </div>
 
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer text-ivory underline underline-offset-4">Als Tabelle anzeigen</summary>

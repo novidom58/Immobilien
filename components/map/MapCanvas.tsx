@@ -94,6 +94,19 @@ function VectorBaseLayer({ onFail }: { onFail: () => void }) {
   return null;
 }
 
+/** Ausschnitt so wählen, dass alle Objekte und beide Büros (Basel, Zug) sichtbar sind. */
+function FitAll({ points }: { points: [number, number][] }) {
+  const map = useMap();
+  const key = points.map((p) => p.join(",")).join(";");
+  useEffect(() => {
+    if (points.length < 2) return;
+    map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 12 });
+    // nur neu ausrichten, wenn sich die Punkte ändern
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, key]);
+  return null;
+}
+
 export default function MapCanvas({ listings }: { listings: MapListing[] }) {
   // Ohne WebGL (ältere Geräte) bleibt die bisherige graue Rasterkarte
   const [vector, setVector] = useState(() => typeof window !== "undefined" && hasWebGL());
@@ -105,6 +118,7 @@ export default function MapCanvas({ listings }: { listings: MapListing[] }) {
       scrollWheelZoom={false}
       className="h-full w-full"
     >
+      <FitAll points={[...OFFICES.map((o) => [o.lat, o.lng] as [number, number]), ...listings.map((l) => [l.lat, l.lng] as [number, number])]} />
       {vector ? (
         <VectorBaseLayer onFail={fallback} />
       ) : (

@@ -20,6 +20,7 @@ type Row = Record<string, unknown>;
  * Täglich früh am Morgen (Vercel Cron, siehe vercel.json):
  * 1. Käufer-Alarm für neue Objekte (mit Foto), an alle passenden Suchprofile
  * 2. Feedback-Link per Mail an Kunden, die gestern besichtigt haben
+ * 2b. Zwei Tage nach einer Exposé-Anfrage: Besichtigung anbieten
  * (Die Tagesübersicht fürs Team verschickt neu /api/cron/morning um 7:30.)
  * Montags läuft zusätzlich der Wochenbericht an Eigentümer, dienstags
  * Wertmonitor und Hypothekenwächter (früher eigene Crons).
@@ -95,6 +96,49 @@ export async function GET(request: Request) {
     }
   }
   result.feedback = viewError ? "SQL «Nachfassen» fehlt noch" : feedbackSent;
+
+  // 2b. Zwei Tage nach einer Exposé-Anfrage: Besichtigung anbieten (einmal)
+  let exposeFollowups = 0;
+  const { data: exposeLeads } = await admin
+    .from("leads")
+    .select("id, name, email, listing_id, status, archived_at, created_at, listings(title, address, city, status)")
+    .eq("source", "expose")
+    .gte("created_at", new Date(now.getTime() - 72 * HOUR).toISOString())
+    .lte("created_at", new Date(now.getTime() - 48 * HOUR).toISOString());
+  for (const l of (exposeLeads ?? []) as Row[]) {
+    const listing = l.listings as { title: string | null; address: string; city: string; status: string } | null;
+    if (!l.email || !listing || l.archived_at || l.status === "abgeschlossen" || l.status === "irrelevant") continue;
+    if (listing.status !== "active" && listing.status !== "reserved") continue;
+    const [{ data: done }, { data: viewing }] = await Promise.all([
+      admin.from("lead_activity").select("id").eq("lead_id", l.id).ilike("text", "Nachfass-Mail nach Exposé%").limit(1),
+      admin.from("leads").select("id").eq("listing_id", l.listing_id).ilike("email", l.email as string).eq("source", "besichtigung").limit(1),
+    ]);
+    if (done?.length || viewing?.length) continue;
+    const title = listing.title || `${listing.address}, ${listing.city}`;
+    const first = ((l.name as string) || "").split(" ")[0] || "Guten Tag";
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: l.email as string,
+      subject: `Möchten Sie «${title}» besichtigen?`,
+      text: [
+        `Hallo ${first}`,
+        "",
+        `Vor zwei Tagen haben Sie das Exposé zu «${title}» angefordert. Hat es Ihnen gefallen?`,
+        "",
+        "Wenn Sie das Objekt gerne sehen möchten, geben Sie einfach drei Wunschtermine an. Wir klären es mit der Eigentümerschaft und bestätigen Ihnen den Termin:",
+        `${SITE}/immobilien/${l.listing_id}#anfragen`,
+        "",
+        "Fragen zur Finanzierung? Antworten Sie auf diese Mail, wir prüfen sie kostenlos.",
+        "",
+        "Freundliche Grüsse",
+        "NoviDom Immobilien AG",
+      ].join("\n"),
+    });
+    if (error) continue;
+    exposeFollowups++;
+    await admin.from("lead_activity").insert({ lead_id: l.id, type: "email", text: `Nachfass-Mail nach Exposé verschickt: ${title}` });
+  }
+  result.exposeNachfassen = exposeFollowups;
 
   // Die Tagesübersicht ans Team kommt neu um 7:30 Uhr (siehe /api/cron/morning)
   const weekday = now.toLocaleString("en-US", { timeZone: "Europe/Zurich", weekday: "short" }); // Mon, Tue, …

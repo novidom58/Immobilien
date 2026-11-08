@@ -10,6 +10,16 @@ import { authErrorText } from "@/lib/authErrors";
 
 type Mode = "login" | "signup";
 
+// Wofür jemand das Portal nutzen will: bestimmt, was im Portal zuerst steht
+const ZIELE = [
+  { value: "verkaufen", label: "Mit NoviDom verkaufen" },
+  { value: "kaufen", label: "Ein Zuhause finden" },
+  { value: "finanzieren", label: "Finanzierung prüfen" },
+  { value: "versichern", label: "Versicherungen vergleichen" },
+  { value: "umbauen", label: "Umbau planen" },
+  { value: "eigentum", label: "Mein Eigentum im Blick" },
+] as const;
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,6 +30,10 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [ziel, setZiel] = useState<string>(() => {
+    const f = searchParams.get("fokus") ?? "";
+    return ZIELE.some((z) => z.value === f) ? f : "";
+  });
   const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +78,12 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
 
+    if (mode === "signup" && !ziel) {
+      setLoading(false);
+      setError("Bitte wählen Sie, wofür Sie NoviDom nutzen möchten.");
+      return;
+    }
+
     if (mode === "login") {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -80,7 +100,7 @@ export function LoginForm() {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, first_name: firstName.trim(), last_name: lastName.trim() } },
+        options: { data: { full_name: fullName, first_name: firstName.trim(), last_name: lastName.trim(), anliegen: ziel || undefined } },
       });
       setLoading(false);
       if (signUpError) {
@@ -114,6 +134,27 @@ export function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {mode === "signup" && (
+          <fieldset>
+            <legend className="mb-2 font-mono text-xs uppercase tracking-wide text-ivory-dim">Wobei können wir helfen?</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {ZIELE.map((z) => (
+                <button
+                  key={z.value}
+                  type="button"
+                  aria-pressed={ziel === z.value}
+                  onClick={() => setZiel(z.value)}
+                  className={`rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
+                    ziel === z.value ? "border-night bg-night text-ink" : "border-line bg-ink-2 text-ivory hover:border-ivory-dim/50"
+                  }`}
+                >
+                  {z.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs text-ivory-dim">Das sehen Sie im Portal zuerst. Alles andere bleibt einen Klick entfernt.</p>
+          </fieldset>
+        )}
         {mode === "signup" && (
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">

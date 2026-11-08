@@ -224,7 +224,7 @@ export function overdueLeads(leads: AdminLeadWithActivity[]) {
 }
 
 export function viewingRequestLeads(leads: AdminLeadWithActivity[]) {
-  return leads.filter((l) => l.listing_id && l.status !== "abgeschlossen" && l.status !== "irrelevant");
+  return leads.filter((l) => l.listing_id && l.source !== "expose" && l.status !== "abgeschlossen" && l.status !== "irrelevant");
 }
 
 export function financingRequestLeads(leads: AdminLeadWithActivity[]) {

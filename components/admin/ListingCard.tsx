@@ -341,6 +341,11 @@ export function ListingCard({
           <Link href={`/immobilien/${listing.id}/expose`} target="_blank" style={{ color: "var(--blue)", textDecoration: "underline" }}>
             Exposé ansehen
           </Link>
+          {listing.offer_type !== "miete" && (
+            <Link href={`/immobilien/${listing.id}/expose?format=bank`} target="_blank" style={{ color: "var(--blue)", textDecoration: "underline" }}>
+              Datenblatt für die Bank
+            </Link>
+          )}
         </div>
         <div style={{ marginTop: 10 }}>
           <PhotoManager listingId={listing.id} count={listing.photoCount} />

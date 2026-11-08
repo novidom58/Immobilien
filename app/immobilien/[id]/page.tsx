@@ -10,6 +10,7 @@ import { ListingViewingRequest } from "@/components/ListingViewingRequest";
 import { ListingTour } from "@/components/ListingTour";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { ObjektFilm } from "@/components/listing/ObjektFilm";
+import { ExposeRequest } from "@/components/listing/ExposeRequest";
 import { asDetails } from "@/lib/listingDetails";
 import { createClient } from "@/lib/supabase/server";
 import { CLIP_BUCKET, clipFolder, flightFolder, flightLabel, isClipFile } from "@/lib/listingClips";
@@ -279,13 +280,7 @@ export default async function ListingDetailPage({
             <ListingViewingRequest listingId={listing.id} address={listing.title || listing.address} />
             <ContactChannels title={listing.title || `${listing.address}, ${listing.city}`} url={`${siteUrl}/immobilien/${listing.id}`} />
             {offer === "kauf" ? (
-              <Link
-                href={`/immobilien/${listing.id}/expose`}
-                target="_blank"
-                className="mt-4 inline-block font-mono text-xs uppercase tracking-wide text-amber underline underline-offset-4 hover:text-amber-soft"
-              >
-                Exposé als PDF →
-              </Link>
+              <ExposeRequest listingId={listing.id} />
             ) : (
               <p className="mt-4 text-xs text-ivory-dim">Grundriss und Anmeldeformular erhalten Sie nach der Besichtigung.</p>
             )}

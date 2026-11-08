@@ -6,7 +6,6 @@ const checklist = [
   "Grundbuchauszug (nicht älter als 3 Monate)",
   "Gebäudeversicherungsausweis",
   "Grundriss- und Katasterplan mit Nettowohnfläche",
-  "Aktuelle Fotos oder ein erster Eindruck der Räume",
   "Angaben zu Baujahr, Zustand und durchgeführten Renovationen",
   "Bei Stockwerkeigentum: Reglement und aktueller Stand des Erneuerungsfonds",
 ];

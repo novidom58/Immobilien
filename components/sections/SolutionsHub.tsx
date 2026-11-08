@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 import { AREAS, areaHref, type AreaId } from "@/components/novidom360/areas";
-import { Compass } from "@/components/novidom360/Compass";
 import { PuzzleHub } from "@/components/novidom360/PuzzleHub";
 
 export function SolutionsHub() {
@@ -60,7 +59,6 @@ export function SolutionsHub() {
         </Reveal>
       </div>
 
-      <Compass onSelect={open} />
     </section>
   );
 }

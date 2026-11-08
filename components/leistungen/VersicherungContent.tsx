@@ -17,7 +17,7 @@ const SITUATIONS = [
   },
   {
     title: "Ich vermiete",
-    items: ["Gebäudehaftpflicht als Vermieter", "Mietzinsausfall", "Rechtsschutz für Mietstreitigkeiten", "Hausrat bleibt Sache der Mieter"],
+    items: ["Gebäudehaftpflicht als Vermieter", "Rechtsschutz für Mietstreitigkeiten", "Hausrat bleibt Sache der Mieter"],
   },
 ];
 
@@ -73,8 +73,8 @@ export function VersicherungContent() {
     <>
       <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-10">
         <SectionLabel>Ihre Situation</SectionLabel>
-        <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
-          Was Sie jetzt <em>wirklich brauchen.</em>
+        <h2 className="mb-10 mt-6 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
+          Was Sie jetzt <span className="text-amber-soft">wirklich brauchen.</span>
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SITUATIONS.map((s) => (
@@ -96,8 +96,8 @@ export function VersicherungContent() {
       <section className="bg-ink-2 py-24">
         <div className="mx-auto max-w-5xl px-6 lg:px-10">
           <SectionLabel>Deckungen im Überblick</SectionLabel>
-          <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
-            Rund ums Wohneigentum <em>verständlich erklärt.</em>
+          <h2 className="mb-10 mt-6 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
+            Rund ums Wohneigentum <span className="text-amber-soft">verständlich erklärt.</span>
           </h2>
           <div className="divide-y divide-line border-y border-line">
             {COVERAGE.map((c) => (
@@ -113,15 +113,15 @@ export function VersicherungContent() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pt-24 lg:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-28 lg:px-10 lg:py-36">
+        <SectionLabel>Policen &amp; Schadenfall</SectionLabel>
+        <h2 className="mb-10 mt-6 max-w-3xl text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
+          Alles an einem Ort, <span className="text-amber-soft">auch wenn etwas passiert.</span>
+        </h2>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="flex flex-col rounded-[28px] border border-line bg-white p-8 lg:p-10">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber text-white">
-              <FileUp className="h-5 w-5" strokeWidth={1.75} />
-            </span>
-            <h2 className="mt-5 font-display text-2xl text-ivory lg:text-3xl">
-              Policen hochladen, <em>Lücken-Check erhalten.</em>
-            </h2>
+          <div className="flex flex-col rounded-2xl border border-line bg-white p-8 lg:p-10">
+            <FileUp className="h-6 w-6 text-amber" strokeWidth={1.5} />
+            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Policen hochladen, Lücken-Check erhalten</h3>
             <p className="mt-3 leading-relaxed text-ivory-dim">
               Fotografieren Sie Ihre Policen oder laden Sie die PDFs hoch. Wir legen alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
             </p>
@@ -142,42 +142,36 @@ export function VersicherungContent() {
             </Link>
           </div>
 
-          <div className="rounded-[28px] bg-night p-8 text-ink lg:p-10">
-            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">
-              <LifeBuoy className="h-4 w-4" strokeWidth={1.75} />
-              Schadenfall-Hilfe
-            </div>
-            <h2 className="mt-3 font-display text-2xl lg:text-3xl">Es ist etwas passiert?</h2>
+          <div className="flex flex-col rounded-2xl border border-line bg-ink-2 p-8 lg:p-10">
+            <LifeBuoy className="h-6 w-6 text-amber" strokeWidth={1.5} />
+            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Es ist etwas passiert?</h3>
             <ol className="mt-5 grid gap-4">
               {SCHADEN.map((s, i) => (
                 <li key={s.title} className="flex gap-4">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber font-display text-sm text-white">{i + 1}</span>
+                  <span className="font-display text-2xl leading-none text-amber">{i + 1}</span>
                   <span>
-                    <span className="block font-semibold">{s.title}</span>
-                    <span className="block text-sm leading-relaxed text-ink/75">{s.text}</span>
+                    <span className="block font-semibold text-ivory">{s.title}</span>
+                    <span className="block text-sm leading-relaxed text-ivory-dim">{s.text}</span>
                   </span>
                 </li>
               ))}
             </ol>
-            <a href="#kontakt" className="mt-7 inline-flex rounded-full bg-amber px-6 py-3.5 text-sm font-semibold text-white hover:bg-amber-soft">
+            <a href="#kontakt" className="mt-8 inline-flex w-fit rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber">
               Schaden melden
             </a>
           </div>
         </div>
-      </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-24 lg:px-10">
-        <div className="flex flex-col items-start gap-6 rounded-[28px] bg-night p-8 text-ink sm:flex-row sm:items-center sm:justify-between lg:p-12">
+        <div className="mt-4 flex flex-col items-start gap-6 rounded-2xl border border-line bg-white p-8 sm:flex-row sm:items-center sm:justify-between lg:p-10">
           <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">In 2 Minuten</div>
-            <h2 className="mt-3 font-display text-2xl lg:text-3xl">Versicherungs-Check im Kundenportal.</h2>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink/75">
-              Ein paar Fragen zu Ihrem Zuhause, und Sie sehen sofort, welche Deckungen passen und wo Lücken sein könnten.
+            <h3 className="font-display text-2xl font-semibold text-ivory">Versicherungs-Check im Kundenportal</h3>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ivory-dim">
+              Ein paar Fragen zu Ihrem Zuhause, und Sie sehen in zwei Minuten, welche Deckungen passen und wo Lücken sein könnten.
             </p>
           </div>
           <Link
-            href="/dashboard#versicherung"
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-amber px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-amber-soft"
+            href="/dashboard?fokus=versichern#versicherung"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ivory transition-colors hover:border-ivory"
           >
             Check starten
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />

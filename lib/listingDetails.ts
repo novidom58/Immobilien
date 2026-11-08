@@ -8,6 +8,16 @@ export type ListingDetails = {
   baujahr?: string;
   renoviert?: string;
   grundstueck?: string;
+  // Angaben, die Banken für die Finanzierung verlangen
+  kubatur?: string;
+  gvw?: string;
+  parzelle?: string;
+  heizung?: string;
+  parkplaetze?: string;
+  nebenkosten?: string;
+  wertquote?: string;
+  erneuerungsfonds?: string;
+  zustand?: string;
   /** Nur bei verkauften Objekten: kurze Zeile auf der Referenz-Kachel */
   referenz?: string;
   /** Wird auf der Startseite und in der Übersicht zuerst gezeigt (im CRM gesetzt) */
@@ -27,6 +37,15 @@ export const DETAIL_FIELDS = [
   { key: "baujahr", label: "Baujahr", placeholder: "z.B. 1965" },
   { key: "renoviert", label: "Letzte Renovation", placeholder: "z.B. 2025" },
   { key: "grundstueck", label: "Grundstücksfläche m²", placeholder: "z.B. 180" },
+  { key: "kubatur", label: "Kubatur m³ (SIA 416)", placeholder: "z.B. 620" },
+  { key: "gvw", label: "Gebäudeversicherungswert CHF", placeholder: "z.B. 980000" },
+  { key: "parzelle", label: "Parzelle / Grundbuch-Nr.", placeholder: "z.B. Allschwil 1234" },
+  { key: "heizung", label: "Heizung / Energieträger", placeholder: "z.B. Wärmepumpe" },
+  { key: "parkplaetze", label: "Parkplätze / Garage", placeholder: "z.B. 1 Einstellhallenplatz" },
+  { key: "nebenkosten", label: "Nebenkosten CHF / Monat", placeholder: "z.B. 350" },
+  { key: "wertquote", label: "Wertquote ‰ (Stockwerkeigentum)", placeholder: "z.B. 145" },
+  { key: "erneuerungsfonds", label: "Erneuerungsfonds CHF (Stockwerkeigentum)", placeholder: "z.B. 85000" },
+  { key: "zustand", label: "Zustand", placeholder: "z.B. sehr gut, 2022 renoviert" },
   { key: "film", label: "Objekt-Film (Link)", placeholder: "z.B. /videos/objektfilm/allschwil-1280.mp4" },
   { key: "referenz", label: "Referenz-Zeile (nur bei Verkauft)", placeholder: "z.B. 2024 · in 6 Wochen verkauft" },
 ] as const;

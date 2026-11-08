@@ -23,6 +23,8 @@ export type PortalListing = {
   tour_url: string | null;
   favorite: boolean;
   match: boolean;
+  /** Grundriss hinterlegt: im Planer einrichtbar */
+  hasPlan?: boolean;
   offmarket_until?: string | null;
 };
 
@@ -98,13 +100,15 @@ export function MatchList({ listings, onCheckPrice }: { listings: PortalListing[
                   Finanzierung prüfen
                 </Link>
               )}
-              <Link
-                href={`/dashboard/planer/${l.id}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber px-4 py-2 text-xs font-semibold text-amber hover:bg-amber hover:text-white"
-              >
-                <Sofa className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Selbst einrichten
-              </Link>
+              {l.hasPlan && (
+                <Link
+                  href={`/dashboard/planer/${l.id}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber px-4 py-2 text-xs font-semibold text-amber hover:bg-amber hover:text-white"
+                >
+                  <Sofa className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  Im Grundriss einrichten
+                </Link>
+              )}
               <a
                 href={CAL_LINK ? `https://cal.com/${CAL_LINK}` : `/immobilien/${l.id}#anfragen`}
                 target={CAL_LINK ? "_blank" : undefined}

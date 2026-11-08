@@ -110,21 +110,23 @@ export function UmbauContent() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 pb-24 lg:px-10">
-        <div className="flex flex-col items-start gap-6 rounded-[28px] bg-night p-8 text-ink sm:flex-row sm:items-center sm:justify-between lg:p-12">
+      <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-10">
+        <div className="flex flex-col items-start gap-6 rounded-2xl border border-line bg-white p-8 sm:flex-row sm:items-center sm:justify-between lg:p-10">
           <div>
-            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber-soft">
+            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber">
               <Sofa className="h-4 w-4" strokeWidth={1.5} />
-              Neu: Grundriss-Planer
+              Grundriss-Planer
             </div>
-            <h2 className="mt-3 font-display text-2xl lg:text-3xl">Ideen direkt am Grundriss ausprobieren.</h2>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink/75">
+            <h2 className="mt-3 font-display text-2xl font-semibold text-ivory lg:text-3xl">
+              Ideen direkt <span className="text-amber-soft">am Grundriss ausprobieren.</span>
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ivory-dim">
               Möbel massstabsgetreu platzieren, Räume neu denken und die Idee mit einem Klick an uns schicken. Auf dem Handy und am Computer.
             </p>
           </div>
           <Link
             href="/grundriss-planer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-amber px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-amber-soft"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
           >
             Planer öffnen
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />

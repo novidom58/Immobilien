@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AlertTriangle, CheckCircle2, CircleDashed, FileText, Pencil, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { kuendigenBis, SPARTEN, sparteLabel, type Policy } from "@/lib/policies";
+import { isKmuSparte, kuendigenBis, SPARTEN, SPARTEN_KMU, SPARTEN_PRIVAT, sparteLabel, type Policy } from "@/lib/policies";
 import { notifyUpload } from "@/app/dashboard/actions";
 
 const chf = (n: number) => `CHF ${Math.round(n).toLocaleString("de-CH")}`;
@@ -59,6 +59,8 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
     .filter(({ bis }) => bis && bis.getTime() > today.getTime() && bis.getTime() - today.getTime() < 120 * 864e5)
     .sort((a, b) => a.bis!.getTime() - b.bis!.getTime());
   const core = SPARTEN.filter((s) => s.core && (s.key !== "gebaeude" || isOwner));
+  // Geschäftspolicen: eigener Block, sobald eine KMU-Police erfasst ist
+  const hasKmu = list.some((p) => isKmuSparte(p.sparte));
 
   function startEdit(p?: Policy) {
     setError(null);
@@ -170,8 +172,14 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             </div>
           )}
         </div>
-        <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {core.map((s) => {
+        {[
+          { title: hasKmu ? "Privat" : null, items: core },
+          ...(hasKmu ? [{ title: "Ihr Betrieb (KMU)", items: SPARTEN_KMU }] : []),
+        ].map((group) => (
+        <div key={group.title ?? "privat"}>
+        {group.title && <div className="mt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-ivory-dim">{group.title}</div>}
+        <div className={`${group.title ? "mt-2" : "mt-5"} grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3`}>
+          {group.items.map((s) => {
             const p = list.find((x) => x.sparte === s.key);
             return (
               <div key={s.key} className={`flex gap-3 rounded-xl border p-3.5 ${p ? "border-emerald-200 bg-emerald-50/50" : "border-line"}`}>
@@ -195,6 +203,8 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
             );
           })}
         </div>
+        </div>
+        ))}
         {soon.length > 0 && (
           <div className="mt-4 flex gap-2.5 rounded-xl bg-amber/10 p-3.5 text-sm text-ivory">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.75} />
@@ -224,11 +234,20 @@ export function PolicyOverview({ user, isOwner }: { user: { name: string; email:
         {form && (
           <form onSubmit={save} className="mt-4 grid gap-3 rounded-xl bg-ink-2 p-4 sm:grid-cols-2">
             <select value={form.sparte} onChange={(e) => setForm({ ...form, sparte: e.target.value })} className={input} aria-label="Versicherung">
-              {SPARTEN.map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
-              ))}
+              <optgroup label="Privat">
+                {SPARTEN_PRIVAT.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Geschäft (KMU)">
+                {SPARTEN_KMU.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.label}
+                  </option>
+                ))}
+              </optgroup>
             </select>
             <input value={form.versicherer} onChange={(e) => setForm({ ...form, versicherer: e.target.value })} placeholder="Versicherer, z.B. Baloise" className={input} />
             <input value={form.policennummer} onChange={(e) => setForm({ ...form, policennummer: e.target.value })} placeholder="Policennummer" className={input} />

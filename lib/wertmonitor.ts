@@ -13,6 +13,10 @@ export type OwnerInput = {
   adresse: string | null;
   hypo_ablauf: string | null;
   hypo_betrag: number | null;
+  /** Wie in der Bewertung gefragt (Einfamilienhaus, Eigentumswohnung …) */
+  objektart?: string | null;
+  grundstueck?: number | null;
+  zustand?: string | null;
 };
 
 /** Prüft und bereinigt Eingaben aus Formularen (öffentlich oder Portal). */
@@ -27,6 +31,7 @@ export function parseOwnerInput(raw: Record<string, unknown>): OwnerInput | null
   const baujahr = Number(raw.baujahr);
   const ablauf = String(raw.hypo_ablauf ?? "");
   const betrag = Number(String(raw.hypo_betrag ?? "").replace(/[^\d]/g, ""));
+  const grundstueck = Number(String(raw.grundstueck ?? "").replace(/[^\d]/g, ""));
   return {
     region: region as ValuationRegion,
     typ: typ as ValuationType,
@@ -36,6 +41,9 @@ export function parseOwnerInput(raw: Record<string, unknown>): OwnerInput | null
     adresse: String(raw.adresse ?? "").trim().slice(0, 200) || null,
     hypo_ablauf: /^\d{4}-\d{2}-\d{2}$/.test(ablauf) ? ablauf : null,
     hypo_betrag: betrag > 0 && betrag < 1e8 ? betrag : null,
+    objektart: String(raw.objektart ?? "").trim().slice(0, 40) || null,
+    grundstueck: grundstueck > 0 && grundstueck < 1e6 ? Math.round(grundstueck) : null,
+    zustand: String(raw.zustand ?? "").trim().slice(0, 60) || null,
   };
 }
 

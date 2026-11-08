@@ -35,7 +35,11 @@ function recommend(a: Answers): Recommendation[] {
       why: "Feuer und Elementarschäden. Je nach Kanton über die kantonale Gebäudeversicherung geregelt, Lücken prüfen wir.",
     });
     list.push({ title: "Gebäudewasser & Glas", why: "Leitungswasser- und Glasbruchschäden am Gebäude sind oft nicht automatisch gedeckt." });
-    if (a.objekt === "haus") list.push({ title: "Gebäudehaftpflicht", why: "Als Eigentümer haften Sie z.B., wenn jemand auf Ihrem Grundstück verunfallt." });
+    if (a.objekt === "haus")
+      list.push({
+        title: "Gebäudehaftpflicht prüfen",
+        why: "Beim selbst bewohnten Einfamilienhaus meist in der Privathaftpflicht enthalten. Wir prüfen, ob Ihre Police das abdeckt.",
+      });
     list.push({ title: "Rechtsschutz Immobilien", why: "Bei Streit mit Handwerkern, Nachbarn oder rund um den Kaufvertrag." });
   }
   if (a.umbau) {

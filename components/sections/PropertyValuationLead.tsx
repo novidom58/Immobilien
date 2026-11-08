@@ -159,7 +159,7 @@ export function PropertyValuationLead() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.1} className="lg:mt-11">
+          <Reveal delay={0.1} className="lg:sticky lg:top-28 lg:mt-36 lg:self-start">
             {status === "done" ? (
               <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-line bg-ink p-10 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber/15">
@@ -287,6 +287,16 @@ export function PropertyValuationLead() {
                         </option>
                       ))}
                     </select>
+                    <label className="mt-1 flex items-start gap-2.5 text-xs leading-relaxed text-ivory-dim">
+                      <input name="consent" type="checkbox" required={step === 4} className="mt-0.5 h-4 w-4 shrink-0 rounded border-line accent-amber" />
+                      <span>
+                        Ich bin einverstanden, dass NoviDom meine Angaben für die Bewertung verwendet und mich dazu kontaktiert. Mehr in der{" "}
+                        <a href="/datenschutz" target="_blank" className="text-amber underline underline-offset-2">
+                          Datenschutzerklärung
+                        </a>
+                        .
+                      </span>
+                    </label>
                   </div>
 
                   <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
@@ -314,9 +324,6 @@ export function PropertyValuationLead() {
                       {status === "sending" ? "Wird gesendet…" : "Kostenlose Bewertung anfragen →"}
                     </button>
                   )}
-                  <p className="mt-3 text-center text-xs text-ivory-dim/50">
-                    Kostenlos · Unverbindlich · In Rekordzeit
-                  </p>
                 </form>
               </div>
             )}

@@ -48,20 +48,37 @@ export function BuyerSection() {
   );
 }
 
-/** Wertmonitor für Eigentümer, die (noch) nicht verkaufen. */
+const OWNER_POINTS = [
+  "Jedes Quartal der aktuelle Richtwert per Mail",
+  "Gleiche Angaben wie bei der kostenlosen Bewertung",
+  "Hypothekenwächter: rechtzeitig vor dem Ablauf vergleichen",
+  "Kostenlos, Abmeldung jederzeit",
+];
+
+/** Wertmonitor für Eigentümer, die (noch) nicht verkaufen. Gleicher Funnel wie die Bewertung. */
 export function OwnerSection() {
   return (
-    <section id="wertmonitor" className="mx-auto max-w-5xl scroll-mt-24 px-4 py-28 lg:px-10">
-      <div className="rounded-[28px] border border-line bg-white p-6 shadow-[0_15px_70px_rgba(61,53,34,0.06)] lg:p-11">
-        <SectionLabel>Wertmonitor</SectionLabel>
-        <h2 className="mt-6 text-balance font-display text-3xl text-ivory lg:text-4xl">
-          Was ist Ihr Zuhause <em>heute wert?</em>
-        </h2>
-        <p className="mt-4 max-w-2xl leading-relaxed text-ivory-dim">
-          Kein Verkauf geplant? Trotzdem gut zu wissen. Sie erhalten jedes Quartal kostenlos den aktuellen Richtwert per Mail. Und wenn Ihre
-          Hypothek ausläuft, erinnern wir Sie rechtzeitig.
-        </p>
-        <div className="mt-8">
+    <section id="wertmonitor" className="scroll-mt-24 bg-ink-2 py-28">
+      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
+        <div>
+          <SectionLabel>Wertmonitor</SectionLabel>
+          <h2 className="mt-6 text-balance font-display text-3xl text-ivory lg:text-5xl">
+            Was ist Ihr Zuhause <em>heute wert?</em>
+          </h2>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-ivory-dim">
+            Kein Verkauf geplant? Trotzdem gut zu wissen. Sie erhalten jedes Quartal kostenlos den aktuellen Richtwert per Mail. Und wenn Ihre
+            Hypothek ausläuft, erinnern wir Sie rechtzeitig.
+          </p>
+          <ul className="mt-8 grid gap-3">
+            {OWNER_POINTS.map((p) => (
+              <li key={p} className="flex items-start gap-2.5 text-sm text-ivory-dim">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-amber/70" />
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="lg:mt-11">
           <WertmonitorForm />
         </div>
       </div>

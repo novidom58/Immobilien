@@ -57,8 +57,8 @@ export default async function PlanerPage({ params }: { params: Promise<{ id: str
           <Link href="/" aria-label="NoviDom Startseite">
             <Logo className="h-8 w-auto" />
           </Link>
-          <Link href="/dashboard#objekte" className="text-sm text-ivory-dim underline underline-offset-4">
-            ← Mein Immobilienplan
+          <Link href="/dashboard#planer" className="text-sm text-ivory-dim underline underline-offset-4">
+            ← Zurück zum Kundenportal
           </Link>
         </div>
         <h1 className="mt-6 font-display text-3xl text-ivory lg:text-4xl">

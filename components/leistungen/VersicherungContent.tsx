@@ -1,23 +1,24 @@
 import Link from "next/link";
-import { ArrowRight, FileUp, LifeBuoy, ShieldCheck } from "lucide-react";
+import { ArrowRight, Briefcase, FileUp, LifeBuoy, ShieldCheck } from "lucide-react";
+import { SPARTEN_KMU } from "@/lib/policies";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 const SITUATIONS = [
   {
     title: "Ich kaufe",
-    items: ["Gebäudeversicherung ab Eigentumsübertragung", "Hausrat neu bewerten", "Risiko-Lebensversicherung für die Hypothek", "Gebäudehaftpflicht beim Einfamilienhaus"],
+    items: ["Gebäudeversicherung ab Eigentumsübertragung", "Hausrat neu bewerten", "Risiko-Lebensversicherung für die Hypothek"],
   },
   {
     title: "Ich baue um",
-    items: ["Bauherrenhaftpflicht", "Bauwesenversicherung", "Versicherungswert nach dem Umbau anpassen", "Rechtsschutz für Streit mit Handwerkern"],
+    items: ["Bauherrenhaftpflicht", "Bauwesenversicherung"],
   },
   {
     title: "Ich wohne im Eigentum",
-    items: ["Unterversicherung vermeiden", "Glas- und Gebäudewasser prüfen", "Erdbeben-Deckung abwägen", "Policen alle drei bis fünf Jahre vergleichen"],
+    items: ["Unterversicherung vermeiden", "Glas- und Gebäudewasser prüfen", "Erdbeben-Deckung abwägen"],
   },
   {
     title: "Ich vermiete",
-    items: ["Gebäudehaftpflicht als Vermieter", "Rechtsschutz für Mietstreitigkeiten", "Hausrat bleibt Sache der Mieter"],
+    items: ["Gebäudehaftpflicht als Vermieter", "Hausrat bleibt Sache der Mieter"],
   },
 ];
 
@@ -44,7 +45,7 @@ const COVERAGE = [
   {
     name: "Gebäudehaftpflicht",
     covers: "Schäden, die Dritte durch Ihr Gebäude erleiden, zum Beispiel durch Dachlawinen oder vereiste Wege.",
-    note: "Beim Einfamilienhaus wichtig, bei Stockwerkeigentum meist über die Gemeinschaft.",
+    note: "Beim selbst bewohnten Einfamilienhaus meist in der Privathaftpflicht enthalten. Separat nötig bei Vermietung oder Mehrfamilienhaus, bei Stockwerkeigentum über die Gemeinschaft.",
   },
   {
     name: "Hausrat",
@@ -174,6 +175,37 @@ export function VersicherungContent() {
             className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ivory transition-colors hover:border-ivory"
           >
             Check starten
+            <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
+          </Link>
+        </div>
+
+        {/* Für Inhaber/innen von kleinen Firmen: Geschäftspolicen gleich mit */}
+        <div className="mt-4 rounded-2xl border border-line bg-ink-2 p-8 lg:p-10">
+          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber">
+            <Briefcase className="h-4 w-4" strokeWidth={1.5} />
+            Für KMU und Selbständige
+          </div>
+          <h3 className="mt-3 font-display text-2xl font-semibold text-ivory">Privat und Geschäft an einem Ort.</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ivory-dim">
+            Sie haben eine eigene Firma? Erfassen Sie Ihre Geschäftspolicen im gleichen Kundenportal. Wir prüfen sie zusammen mit den privaten, damit nichts doppelt
+            oder gar nicht versichert ist.
+          </p>
+          <ul className="mt-5 grid gap-2.5 text-sm text-ivory sm:grid-cols-2 lg:grid-cols-3">
+            {SPARTEN_KMU.map((s) => (
+              <li key={s.key} className="flex gap-2.5">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.5} />
+                <span>
+                  {s.label}
+                  <span className="block text-xs text-ivory-dim">{s.hint}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href="/dashboard?fokus=versichern#policen"
+            className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
+          >
+            Geschäftspolicen erfassen
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
           </Link>
         </div>

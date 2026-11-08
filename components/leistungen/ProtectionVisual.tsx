@@ -46,7 +46,6 @@ const RINGS: Ring[] = [
       { icon: CloudHail, label: "Elementar & Hagel" },
       { icon: Droplets, label: "Gebäudewasser" },
       { icon: Activity, label: "Erdbeben" },
-      { icon: House, label: "Gebäudehaftpflicht" },
     ],
   },
   {

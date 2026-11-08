@@ -20,7 +20,7 @@ import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 import { UmbauContent } from "@/components/leistungen/UmbauContent";
 import { FinanzHero } from "@/components/leistungen/FinanzHero";
 import { ZinsBarometer } from "@/components/leistungen/ZinsBarometer";
-import { BuildUpHero } from "@/components/leistungen/BuildUpHero";
+import { RenovationHero } from "@/components/leistungen/RenovationHero";
 import { SellFlight } from "@/components/leistungen/SellFlight";
 import { FeaturedListings } from "@/components/sections/FeaturedListings";
 import { ProtectionVisual } from "@/components/leistungen/ProtectionVisual";
@@ -96,14 +96,14 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           )}
         </section>
 
-        {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Aufbau-Animation, Versicherung als Schutzschichten, Verkaufen als Flug übers Quartier */}
+        {/* Bild pro Bereich: Finanzieren mit Basel und Schnell-Check, Umbau als Sanierung eines bestehenden Hauses, Versicherung als Schutzschichten, Verkaufen als Flug übers Quartier */}
         {area.id === "fin" ? (
           <>
             <FinanzHero />
             <ZinsBarometer />
           </>
         ) : area.id === "umbau" ? (
-          <BuildUpHero />
+          <RenovationHero />
         ) : area.id === "vers" ? (
           <ProtectionVisual />
         ) : area.id === "kv" ? (

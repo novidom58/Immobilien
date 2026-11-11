@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, User } from "lucide-react";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Reveal } from "@/lib/reveal";
 
@@ -7,10 +7,30 @@ const competences = ["Immobilienverkauf", "Bewertung", "Finanzierung", "Vermarkt
 
 // Team auf der Website (Fotos folgen). Peter Hohler kommt später dazu.
 const PEOPLE = [
-  { name: "Walter Binggeli", role: "Geschäftsführer · VR-Präsident", email: "walter.binggeli@novidom-immo.ch" },
-  { name: "Nicolaj Saric", role: "Leiter Bauabteilung · Geschäftsleitung", email: "nicolaj.saric@novidom-immo.ch" },
-  { name: "Katharine Schaad", role: "Finanzen", email: "katharine.schaad@novidom-immo.ch" },
-  { name: "Jana Schnuderl", role: "Immobilienmaklerin", email: "jana.schnuderl@novidom-immo.ch" },
+  {
+    name: "Walter Binggeli",
+    role: "Geschäftsführer · VR-Präsident",
+    text: "Führt NoviDom und sorgt dafür, dass Sie vom ersten Gespräch bis zum Notartermin gut begleitet sind.",
+    email: "walter.binggeli@novidom-immo.ch",
+  },
+  {
+    name: "Nicolaj Saric",
+    role: "Leiter Bauabteilung · Geschäftsleitung",
+    text: "Leitet die Bauabteilung: Umbau, Renovation und der Zustand Ihrer Liegenschaft.",
+    email: "nicolaj.saric@novidom-immo.ch",
+  },
+  {
+    name: "Katharine Schaad",
+    role: "Finanzen",
+    text: "Hat die Finanzen im Blick, für klare Zahlen und saubere Abrechnungen.",
+    email: "katharine.schaad@novidom-immo.ch",
+  },
+  {
+    name: "Jana Schnuderl",
+    role: "Immobilienmaklerin",
+    text: "Begleitet Verkäufer und Käufer persönlich, von der Besichtigung bis zur Schlüsselübergabe.",
+    email: "jana.schnuderl@novidom-immo.ch",
+  },
 ];
 
 const stats = [
@@ -77,22 +97,23 @@ export function AboutJana() {
           </Reveal>
         </div>
 
-        {/* Team ohne Fotos: Initialen, Funktion und Mail */}
+        {/* Team wie bei HypoCasa: Bildfläche «Foto folgt», darunter Name, Funktion, kurzer Satz */}
         <Reveal delay={0.15}>
-          <ul className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {PEOPLE.map((p) => (
-              <li key={p.name} className="rounded-2xl border border-line bg-white p-6">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-amber/10 font-display text-lg text-amber">
-                  {p.name
-                    .split(" ")
-                    .map((w) => w[0])
-                    .join("")}
-                </span>
-                <div className="mt-5 font-display text-xl text-ivory">{p.name}</div>
-                <div className="mt-1 text-sm leading-snug text-ivory-dim">{p.role}</div>
-                <a href={`mailto:${p.email}`} title={p.email} className="mt-4 inline-flex text-sm font-semibold text-amber hover:underline">
-                  E-Mail schreiben →
-                </a>
+          <ul className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {PEOPLE.map((p, i) => (
+              <li key={p.name} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white">
+                <div className={`flex aspect-[4/5] flex-col items-center justify-center gap-3 ${i === 0 ? "bg-amber/15 text-amber" : "bg-ink-3 text-ivory-dim"}`}>
+                  <User className="h-9 w-9" strokeWidth={1.5} />
+                  <span className="font-mono text-[11px] uppercase tracking-[0.2em]">Foto folgt</span>
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="font-display text-xl text-ivory">{p.name}</div>
+                  <div className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-amber">{p.role}</div>
+                  <p className="mt-3 text-sm leading-relaxed text-ivory-dim">{p.text}</p>
+                  <a href={`mailto:${p.email}`} title={p.email} className="mt-auto pt-4 text-sm font-semibold text-amber hover:underline">
+                    E-Mail schreiben →
+                  </a>
+                </div>
               </li>
             ))}
           </ul>

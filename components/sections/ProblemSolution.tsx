@@ -42,7 +42,7 @@ export function ProblemSolution() {
               <SectionLabel>Das Problem</SectionLabel>
               <h2 className="mt-6 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
                 Was beim Immobilien&shy;verkauf oft{" "}
-                <span className="text-amber-soft italic">schief geht</span>
+                <span className="text-amber-soft">schief geht</span>
               </h2>
               <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
                 Viele Eigentümer machen kostspielige Fehler — nicht aus
@@ -80,7 +80,7 @@ export function ProblemSolution() {
               <h2 className="mt-6 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
                 Voller Service.
                 <br />
-                <span className="text-amber-soft italic">Faire Kosten.</span>
+                <span className="text-amber-soft">Faire Kosten.</span>
               </h2>
               <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
                 Wir lösen jedes dieser Probleme — mit Bankexpertise,

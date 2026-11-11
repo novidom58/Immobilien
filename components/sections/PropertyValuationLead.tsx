@@ -135,7 +135,7 @@ export function PropertyValuationLead() {
             <h2 className="mt-6 text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
               Was ist Ihre Immobilie
               <br />
-              <span className="text-amber-soft italic">wirklich wert?</span>
+              <span className="text-amber-soft">wirklich wert?</span>
             </h2>
             <p className="mt-6 max-w-md text-balance text-lg text-ivory-dim">
               Der richtige Verkauf beginnt mit einer realistischen

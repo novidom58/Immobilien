@@ -54,7 +54,7 @@ export function RatgeberTeaser() {
               <h3 className="mt-4 text-balance font-display text-2xl font-semibold leading-snug text-ivory">
                 «1×1 des Immobilien&shy;verkaufs
                 <br />
-                <span className="italic text-amber-soft">in der Schweiz»</span>
+                <span className="text-amber-soft">in der Schweiz»</span>
               </h3>
               <ul className="mt-6 space-y-2.5">
                 {chapters.map((c) => (

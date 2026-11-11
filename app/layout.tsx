@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { SmoothScroll } from "@/lib/providers/smooth-scroll";
 import { Loader } from "@/components/Loader";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -9,13 +9,6 @@ import { AuthLinkCatcher } from "@/components/AuthLinkCatcher";
 import "./globals.css";
 import { OFFICES } from "@/lib/offices";
 import { SOCIAL_LINKS } from "@/lib/constants";
-
-const serif = Fraunces({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -112,7 +105,7 @@ export default function RootLayout({
   return (
     <html
       lang="de-CH"
-      className={`${serif.variable} ${inter.variable} ${mono.variable} h-full`}
+      className={`${inter.variable} ${mono.variable} h-full`}
     >
       <body className="min-h-full bg-ink text-ivory antialiased selection:bg-amber selection:text-ink">
         <script

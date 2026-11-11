@@ -22,7 +22,7 @@
 /* next/font generates its own CSS variable names on <html>; alias them to
    our theme's font tokens (not self-referential — different names). */
 @theme inline {
-  --font-display: var(--font-serif);
+  --font-display: var(--font-inter);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-mono-tech);
 }
@@ -73,14 +73,23 @@ body {
   color: var(--color-ink);
 }
 
-/* Serifen-Headlines wie im Editorial-Entwurf: leicht, eng gesetzt. */
+/* Titel im Stil von HypoCasa: klare, fette Grotesk (Inter), eng gesetzt,
+   ohne Kursiv. Hervorhebungen (<em>) erscheinen in der Akzentfarbe. */
 .font-display {
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 h1.font-display,
 h2.font-display {
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+.font-display em,
+h1 em,
+h2 em {
+  font-style: normal;
+  color: var(--color-amber);
 }
 
 /* Feines Filmkorn; auf dem hellen Grund nur noch angedeutet */

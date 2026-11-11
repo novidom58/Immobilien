@@ -40,7 +40,7 @@ export function HeroHeadline({ text, accent }: { text: string; accent?: string }
       {accent && (
         <>
           <br />
-          <Words text={accent} className="italic" />
+          <Words text={accent} className="text-amber" />
         </>
       )}
     </motion.h1>

@@ -5,6 +5,14 @@ import { Reveal } from "@/lib/reveal";
 
 const competences = ["Immobilienverkauf", "Bewertung", "Finanzierung", "Vermarktung"];
 
+// Team auf der Website (Fotos folgen). Peter Hohler kommt später dazu.
+const PEOPLE = [
+  { name: "Walter Binggeli", role: "Geschäftsführer · VR-Präsident", email: "walter.binggeli@novidom-immo.ch" },
+  { name: "Nicolaj Saric", role: "Leiter Bauabteilung · Geschäftsleitung", email: "nicolaj.saric@novidom-immo.ch" },
+  { name: "Katharine Schaad", role: "Finanzen", email: "katharine.schaad@novidom-immo.ch" },
+  { name: "Jana Schnuderl", role: "Immobilienmaklerin", email: "jana.schnuderl@novidom-immo.ch" },
+];
+
 const stats = [
   { value: "500+", label: "Bewertungen" },
   { value: "20+", label: "Jahre Praxis" },
@@ -17,16 +25,7 @@ export function AboutJana() {
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionLabel>Köpfe hinter NoviDom</SectionLabel>
 
-        <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-24">
-          <Reveal>
-            <div className="relative flex aspect-[4/5] w-full max-w-xs items-center justify-center overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-ink-3 via-ink-2 to-ink">
-              <span className="font-display text-6xl font-semibold text-ivory/15">
-                ND
-              </span>
-              <div className="grain absolute inset-0" />
-            </div>
-          </Reveal>
-
+        <div className="mt-10">
           <Reveal delay={0.1}>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
               Unser Team
@@ -77,6 +76,27 @@ export function AboutJana() {
             </Link>
           </Reveal>
         </div>
+
+        {/* Team ohne Fotos: Initialen, Funktion und Mail */}
+        <Reveal delay={0.15}>
+          <ul className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PEOPLE.map((p) => (
+              <li key={p.name} className="rounded-2xl border border-line bg-white p-6">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-amber/10 font-display text-lg text-amber">
+                  {p.name
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")}
+                </span>
+                <div className="mt-5 font-display text-xl text-ivory">{p.name}</div>
+                <div className="mt-1 text-sm leading-snug text-ivory-dim">{p.role}</div>
+                <a href={`mailto:${p.email}`} title={p.email} className="mt-4 inline-flex text-sm font-semibold text-amber hover:underline">
+                  E-Mail schreiben →
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
       </div>
     </section>
   );

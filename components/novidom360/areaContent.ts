@@ -30,8 +30,8 @@ export type AreaContent = {
   cta: string;
   /** Kurze Vertrauenspunkte unter den Buttons */
   badges?: string[];
-  /** Eigene Akzentfarbe für die Bereichsseite (z.B. HypoCasa-Rot) */
-  accentColor?: string;
+  /** Bereichsseite im Look unseres Partners (Finanzieren und Versichern laufen über HypoCasa) */
+  theme?: "hypocasa";
   /** Abschluss-Formular am Seitenende */
   closing: { title: string; text: string };
 };
@@ -62,7 +62,7 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     accent: "Persönlich.",
     intro:
       "Mit unserem Partner HypoCasa vergleichen wir über 50 Banken, Versicherungen und Pensionskassen und finden die beste Lösung für Sie. Von der ersten Anfrage bis zum Notartermin. Persönlich, neutral und kostenlos.",
-    accentColor: "#c0392b",
+    theme: "hypocasa",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Viele Anbieter, ein Vergleich", text: "Statt bei jeder Bank einzeln anzufragen, holen wir die Offerten für Sie ein und vergleichen sie verständlich." },
@@ -109,13 +109,14 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     headline: "Rundum abgesichert.",
     accent: "Passend zu Ihrem Zuhause.",
     intro:
-      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Wir prüfen, was Ihr Zuhause wirklich braucht, und vermitteln an ausgewählte Partner. Ohne Standardpaket.",
+      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Wir prüfen, was Ihr Zuhause wirklich braucht. Abgeschlossen wird über unseren Partner HypoCasa, mit Vergleich über viele Versicherer. Ohne Standardpaket.",
+    theme: "hypocasa",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Gebäude & Naturgefahren", text: "Je nach Kanton über die Gebäudeversicherung geregelt. Wir zeigen, wo Lücken bestehen." },
       { title: "Hausrat & Haftpflicht", text: "Neu bewertet beim Umzug, damit die Versicherungssumme zum neuen Zuhause passt." },
       { title: "Bauzeit absichern", text: "Bauherrenhaftpflicht und Bauwesenversicherung beim Umbau, damit nichts an Ihnen hängen bleibt." },
-      { title: "Rechtsschutz", text: "Für Streitigkeiten mit Handwerkern, Nachbarn oder beim Kaufvertrag." },
+      { title: "Rechtsschutz", text: "Für Streitigkeiten mit Nachbarn, dem Vermieter oder rund um den Kaufvertrag." },
     ],
     faq: [
       { q: "Wann sollte ich meine Versicherungen prüfen?", a: "Beim Kauf, vor einem Umbau und bei jedem grösseren Lebensereignis. Spätestens alle paar Jahre lohnt sich ein Check." },

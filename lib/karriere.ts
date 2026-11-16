@@ -15,8 +15,14 @@ const gesamtZiel = (immo: number) => Math.round((immo * (100 + GESAMT_ZUSCHLAG_P
 export const STUFEN = [
   { nr: 1, titel: "Immobilienberater", anteil: 35, abImmo: 0, abGesamt: 0 },
   { nr: 2, titel: "Senior-Berater", anteil: 45, abImmo: 40_000, abGesamt: gesamtZiel(40_000) },
-  { nr: 3, titel: "Top-Berater", anteil: 50, abImmo: 80_000, abGesamt: gesamtZiel(80_000) },
+  { nr: 3, titel: "Top-Berater", anteil: 55, abImmo: 80_000, abGesamt: gesamtZiel(80_000) },
 ] as const;
+
+/**
+ * Versicherungen und Finanzierungen: wer sie bringt, erhält fix diesen Anteil
+ * der Courtage bzw. Entschädigung, unabhängig von der Stufe (Rest: Firma).
+ */
+export const FIN_ANTEIL = 80;
 
 /** Angestellte erhalten je Stufe so viele Prozentpunkte weniger als Freelancer. */
 export const ANGESTELLT_ABZUG = 5;
@@ -79,7 +85,7 @@ export function karriereStand(posten: Posten[], anstellung: Anstellung, jetzt = 
   // Anteil pro Posten: Stufe zum Zeitpunkt des Abschlusses (inkl. diesem)
   const mitAnteil = fenster.map((p) => {
     const s = summen(sortiert, t(p.datum));
-    const pct = anteilFuer(stufeFuer(s.immo, s.gesamt), anstellung);
+    const pct = p.art === "immobilie" ? anteilFuer(stufeFuer(s.immo, s.gesamt), anstellung) : FIN_ANTEIL;
     return { ...p, anteil: pct, betrag: (p.umsatz * pct) / 100 };
   });
   const verdient = mitAnteil.reduce((s, p) => s + p.betrag, 0);

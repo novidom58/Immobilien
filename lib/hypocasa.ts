@@ -1,6 +1,6 @@
 // HypoCasa (Hypothekenberatung) ist Partner von NoviDom, hat aber einen
 // eigenen Auftritt und eigene Daten. Von hier aus geht nur eine Mail an
-// HypoCasa, wenn NoviDom-Kunden eine Finanzierung wünschen.
+// HypoCasa, wenn NoviDom-Kunden eine Finanzierung oder Versicherung wünschen.
 
 import { createResendClient } from "@/lib/resend";
 

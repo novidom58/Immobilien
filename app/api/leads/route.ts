@@ -107,12 +107,14 @@ export async function POST(request: Request) {
     });
     results.emailed = !error;
 
-    // Finanzierungswunsch (Formular, Finanzierungs-Pass im Portal): HypoCasa
-    // erhält den Lead direkt per Mail, ohne Umweg über das Team.
-    if (wantsFinancing || anliegen === "finanzieren") {
+    // Finanzierung und Versicherung laufen über HypoCasa: der Lead geht
+    // direkt per Mail an HypoCasa, ohne Umweg über das Team.
+    const hypoCasaThema =
+      anliegen === "versichern" ? "Versicherungs" : wantsFinancing || anliegen === "finanzieren" ? "Finanzierungs" : null;
+    if (hypoCasaThema) {
       await notifyHypoCasa({
         replyTo: email,
-        subject: `Finanzierungs-Lead von NoviDom: ${name}`,
+        subject: `${hypoCasaThema}-Lead von NoviDom: ${name}`,
         text: `Name: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\nQuelle: NoviDom ${source || type}\n\n${message || "—"}`,
       }).catch(() => false);
     }

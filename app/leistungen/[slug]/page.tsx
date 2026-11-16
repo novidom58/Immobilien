@@ -53,7 +53,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
   const content = AREA_CONTENT[area.id];
   const contact = AREA_CONTACTS[area.id];
-  // Finanzieren läuft mit HypoCasa und übernimmt deren Rot als Akzentfarbe.
+  // Finanzieren und Versichern laufen mit HypoCasa und übernehmen deren Rot als Akzentfarbe.
   const themeStyle = content.accentColor
     ? ({ "--color-amber": content.accentColor, "--color-amber-soft": content.accentColor } as React.CSSProperties)
     : undefined;

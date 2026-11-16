@@ -17,7 +17,7 @@ export const AREAS: {
 }[] = [
   { id: "kv", slug: "kaufen-verkaufen", num: "01", title: "Kaufen & Verkaufen", short: "Von der Bewertung bis zum Schlüssel.", compassLabel: "Kaufen / Verkaufen", kicker: "01 — Kaufen & Verkaufen", icon: Home },
   { id: "fin", slug: "finanzieren", num: "02", title: "Finanzieren", short: "Mit Hypocasa, direkt beim Kauf.", compassLabel: "Finanzieren", kicker: "02 — Mit Hypocasa", icon: Coins },
-  { id: "vers", slug: "versichern", num: "03", title: "Versichern", short: "Der letzte Schritt zum Zuhause.", compassLabel: "Versichern", kicker: "03 — Rundum abgesichert", icon: ShieldCheck },
+  { id: "vers", slug: "versichern", num: "03", title: "Versichern", short: "Mit Hypocasa, passend zum Zuhause.", compassLabel: "Versichern", kicker: "03 — Mit Hypocasa", icon: ShieldCheck },
   { id: "umbau", slug: "umbauen", num: "04", title: "Umbauen", short: "Vorher / Nachher, koordiniert.", compassLabel: "Umbauen", kicker: "04 — Umbauen & Aufwerten", icon: Hammer },
 ];
 

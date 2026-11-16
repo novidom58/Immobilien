@@ -109,7 +109,8 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     headline: "Rundum abgesichert.",
     accent: "Passend zu Ihrem Zuhause.",
     intro:
-      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Wir prüfen, was Ihr Zuhause wirklich braucht, und vermitteln an ausgewählte Partner. Ohne Standardpaket.",
+      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Mit unserem Partner HypoCasa prüfen wir, was Ihr Zuhause wirklich braucht, und vergleichen die Angebote mehrerer Versicherer. Ohne Standardpaket. Persönlich, neutral und kostenlos.",
+    accentColor: "#c0392b",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Gebäude & Naturgefahren", text: "Je nach Kanton über die Gebäudeversicherung geregelt. Wir zeigen, wo Lücken bestehen." },
@@ -119,13 +120,14 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     ],
     faq: [
       { q: "Wann sollte ich meine Versicherungen prüfen?", a: "Beim Kauf, vor einem Umbau und bei jedem grösseren Lebensereignis. Spätestens alle paar Jahre lohnt sich ein Check." },
-      { q: "Kostet die Beratung etwas?", a: "Die Erstberatung ist für Sie kostenlos und unverbindlich." },
+      { q: "Kostet die Beratung etwas?", a: "Die Beratung ist für Sie kostenlos. HypoCasa wird von den Versicherungen entschädigt, wenn eine Police abgeschlossen wird. Kein Abschluss, keine Kosten." },
+      { q: "Wer schliesst die Versicherung ab?", a: "Die Versicherungen schliessen Sie über unseren Partner HypoCasa ab. Ein Ansprechpartner für Hypothek und Versicherung, abgestimmt auf Ihre Finanzierung." },
       { q: "Muss ich meine bestehenden Policen kündigen?", a: "Nein. Wir prüfen zuerst, was Sie haben, und empfehlen nur Änderungen, die sich lohnen." },
       { q: "Was passiert mit der Gebäudeversicherung beim Kauf?", a: "Sie geht mit dem Eigentum auf Sie über. Zusatzdeckungen wie Gebäudewasser oder Glas laufen beim Verkäufer und müssen neu abgeschlossen werden." },
       { q: "Was ist Unterversicherung?", a: "Ist die Versicherungssumme zu tief, zahlt die Versicherung im Schadenfall nur anteilig. Nach Umzug oder Umbau sollten Sie die Summen deshalb anpassen." },
       { q: "Braucht es eine Lebensversicherung für die Hypothek?", a: "Nicht zwingend, aber sie schützt Ihre Familie, wenn ein Einkommen wegfällt und die Hypothek sonst nicht mehr tragbar wäre." },
     ],
     cta: "Versicherung besprechen",
-    closing: { title: "Sichern wir Ihr Zuhause ab.", text: "Wir prüfen Ihre bestehenden Policen und zeigen, wo Lücken sind — unverbindlich und kostenlos." },
+    closing: { title: "Sichern wir Ihr Zuhause ab.", text: "Gemeinsam mit HypoCasa prüfen wir Ihre bestehenden Policen und zeigen, wo Lücken sind — unverbindlich und kostenlos." },
   },
 };

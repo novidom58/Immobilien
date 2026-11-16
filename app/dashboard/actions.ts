@@ -160,16 +160,6 @@ export async function saveFinanceCheck(input: { income: number; savings: number;
   return { error: null, maxPrice: max };
 }
 
-export async function saveInsuranceCheck(answers: Record<string, string | boolean>) {
-  const { supabase, user } = await requireUser();
-  if (!supabase || !user) return { error: "Bitte melden Sie sich an." };
-  const { error } = await supabase
-    .from("customer_plans")
-    .upsert({ user_id: user.id, versicherung: answers, updated_at: new Date().toISOString() });
-  if (error) return { error: error.message };
-  return { error: null };
-}
-
 export async function toggleFavorite(listingId: string) {
   const { supabase, user } = await requireUser();
   if (!supabase || !user) return { error: "Bitte melden Sie sich an." };

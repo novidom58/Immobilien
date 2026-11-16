@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { OpenSectionOnHash } from "@/components/portal/OpenSectionOnHash";
-import { PolicyOverview } from "@/components/portal/PolicyOverview";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
@@ -18,7 +17,6 @@ import { SaleStepper } from "@/components/SaleStepper";
 import { Logo } from "@/components/ui/Logo";
 import { SearchProfileForm, type SearchProfile } from "@/components/portal/SearchProfileForm";
 import { FinanceCheck } from "@/components/portal/FinanceCheck";
-import { InsuranceCheck } from "@/components/portal/InsuranceCheck";
 import { MatchList, type PortalListing } from "@/components/portal/MatchList";
 import { matchesPlan } from "@/lib/planMatching";
 import { FinancePass } from "@/components/portal/FinancePass";
@@ -90,7 +88,7 @@ async function getCrmProfile(userId: string, email: string | undefined) {
   };
 }
 
-type PortalSection = "weg" | "suchprofil" | "objekte" | "planer" | "finanzierung" | "versicherung" | "umbau" | "eigentum" | "verkaufen";
+type PortalSection = "weg" | "suchprofil" | "objekte" | "planer" | "finanzierung" | "umbau" | "eigentum" | "verkaufen";
 
 const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
   verkauf: "Mein Verkauf",
@@ -99,20 +97,19 @@ const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
   objekte: "Passende Objekte",
   planer: "Grundriss-Planer",
   finanzierung: "Finanzierung",
-  versicherung: "Versicherung",
   umbau: "Umbau",
   eigentum: "Mein Eigentum",
   verkaufen: "Verkaufen",
 };
 
 const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
-  kaufen: ["suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
-  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau"],
-  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "planer", "versicherung", "umbau", "verkaufen"],
-  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "suchprofil", "objekte", "planer", "verkaufen"],
-  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "planer", "verkaufen"],
-  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "suchprofil", "objekte", "planer"],
-  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "planer", "versicherung", "umbau"],
+  kaufen: ["suchprofil", "objekte", "planer", "finanzierung", "umbau", "eigentum", "verkaufen"],
+  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "planer", "finanzierung", "umbau"],
+  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "planer", "umbau", "verkaufen"],
+  umbauen: ["umbau", "finanzierung", "eigentum", "suchprofil", "objekte", "planer", "verkaufen"],
+  versichern: ["eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "planer", "verkaufen"],
+  eigentum: ["eigentum", "finanzierung", "umbau", "verkaufen", "suchprofil", "objekte", "planer"],
+  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "planer", "umbau"],
 };
 
 /**
@@ -142,7 +139,7 @@ const MAIN: Record<keyof typeof ORDER, PortalSection[]> = {
   verkaufen: ["verkaufen", "eigentum"],
   finanzieren: ["finanzierung"],
   umbauen: ["umbau"],
-  versichern: ["versicherung"],
+  versichern: ["eigentum"],
   eigentum: ["eigentum"],
   trennung: ["finanzierung", "eigentum", "verkaufen"],
 };
@@ -153,7 +150,7 @@ const TITLE: Record<keyof typeof ORDER, [string, string]> = {
   verkaufen: ["Mein", "Verkauf"],
   finanzieren: ["Meine", "Finanzierung"],
   umbauen: ["Mein", "Umbau"],
-  versichern: ["Meine", "Versicherungen"],
+  versichern: ["Mein", "Zuhause"],
   eigentum: ["Mein", "Eigentum"],
   trennung: ["Meine", "Situation"],
 };
@@ -164,18 +161,17 @@ const MORE_HINT: Record<PortalSection, string> = {
   objekte: "Passende Objekte und Favoriten",
   planer: "Möbel massstabsgetreu im echten Grundriss platzieren",
   finanzierung: "Kaufkraft prüfen und Unterlagen für die Bank",
-  versicherung: "Policen an einem Ort, Lücken-Check und Schaden melden",
   umbau: "Richtpreise, Förderung und Umbau anfragen",
   eigentum: "Wertmonitor und Hypothekenwächter für Ihre Immobilie",
   verkaufen: "Was ist Ihr Zuhause wert? Verkauf starten",
 };
 
 const INTRO: Record<Anliegen | "eigentum", string> = {
-  kaufen: "Suchprofil, Finanzierung und Versicherung an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
+  kaufen: "Suchprofil, Finanzierung und Objekte an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
   verkaufen: "Was ist Ihr Zuhause wert, und wie verkaufen Sie es am besten? Hier starten Sie Ihren Verkauf und behalten alles im Blick.",
   finanzieren: "Ihre Kaufkraft, Ihr Finanzierungs-Pass und Ihre laufende Hypothek an einem Ort. HypoCasa prüft verbindlich innert 24 Stunden.",
-  umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
-  versichern: "Prüfen Sie in zwei Minuten, ob Ihr Zuhause richtig versichert ist. Wir zeigen Ihnen, wo Lücken sein könnten.",
+  umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Die Finanzierung gleich dabei.",
+  versichern: "Ihre Versicherungen prüft und vermittelt unser Partner HypoCasa persönlich. Hier behalten Sie Wert und Hypothek Ihres Zuhauses im Blick.",
   eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
   trennung: "Prüfen Sie, ob Sie das Haus allein finanzieren können, und sehen Sie den aktuellen Richtwert. Vertraulich und nur für Sie sichtbar.",
 };
@@ -197,7 +193,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   if (!user) redirect("/login?redirect=/dashboard");
 
   // Alles, was nicht voneinander abhängt, gleichzeitig laden (schnellerer Einstieg)
-  const [listingsRes, planRes, profileRes, publicRes, crm, policiesRes] = await Promise.all([
+  const [listingsRes, planRes, profileRes, publicRes, crm] = await Promise.all([
     supabase
       .from("listings")
       .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type, living_area, postal_code")
@@ -212,7 +208,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       .order("created_at", { ascending: false })
       .limit(40),
     getCrmProfile(user.id, user.email),
-    supabase.from("customer_policies").select("id", { count: "exact", head: true }).eq("user_id", user.id),
   ]);
   const listing = (listingsRes.data as Listing[] | null)?.[0];
 
@@ -260,7 +255,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     documents = documents.filter((doc) => doc.url);
   }
 
-  // «Mein Immobilienplan»: Suchprofil, Finanzierung, Versicherung, Favoriten
+  // «Mein Immobilienplan»: Suchprofil, Finanzierung, Favoriten
   const plan = planRes.data as
     | (SearchProfile & {
         finanz: { income: number; savings: number; pension: number; price: number; max_price?: number; saved_at?: string } | null;
@@ -428,21 +423,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </section>
     ),
-    versicherung: (
-        <section id="versicherung" className={sectionClass}>
-          <h2 className={sectionHead}>Meine Versicherungen</h2>
-          <div className="mt-5">
-            <div id="policen" className="scroll-mt-28" />
-            <PolicyOverview user={portalUser} isOwner={Boolean(plan?.eigentum)} />
-          </div>
-          <details className="mt-5 rounded-2xl border border-line bg-white p-5">
-            <summary className="cursor-pointer font-display text-lg text-ivory">Bedarfs-Check: Was brauche ich wirklich?</summary>
-            <div className="mt-4">
-              <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
-            </div>
-          </details>
-        </section>
-    ),
     umbau: (
         <section id="umbau" className={sectionClass}>
           <h2 className={sectionHead}>Umbauen &amp; einrichten</h2>
@@ -531,7 +511,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
 
   // Übersicht: alle Bereiche als Kacheln mit dem aktuellen Stand
-  const policyCount = policiesRes.count ?? 0;
   const matchCount = portalListings.filter((l) => l.match).length;
   const status: Record<PortalSection | "verkauf", string> = {
     verkauf: listing ? `${listing.views} Aufrufe · ${listing.viewing_requests} Anfragen` : "",
@@ -544,7 +523,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         : plan?.finanz?.max_price
           ? `Kaufkraft bis ${formatChf(plan.finanz.max_price)}`
           : "Noch nicht geprüft",
-    versicherung: policyCount ? `${policyCount} ${policyCount === 1 ? "Police" : "Policen"} erfasst` : "Policen hinzufügen",
     planer: `${planOptions.length} ${planOptions.length === 1 ? "Grundriss" : "Grundrisse"}${planOptions.some((o) => o.favorite) ? ` · ${planOptions.filter((o) => o.favorite).length} Favoriten` : ""}`,
     umbau: "Richtpreise und Anfrage",
     eigentum: eigentum ? `Richtwert ${formatChf(eigentum.wert.mid)}` : "Wertmonitor einrichten",

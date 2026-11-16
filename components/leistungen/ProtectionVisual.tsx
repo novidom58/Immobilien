@@ -89,7 +89,7 @@ export function ProtectionVisual() {
     <section ref={ref} className="relative mx-auto max-w-7xl px-4 lg:h-[230vh] lg:px-10">
       <div className="overflow-hidden rounded-[28px] border lg:sticky lg:top-20 border-line bg-gradient-to-br from-[#f3efe7] via-white to-[#eef2f6] p-5 sm:p-10">
         <div className="text-center">
-          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Rundum-Schutz · von innen nach aussen</div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim">Mit HypoCasa · Rundum-Schutz</div>
           <h2 className="mx-auto mt-3 max-w-2xl text-balance font-display text-3xl text-ivory lg:text-4xl">
             Damit Ihr Traumzuhause <em>ein Traum bleibt.</em>
           </h2>
@@ -112,8 +112,8 @@ export function ProtectionVisual() {
                     height: `${RADIUS[i] * 2}%`,
                     transform: `translate(-50%, -50%) scale(${on ? 1 : 0.6})`,
                     opacity: on ? 1 : 0,
-                    border: `${i === active ? 3 : 1.5}px ${i === 0 ? "solid" : "dashed"} rgba(143,106,57,${i === active ? 0.9 : 0.45})`,
-                    background: i === active ? "rgba(143,106,57,0.06)" : "transparent",
+                    border: `${i === active ? 3 : 1.5}px ${i === 0 ? "solid" : "dashed"} rgba(192,57,43,${i === active ? 0.9 : 0.45})`,
+                    background: i === active ? "rgba(192,57,43,0.06)" : "transparent",
                     zIndex: 3 - i,
                   }}
                 />
@@ -124,7 +124,7 @@ export function ProtectionVisual() {
               <span aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[94%] w-[94%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber/30 motion-safe:animate-[nd-pulse_3.2s_ease-out_infinite]" />
             )}
             {/* Haus im Zentrum */}
-            <div className="absolute left-1/2 top-1/2 z-10 flex h-[30%] w-[30%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber text-white shadow-[0_18px_40px_-12px_rgba(143,106,57,0.7)]">
+            <div className="absolute left-1/2 top-1/2 z-10 flex h-[30%] w-[30%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber text-white shadow-[0_18px_40px_-12px_rgba(192,57,43,0.7)]">
               <House className="h-1/2 w-1/2" strokeWidth={1.4} />
             </div>
             {/* Symbole auf den Ringen */}

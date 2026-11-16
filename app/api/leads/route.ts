@@ -6,6 +6,7 @@ import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
 import { syncLeadToCrm } from "@/lib/leadCrm";
 import { isAnliegen } from "@/lib/anliegen";
+import { notifyHypoCasa } from "@/lib/hypocasa";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
@@ -105,6 +106,16 @@ export async function POST(request: Request) {
       text: `Typ: ${type}\nName: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\n\nNachricht:\n${message || "—"}`,
     });
     results.emailed = !error;
+
+    // Finanzierungswunsch (Formular, Finanzierungs-Pass im Portal): HypoCasa
+    // erhält den Lead direkt per Mail, ohne Umweg über das Team.
+    if (wantsFinancing || anliegen === "finanzieren") {
+      await notifyHypoCasa({
+        replyTo: email,
+        subject: `Finanzierungs-Lead von NoviDom: ${name}`,
+        text: `Name: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\nQuelle: NoviDom ${source || type}\n\n${message || "—"}`,
+      }).catch(() => false);
+    }
 
     // Best-effort auto-reply to the submitter. Failing this never fails the
     // request - the internal notification above already went through.

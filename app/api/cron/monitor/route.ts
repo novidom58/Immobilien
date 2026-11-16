@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createResendClient } from "@/lib/resend";
 import { formatChf, PRICE_STAND } from "@/lib/valuation";
 import { ownerValue, parseOwnerInput } from "@/lib/wertmonitor";
+import { notifyHypoCasa } from "@/lib/hypocasa";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,11 @@ export async function GET(request: Request) {
       subject: `Hypothekenwächter: ${lines.length} Hypothek(en) laufen in den nächsten 12 Monaten ab`,
       text: [...lines, "", `Übersicht im Admin: ${SITE}/admin/hypotheken`].join("\n"),
     });
+    // Dieselbe Liste geht an HypoCasa, die die Verlängerungen offeriert.
+    await notifyHypoCasa({
+      subject: `Hypothekenwächter NoviDom: ${lines.length} Verlängerung(en) in den nächsten 12 Monaten`,
+      text: lines.join("\n"),
+    }).catch(() => false);
   }
 
   return NextResponse.json({ ok: true, wertmonitor: wertSent, hypothekenwaechter: hypoSent });

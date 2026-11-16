@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { OpenSectionOnHash } from "@/components/portal/OpenSectionOnHash";
-import { PolicyOverview } from "@/components/portal/PolicyOverview";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
 import Link from "next/link";
@@ -18,7 +17,6 @@ import { SaleStepper } from "@/components/SaleStepper";
 import { Logo } from "@/components/ui/Logo";
 import { SearchProfileForm, type SearchProfile } from "@/components/portal/SearchProfileForm";
 import { FinanceCheck } from "@/components/portal/FinanceCheck";
-import { InsuranceCheck } from "@/components/portal/InsuranceCheck";
 import { MatchList, type PortalListing } from "@/components/portal/MatchList";
 import { matchesPlan } from "@/lib/planMatching";
 import { FinancePass } from "@/components/portal/FinancePass";
@@ -164,7 +162,7 @@ const MORE_HINT: Record<PortalSection, string> = {
   objekte: "Passende Objekte und Favoriten",
   planer: "Möbel massstabsgetreu im echten Grundriss platzieren",
   finanzierung: "Kaufkraft prüfen und Unterlagen für die Bank",
-  versicherung: "Policen an einem Ort, Lücken-Check und Schaden melden",
+  versicherung: "Policen prüfen und vergleichen lassen, mit HypoCasa",
   umbau: "Richtpreise, Förderung und Umbau anfragen",
   eigentum: "Wertmonitor und Hypothekenwächter für Ihre Immobilie",
   verkaufen: "Was ist Ihr Zuhause wert? Verkauf starten",
@@ -175,7 +173,7 @@ const INTRO: Record<Anliegen | "eigentum", string> = {
   verkaufen: "Was ist Ihr Zuhause wert, und wie verkaufen Sie es am besten? Hier starten Sie Ihren Verkauf und behalten alles im Blick.",
   finanzieren: "Ihre Kaufkraft, Ihr Finanzierungs-Pass und Ihre laufende Hypothek an einem Ort. HypoCasa prüft verbindlich innert 24 Stunden.",
   umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
-  versichern: "Prüfen Sie in zwei Minuten, ob Ihr Zuhause richtig versichert ist. Wir zeigen Ihnen, wo Lücken sein könnten.",
+  versichern: "Lassen Sie Ihre Versicherungen prüfen und vergleichen, zusammen mit unserem Partner HypoCasa. Wir zeigen Ihnen, wo Lücken sein könnten.",
   eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
   trennung: "Prüfen Sie, ob Sie das Haus allein finanzieren können, und sehen Sie den aktuellen Richtwert. Vertraulich und nur für Sie sichtbar.",
 };
@@ -197,7 +195,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   if (!user) redirect("/login?redirect=/dashboard");
 
   // Alles, was nicht voneinander abhängt, gleichzeitig laden (schnellerer Einstieg)
-  const [listingsRes, planRes, profileRes, publicRes, crm, policiesRes] = await Promise.all([
+  const [listingsRes, planRes, profileRes, publicRes, crm] = await Promise.all([
     supabase
       .from("listings")
       .select("id, address, city, status, views, tour_views, expose_downloads, viewing_requests, price_chf, rooms, property_type, living_area, postal_code")
@@ -212,7 +210,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       .order("created_at", { ascending: false })
       .limit(40),
     getCrmProfile(user.id, user.email),
-    supabase.from("customer_policies").select("id", { count: "exact", head: true }).eq("user_id", user.id),
   ]);
   const listing = (listingsRes.data as Listing[] | null)?.[0];
 
@@ -430,17 +427,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     ),
     versicherung: (
         <section id="versicherung" className={sectionClass}>
-          <h2 className={sectionHead}>Meine Versicherungen</h2>
-          <div className="mt-5">
-            <div id="policen" className="scroll-mt-28" />
-            <PolicyOverview user={portalUser} isOwner={Boolean(plan?.eigentum)} />
-          </div>
-          <details className="mt-5 rounded-2xl border border-line bg-white p-5">
-            <summary className="cursor-pointer font-display text-lg text-ivory">Bedarfs-Check: Was brauche ich wirklich?</summary>
-            <div className="mt-4">
-              <InsuranceCheck initial={plan?.versicherung ?? null} user={portalUser} />
+          <h2 className={sectionHead}>Versicherungen</h2>
+          {/* Versicherungen laufen über unseren Partner HypoCasa, darum hier nur der Weg dorthin */}
+          <div id="policen" className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white p-6">
+            <div>
+              <div className="font-display text-xl text-ivory">Policen prüfen und vergleichen lassen</div>
+              <p className="mt-1 max-w-xl text-sm text-ivory-dim">
+                Gebäude, Hausrat, Haftpflicht und Vorsorge: Zusammen mit unserem Partner HypoCasa prüfen wir Ihre Policen auf Lücken und vergleichen über viele
+                Versicherer. Kostenlos und unverbindlich.
+              </p>
             </div>
-          </details>
+            <Link href="/leistungen/versichern#kontakt" className="rounded-full bg-night px-5 py-3 text-sm font-semibold text-ink hover:bg-amber">
+              Beratung anfragen
+            </Link>
+          </div>
         </section>
     ),
     umbau: (
@@ -531,7 +531,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const more = order.filter((k) => !main.includes(k) && portalSections[k] && !(listing && k === "verkaufen"));
 
   // Übersicht: alle Bereiche als Kacheln mit dem aktuellen Stand
-  const policyCount = policiesRes.count ?? 0;
   const matchCount = portalListings.filter((l) => l.match).length;
   const status: Record<PortalSection | "verkauf", string> = {
     verkauf: listing ? `${listing.views} Aufrufe · ${listing.viewing_requests} Anfragen` : "",
@@ -544,7 +543,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         : plan?.finanz?.max_price
           ? `Kaufkraft bis ${formatChf(plan.finanz.max_price)}`
           : "Noch nicht geprüft",
-    versicherung: policyCount ? `${policyCount} ${policyCount === 1 ? "Police" : "Policen"} erfasst` : "Policen hinzufügen",
+    versicherung: "Prüfen lassen mit HypoCasa",
     planer: `${planOptions.length} ${planOptions.length === 1 ? "Grundriss" : "Grundrisse"}${planOptions.some((o) => o.favorite) ? ` · ${planOptions.filter((o) => o.favorite).length} Favoriten` : ""}`,
     umbau: "Richtpreise und Anfrage",
     eigentum: eigentum ? `Richtwert ${formatChf(eigentum.wert.mid)}` : "Wertmonitor einrichten",

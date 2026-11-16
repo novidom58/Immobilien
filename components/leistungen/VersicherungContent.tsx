@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRight, Briefcase, FileUp, LifeBuoy, ShieldCheck } from "lucide-react";
 import { SPARTEN_KMU } from "@/lib/policies";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -122,9 +121,9 @@ export function VersicherungContent() {
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="flex flex-col rounded-2xl border border-line bg-white p-8 lg:p-10">
             <FileUp className="h-6 w-6 text-amber" strokeWidth={1.5} />
-            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Policen hochladen, Lücken-Check erhalten</h3>
+            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Policen prüfen lassen, Lücken-Check erhalten</h3>
             <p className="mt-3 leading-relaxed text-ivory-dim">
-              Fotografieren Sie Ihre Policen oder laden Sie die PDFs hoch. Wir legen alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
+              Schicken Sie uns Ihre Policen als Foto oder PDF. Zusammen mit unserem Partner HypoCasa legen wir alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
             </p>
             <ul className="mt-5 grid gap-2 text-sm text-ivory">
               {["Kostenlos und unverbindlich", "Antwort innert 5 Arbeitstagen", "Gebäude, Hausrat, Haftpflicht, Leben und 3a in einem Blick"].map((t) => (
@@ -134,13 +133,13 @@ export function VersicherungContent() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/dashboard?fokus=versichern#policen"
+            <a
+              href="#kontakt"
               className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
             >
-              Policen hochladen
+              Policen-Check anfragen
               <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-            </Link>
+            </a>
           </div>
 
           <div className="flex flex-col rounded-2xl border border-line bg-ink-2 p-8 lg:p-10">
@@ -163,22 +162,6 @@ export function VersicherungContent() {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col items-start gap-6 rounded-2xl border border-line bg-white p-8 sm:flex-row sm:items-center sm:justify-between lg:p-10">
-          <div>
-            <h3 className="font-display text-2xl font-semibold text-ivory">Versicherungs-Check im Kundenportal</h3>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ivory-dim">
-              Ein paar Fragen zu Ihrem Zuhause, und Sie sehen in zwei Minuten, welche Deckungen passen und wo Lücken sein könnten.
-            </p>
-          </div>
-          <Link
-            href="/dashboard?fokus=versichern#versicherung"
-            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ivory transition-colors hover:border-ivory"
-          >
-            Check starten
-            <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-          </Link>
-        </div>
-
         {/* Für Inhaber/innen von kleinen Firmen: Geschäftspolicen gleich mit */}
         <div className="mt-4 rounded-2xl border border-line bg-ink-2 p-8 lg:p-10">
           <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber">
@@ -187,8 +170,8 @@ export function VersicherungContent() {
           </div>
           <h3 className="mt-3 font-display text-2xl font-semibold text-ivory">Privat und Geschäft an einem Ort.</h3>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ivory-dim">
-            Sie haben eine eigene Firma? Erfassen Sie Ihre Geschäftspolicen im gleichen Kundenportal. Wir prüfen sie zusammen mit den privaten, damit nichts doppelt
-            oder gar nicht versichert ist.
+            Sie haben eine eigene Firma? Wir prüfen Ihre Geschäftspolicen zusammen mit den privaten, damit nichts doppelt oder gar nicht versichert ist. Der Abschluss
+            läuft über unseren Partner HypoCasa.
           </p>
           <ul className="mt-5 grid gap-2.5 text-sm text-ivory sm:grid-cols-2 lg:grid-cols-3">
             {SPARTEN_KMU.map((s) => (
@@ -201,13 +184,13 @@ export function VersicherungContent() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/dashboard?fokus=versichern#policen"
+          <a
+            href="#kontakt"
             className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
           >
-            Geschäftspolicen erfassen
+            KMU-Beratung anfragen
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-          </Link>
+          </a>
         </div>
       </section>
     </>

@@ -55,6 +55,12 @@ export default async function KarrierePage({ searchParams }: { searchParams: Pro
   const anstellung = (beraterList.find((b) => b.name === name)?.anstellung === "angestellt" ? "angestellt" : "freelancer") as Anstellung;
 
   const { stand, offen, needsSql } = await loadKarriere(supabase, name, anstellung);
+  // Partner: alle offenen Meldungen aller Mitarbeitenden, zum Prüfen an einem Ort
+  const { data: alleOffenRows } = isPartner
+    ? await supabase.from("staff_ertraege").select("*").is("bestaetigt_am", null).order("abgeschlossen_am", { ascending: false })
+    : { data: [] };
+  const alleOffen = (alleOffenRows ?? []) as Row[];
+  const beraterNamen = beraterList.map((b) => b.name);
   const abzug = anstellung === "angestellt" ? ANGESTELLT_ABZUG : 0;
 
   return (
@@ -74,6 +80,56 @@ export default async function KarrierePage({ searchParams }: { searchParams: Pro
           </div>
         )}
       </div>
+
+      {isPartner && alleOffen.length > 0 && (
+        <div className="card" style={{ marginBottom: 16, borderColor: "rgba(199,138,58,.45)" }}>
+          <div className="card-header">
+            <div>
+              <div className="card-title">Zur Prüfung: {alleOffen.length} {alleOffen.length === 1 ? "Meldung" : "Meldungen"} aller Mitarbeitenden</div>
+              <div className="card-sub">
+                Betrag laut Abrechnung von HypoCasa eintragen, Bringer prüfen, dann bestätigen. Erst danach zählt es im Guthaben (Bringer 80 %, Firma 20 %).
+              </div>
+            </div>
+          </div>
+          <div className="crm-table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Gemeldet von</th>
+                  <th>Datum</th>
+                  <th>Art</th>
+                  <th>Kunde</th>
+                  <th>Volumen / Prämie</th>
+                  <th>Bringer und Betrag</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {alleOffen.map((e) => {
+                  const vorschlag =
+                    Number(e.ertrag_chf) ||
+                    (e.art === "hypothek" && Number(e.volumen_chf) ? Math.round((Number(e.volumen_chf) * HYPO_ERTRAG_PCT) / 100) : null);
+                  return (
+                    <tr key={e.id as string}>
+                      <td className="td-name">{e.berater as string}</td>
+                      <td>{datum(e.abgeschlossen_am as string)}</td>
+                      <td>{e.art === "hypothek" ? "Hypothek" : "Versicherung"}</td>
+                      <td>{(e.kunde as string) || "–"}</td>
+                      <td>{Number(e.volumen_chf) ? chf(Number(e.volumen_chf)) : "–"}</td>
+                      <td>
+                        <ConfirmErtrag id={e.id as string} vorschlag={vorschlag} berater={e.berater as string} beraterOptions={beraterNamen} />
+                      </td>
+                      <td>
+                        <DeleteErtrag id={e.id as string} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {needsSql && (
         <div className="card" style={{ padding: 16, marginBottom: 16, fontSize: 13, color: "var(--red)" }}>
@@ -194,7 +250,13 @@ export default async function KarrierePage({ searchParams }: { searchParams: Pro
                         <td>{e.art === "hypothek" ? "Hypothek" : "Versicherung"}</td>
                         <td className="td-name">{(e.kunde as string) || "–"}</td>
                         <td>{Number(e.volumen_chf) ? chf(Number(e.volumen_chf)) : "–"}</td>
-                        <td>{isPartner ? <ConfirmErtrag id={e.id as string} vorschlag={vorschlag} /> : <span className="badge badge-gold">wartet auf Bestätigung</span>}</td>
+                        <td>
+                          {isPartner ? (
+                            <ConfirmErtrag id={e.id as string} vorschlag={vorschlag} berater={name} beraterOptions={beraterNamen} />
+                          ) : (
+                            <span className="badge badge-gold">wartet auf Bestätigung</span>
+                          )}
+                        </td>
                         <td>
                           <DeleteErtrag id={e.id as string} />
                         </td>

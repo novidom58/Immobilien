@@ -37,9 +37,14 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     return saleDeadlineProgress(l.activated_at, l.sale_deadline_months).remainingDays <= 30;
   }).length;
 
+  // Partner: offene Versicherungs-/Hypothekar-Meldungen zum Prüfen
+  const { count: zurPruefung } =
+    role === "admin" ? await supabase.from("staff_ertraege").select("id", { count: "exact", head: true }).is("bestaetigt_am", null) : { count: 0 };
+
   const counts = {
     leads: leads.length,
     fristen: fristenCount,
+    pruefen: zurPruefung ?? 0,
   };
 
   return (

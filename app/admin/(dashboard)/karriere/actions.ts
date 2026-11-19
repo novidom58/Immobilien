@@ -56,16 +56,18 @@ export async function addErtrag(formData: FormData): Promise<Result> {
   return { error: null };
 }
 
-/** Partner bestätigen einen Eintrag und legen den definitiven Ertrag fest. */
+/** Partner bestätigen einen Eintrag, legen den definitiven Ertrag fest und korrigieren bei Bedarf den Bringer. */
 export async function confirmErtrag(formData: FormData): Promise<Result> {
   const { supabase, staff } = await staffClient();
   if (!supabase || staff?.role !== "admin") return { error: "Nur Partner können bestätigen." };
   const id = String(formData.get("id") ?? "");
   const ertrag = num(formData.get("ertrag"));
+  // Bringer korrigieren: wer den Kunden gebracht hat, erhält die 80 %
+  const berater = String(formData.get("berater") ?? "").trim();
   if (!id || !ertrag) return { error: "Bitte den Ertrag in CHF angeben." };
   const { error } = await supabase
     .from("staff_ertraege")
-    .update({ ertrag_chf: ertrag, bestaetigt_am: new Date().toISOString() })
+    .update({ ertrag_chf: ertrag, bestaetigt_am: new Date().toISOString(), ...(berater ? { berater } : {}) })
     .eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/admin/karriere");

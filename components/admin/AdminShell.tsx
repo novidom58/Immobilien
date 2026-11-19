@@ -33,6 +33,8 @@ export function AdminShell({
   counts: {
     leads: number;
     fristen: number;
+    /** Offene Versicherungs-/Hypothekar-Meldungen (nur Partner) */
+    pruefen?: number;
   };
 }) {
   const pathname = usePathname();
@@ -49,7 +51,7 @@ export function AdminShell({
       title: "Übersicht",
       items: [
         { href: "/admin", label: "Heute", icon: "☀️" },
-        { href: "/admin/karriere", label: "Karriere", icon: "🏆" },
+        { href: "/admin/karriere", label: "Karriere", icon: "🏆", badge: counts.pruefen, badgeTone: "gold" },
         { href: "/admin/provisionen", label: "Provisionen", icon: "💰" },
         { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
         { href: "/admin/mitarbeiter", label: "Mitarbeitende", icon: "📈" },

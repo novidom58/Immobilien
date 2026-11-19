@@ -24,6 +24,9 @@ export const STUFEN = [
  */
 export const FIN_ANTEIL = 80;
 
+/** Wer ein Objekt bringt, erhält diesen Anteil der Verkaufs-/Vermietungsprovision. */
+export const BRINGER_ANTEIL = 20;
+
 /** Angestellte erhalten je Stufe so viele Prozentpunkte weniger als Freelancer. */
 export const ANGESTELLT_ABZUG = 5;
 
@@ -39,7 +42,8 @@ export type Anstellung = "freelancer" | "angestellt";
 
 export type Posten = {
   id: string;
-  art: "immobilie" | "versicherung" | "hypothek";
+  /** «bringer»: Objekt gebracht, ein anderer hat verkauft (20 %, zählt nicht für die Stufe) */
+  art: "immobilie" | "versicherung" | "hypothek" | "bringer";
   titel: string;
   datum: string; // YYYY-MM-DD
   /** Umsatz für NoviDom (Provision, Courtage, Entschädigung) */
@@ -64,7 +68,8 @@ export function anteilFuer(stufe: (typeof STUFEN)[number], anstellung: Anstellun
 function summen(posten: Posten[], bis: number) {
   const fenster = posten.filter((p) => t(p.datum) <= bis && t(p.datum) > bis - 365 * DAY);
   const immo = fenster.filter((p) => p.art === "immobilie").reduce((s, p) => s + p.umsatz, 0);
-  const gesamt = fenster.reduce((s, p) => s + p.umsatz, 0);
+  // Bringer-Anteile zählen für das Guthaben, aber nicht für die Stufe
+  const gesamt = fenster.filter((p) => p.art !== "bringer").reduce((s, p) => s + p.umsatz, 0);
   return { immo, gesamt, fenster };
 }
 
@@ -85,7 +90,7 @@ export function karriereStand(posten: Posten[], anstellung: Anstellung, jetzt = 
   // Anteil pro Posten: Stufe zum Zeitpunkt des Abschlusses (inkl. diesem)
   const mitAnteil = fenster.map((p) => {
     const s = summen(sortiert, t(p.datum));
-    const pct = p.art === "immobilie" ? anteilFuer(stufeFuer(s.immo, s.gesamt), anstellung) : FIN_ANTEIL;
+    const pct = p.art === "immobilie" ? anteilFuer(stufeFuer(s.immo, s.gesamt), anstellung) : p.art === "bringer" ? BRINGER_ANTEIL : FIN_ANTEIL;
     return { ...p, anteil: pct, betrag: (p.umsatz * pct) / 100 };
   });
   const verdient = mitAnteil.reduce((s, p) => s + p.betrag, 0);

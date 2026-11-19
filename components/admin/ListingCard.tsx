@@ -352,7 +352,7 @@ export function ListingCard({
         </div>
         {isPartner && (
           <div style={{ marginTop: 8 }}>
-            <DealPanel listingId={listing.id} offerType={listing.offer_type} />
+            <DealPanel listingId={listing.id} offerType={listing.offer_type} verkaeufer={listing.berater} beraterOptions={beraterOptions} />
           </div>
         )}
 

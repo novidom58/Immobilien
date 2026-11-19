@@ -216,7 +216,7 @@ export default async function KarrierePage({ searchParams }: { searchParams: Pro
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-header">
             <div>
-              <div className="card-title">Versicherung oder Hypothek erfassen</div>
+              <div className="card-title">{isPartner ? "Versicherung oder Hypothek erfassen" : "Hypothek melden"}</div>
               <div className="card-sub">
                 Zählt zum Gesamtumsatz. Bei Hypotheken ohne bekannte Entschädigung rechnen wir {String(HYPO_ERTRAG_PCT).replace(".", ",")} % vom Volumen.
               </div>

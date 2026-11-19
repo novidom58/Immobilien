@@ -33,7 +33,8 @@ export function ErtragForm({ berater, isPartner }: { berater: string; isPartner:
       <input type="hidden" name="berater" value={berater} />
       <select name="art" className="field-select" value={art} onChange={(e) => setArt(e.target.value as typeof art)} aria-label="Art">
         <option value="hypothek">Hypothek</option>
-        <option value="versicherung">Versicherung</option>
+        {/* Versicherungen rechnet HypoCasa ab, erfasst werden sie nur von Partnern */}
+        {isPartner && <option value="versicherung">Versicherung</option>}
       </select>
       <input name="kunde" className="field-input" placeholder="Kunde" aria-label="Kunde" />
       <input

@@ -37,7 +37,7 @@ const BUILDING_BLOCKS = [
   { icon: Landmark, title: "Hypothek", text: "Ein Anteil an der Provision, wenn Ihre Käufer über HypoCasa finanzieren." },
   { icon: Users, title: "Teamleitung", text: "Als Teamleiter/in verdienen Sie an jedem Verkauf Ihres Teams mit." },
   { icon: Crown, title: "Beteiligung", text: "Die Besten werden Aktionärinnen und Aktionäre der NoviDom Immobilien AG." },
-  { icon: Layers, title: "Ihr Modell", text: "Angestellt oder selbständig, Vollzeit oder nebenberuflich." },
+  { icon: Layers, title: "Ihr Modell", text: "Vollzeit oder nebenberuflich, nach Vereinbarung." },
 ];
 
 const CAREER = [
@@ -52,19 +52,6 @@ const PROFILES = [
   { title: "Immobilienberater/in", text: "Sie bewerten, vermarkten und verkaufen, mit Freude am Kontakt und am Abschluss. Erfahrung oder Fachausweis ist ein Plus." },
   { title: "Finanzierung & Versicherung", text: "Hypotheken, Vorsorge und Versicherungen rund ums Eigenheim. Bank- oder Versicherungshintergrund willkommen." },
   { title: "Quereinstieg & Nebenberuf", text: "Kaufmännisch, Bau oder Verkauf und Lust auf Immobilien? Starten Sie nebenberuflich, wir bilden Sie im Team weiter." },
-];
-
-const MODELS = [
-  {
-    kicker: "Sozial abgesichert",
-    title: "Angestellt",
-    items: ["Anstellung bei der NoviDom Immobilien AG", "Pensum nach Vereinbarung", "AHV, Pensionskasse und Unfallversicherung über NoviDom"],
-  },
-  {
-    kicker: "Maximaler Anteil",
-    title: "Selbständig",
-    items: ["Der höhere Anteil an der Provision", "Freie Zeiteinteilung, auch nebenberuflich", "Eigene AHV und Versicherungen"],
-  },
 ];
 
 const SUPPORT = [
@@ -177,30 +164,6 @@ export default function KarrierePage() {
             ))}
           </ol>
           <p className="mt-4 text-sm text-ivory-dim">Auf jeder Stufe zusätzlich: Bonus Eigenakquise und Anteil an der Hypothekenprovision.</p>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
-          <SectionLabel>Zusammenarbeit</SectionLabel>
-          <h2 className="mb-10 mt-6 font-display text-3xl text-ivory lg:text-4xl">
-            Angestellt oder selbständig: <em>Sie wählen.</em>
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {MODELS.map((m) => (
-              <div key={m.title} className="rounded-2xl border border-line bg-white p-6 lg:p-8">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-amber">{m.kicker}</div>
-                <div className="mt-2 font-display text-2xl text-ivory">{m.title}</div>
-                <ul className="mt-4 grid gap-2">
-                  {m.items.map((it) => (
-                    <li key={it} className="flex gap-2.5 text-sm text-ivory-dim">
-                      <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" strokeWidth={1.75} />
-                      {it}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-sm text-ivory-dim">Vertragsdetails werden individuell vereinbart.</p>
         </section>
 
         <section className="bg-ink-2 py-20">

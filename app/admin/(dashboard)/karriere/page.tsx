@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 type Row = Record<string, unknown>;
 
-const ART: Record<Posten["art"], string> = { immobilie: "Immobilie", versicherung: "Versicherung", hypothek: "Hypothek" };
+const ART: Record<Posten["art"], string> = { immobilie: "Immobilie", versicherung: "Versicherung", hypothek: "Hypothek", bringer: "Objekt gebracht" };
 const datum = (d: string) => new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString("de-CH");
 
 /**

@@ -80,12 +80,12 @@ export function Hero({ showcase = [] }: { showcase?: ShowcaseItem[] }) {
         </motion.div>
       </div>
 
-      {/* Bildkarte mit den aktuellen Objekten und dem Provisions-Siegel */}
+      {/* Objektbilder randlos über die ganze Breite, dazu das Provisions-Siegel */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative mx-auto max-w-7xl px-4 pb-20 lg:px-10"
+        className="relative pb-20"
       >
         <HeroShowcase items={showcase} />
       </motion.div>

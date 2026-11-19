@@ -3,10 +3,10 @@
 // gelten nur, wenn im Vertrag mit Kunde oder Partner nichts anderes steht.
 // Basis jeder Aufteilung ist der Betrag, der tatsächlich bei NoviDom eingeht.
 
-import { FIN_ANTEIL, STUFEN } from "@/lib/karriere";
+import { BRINGER_ANTEIL, FIN_ANTEIL, STUFEN } from "@/lib/karriere";
 
 /** Wer ein Objekt bringt (Akquise, Mandat), erhält diesen Anteil der Verkaufs-/Vermietungsprovision. */
-export const BRINGER_IMMO_PCT = 20;
+export const BRINGER_IMMO_PCT = BRINGER_ANTEIL;
 /** Wer eine Versicherung oder Finanzierung bringt, erhält diesen Anteil der Courtage bzw. Entschädigung. */
 export const BRINGER_FIN_PCT = FIN_ANTEIL;
 

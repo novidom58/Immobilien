@@ -20,9 +20,10 @@ const num = (v: FormDataEntryValue | null) => {
 };
 
 /**
- * Versicherungs- oder Hypothekar-Abschluss erfassen. Mitarbeitende erfassen
- * für sich selbst (zählt nach Bestätigung durch einen Partner), Partner für
- * eine beliebige Person (gilt sofort als bestätigt).
+ * Versicherungs- oder Hypothekar-Abschluss erfassen. Mitarbeitende melden
+ * Hypotheken für sich selbst (zählt nach Bestätigung durch einen Partner).
+ * Versicherungen rechnet HypoCasa ab, sie erfassen nur Partner, für eine
+ * beliebige Person (gilt sofort als bestätigt).
  */
 export async function addErtrag(formData: FormData): Promise<Result> {
   const { supabase, staff } = await staffClient();
@@ -32,6 +33,8 @@ export async function addErtrag(formData: FormData): Promise<Result> {
   if (!berater) return { error: "Kein Berater zugeordnet." };
 
   const art = formData.get("art") === "hypothek" ? "hypothek" : "versicherung";
+  // Versicherungen werden über HypoCasa abgerechnet und nur von Partnern erfasst
+  if (art === "versicherung" && staff.role !== "admin") return { error: "Versicherungen erfassen die Partner." };
   const volumen = num(formData.get("volumen"));
   let ertrag = num(formData.get("ertrag"));
   if (!ertrag && art === "hypothek" && volumen) ertrag = Math.round((volumen * HYPO_ERTRAG_PCT) / 100);

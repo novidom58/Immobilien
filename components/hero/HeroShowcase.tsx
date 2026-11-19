@@ -47,7 +47,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
 
   return (
     <div className="relative">
-      <div className="relative aspect-[4/3] overflow-hidden bg-ink-3 sm:aspect-[16/8] lg:aspect-auto lg:h-[min(78svh,820px)]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] bg-ink-3 shadow-[0_30px_80px_-30px_rgba(41,37,27,0.35)] sm:aspect-[16/8]">
         <AnimatePresence initial={false}>
           <motion.div
             key={current ? current.id : "fallback"}
@@ -69,7 +69,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-6 pt-24 text-white lg:px-[max(2.5rem,calc(50vw-37.5rem))] lg:pb-10">
+        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-6 pt-24 text-white lg:px-8 lg:pb-8">
           {current ? (
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/80">
@@ -107,7 +107,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
 
       {/* Provisions-Siegel: bewusst gross und verspielt, das Hauptargument */}
       <motion.div
-        className="absolute -top-8 right-2 z-10 sm:-top-16 sm:right-8 lg:right-[max(2rem,calc(50vw-38rem))]"
+        className="absolute -top-8 right-2 z-10 sm:-top-16 sm:right-8"
         initial={{ scale: 0, rotate: -40 }}
         animate={{ scale: 1, rotate: -8 }}
         transition={{ type: "spring", stiffness: 260, damping: 10, delay: 1.6 }}

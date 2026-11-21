@@ -47,8 +47,7 @@ export async function syncLeadToCrm(lead: LeadForCrm) {
   const rollen = suggestRoles(lead);
   const fields = clean(lead.profile);
   const ziel = lead.anliegen ? ZIEL[lead.anliegen] : undefined;
-  const viaHypoCasa = (lead.source ?? "").toLowerCase().startsWith("hypocasa");
-  const note = `Anfrage über ${viaHypoCasa ? "HypoCasa" : "die Webseite"}${lead.anliegen ? ` (${lead.anliegen})` : ""}${lead.message ? `:\n${lead.message}` : ""}`;
+  const note = `Anfrage über die Webseite${lead.anliegen ? ` (${lead.anliegen})` : ""}${lead.message ? `:\n${lead.message}` : ""}`;
 
   const { data: existing } = await admin.from("customers").select("id, rollen, ziel").ilike("email", lead.email).limit(1).maybeSingle();
   if (existing) {

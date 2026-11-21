@@ -34,6 +34,13 @@ export default async function AdminKanaelePage() {
           <div className="page-title">Was bringt was</div>
           <div className="page-sub">Leads nach Quelle — wo die Anfragen wirklich herkommen</div>
         </div>
+        <a href="/api/admin/kennzahlen" className="btn btn-ghost btn-sm" title="Für die gemeinsame Excel-Übersicht mit HypoCasa">
+          Kennzahlen als CSV (12 Monate)
+        </a>
+      </div>
+      <div className="card" style={{ padding: "12px 16px", marginBottom: 14, fontSize: 13, lineHeight: 1.6 }}>
+        <strong>Monatliche Übersicht mit HypoCasa:</strong> Die Kennzahlen-CSV enthält nur Anzahlen (Anfragen, Besichtigungen, Abschlüsse), keine Namen oder
+        Kontaktdaten. HypoCasa liefert die eigenen Zahlen aus dem HypoCasa-CRM; beides kommt in die gemeinsame Excel-Liste.
       </div>
 
       <div className="card">

@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 
-// Leads als CSV (Excel-tauglich, Semikolon, UTF-8 mit BOM) für den Import in
-// ein anderes CRM. Nur für Admins.
+// Leads als CSV (Excel-tauglich, Semikolon, UTF-8 mit BOM), nur für Admins und
+// nur für interne Zwecke. Enthält Personendaten: nicht an HypoCasa oder Dritte
+// weitergeben. Für die gemeinsame Übersicht gibt es /api/admin/kennzahlen.
 export async function GET(request: Request) {
   const supabase = await createClient();
   if (!supabase) return new Response("Nicht eingerichtet.", { status: 503 });

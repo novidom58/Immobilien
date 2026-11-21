@@ -51,7 +51,6 @@ export function CsvImportTool() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
-  const [herkunft, setHerkunft] = useState<"novidom" | "hypocasa">("novidom");
 
   function handleFile(file: File | null) {
     if (!file) return;
@@ -75,7 +74,7 @@ export function CsvImportTool() {
   async function handleImport() {
     setBusy(true);
     setError(null);
-    const res = await bulkImportCustomers(rows, herkunft);
+    const res = await bulkImportCustomers(rows);
     setBusy(false);
     if (res.error) {
       setError(res.error);
@@ -141,13 +140,6 @@ export function CsvImportTool() {
                 … und {rows.length - 20} weitere Zeilen.
               </p>
             )}
-            <label className="field-label" style={{ display: "grid", gap: 4, marginTop: 16, maxWidth: 320 }}>
-              Woher kommen diese Kontakte?
-              <select className="field-select" value={herkunft} onChange={(e) => setHerkunft(e.target.value as "novidom" | "hypocasa")}>
-                <option value="novidom">NoviDom (Bestand)</option>
-                <option value="hypocasa">HypoCasa (Finanzierung / Versicherung)</option>
-              </select>
-            </label>
             <div className="flex items-center gap-3" style={{ marginTop: 16 }}>
               <button type="button" disabled={busy} onClick={handleImport} className="btn btn-primary">
                 {busy ? "Importiert…" : `✓ ${rows.length} Zeilen importieren`}

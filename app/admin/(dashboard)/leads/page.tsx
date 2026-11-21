@@ -35,7 +35,11 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
         </div>
         <div className="flex gap-2">
           {isPartner && (
-            <a href={`/api/admin/leads-export${archiv ? "?archiv=1" : ""}`} className="btn btn-ghost btn-sm">
+            <a
+              href={`/api/admin/leads-export${archiv ? "?archiv=1" : ""}`}
+              className="btn btn-ghost btn-sm"
+              title="Nur für interne Zwecke. Nicht an HypoCasa oder Dritte weitergeben (Personendaten)."
+            >
               Als Excel/CSV exportieren
             </a>
           )}

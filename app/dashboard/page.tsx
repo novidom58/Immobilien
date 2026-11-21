@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PORTAL_WEGWEISER } from "@/lib/wegweiser";
 import { OpenSectionOnHash } from "@/components/portal/OpenSectionOnHash";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
@@ -774,6 +775,32 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </div>
           </section>
         )}
+
+        {/* Wegweiser: kurze Antworten, wo was im Portal steht */}
+        <details className="group mt-12 rounded-2xl border border-line bg-white px-5 py-4 open:pb-6">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <span>
+              <span className="block font-display text-lg text-ivory">Wo finde ich was?</span>
+              <span className="block text-sm text-ivory-dim">Kurze Antworten zu Ihrem Kundenportal</span>
+            </span>
+            <span aria-hidden className="text-2xl leading-none text-amber transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+            {PORTAL_WEGWEISER.map((w) => (
+              <div key={w.frage}>
+                <dt className="text-sm font-semibold text-ivory">{w.frage}</dt>
+                <dd className="mt-1 text-sm leading-relaxed text-ivory-dim">{w.antwort}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 text-sm text-ivory-dim">
+            Noch Fragen? Schreiben Sie uns an{" "}
+            <a href="mailto:verkaufen@novidom-immo.ch" className="font-semibold text-amber hover:underline">
+              verkaufen@novidom-immo.ch
+            </a>
+            , wir melden uns persönlich.
+          </p>
+        </details>
       </div>
     </main>
   );

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createResendClient } from "@/lib/resend";
+import { saleDeadlineProgress } from "@/lib/dates";
 import { agendaLine, loadAgenda, zDay, zDayLabel, type AgendaItem } from "@/lib/agenda";
 
 export const dynamic = "force-dynamic";
@@ -132,6 +133,38 @@ export async function GET(request: Request, { params }: { params: Promise<{ slot
         ...customerFollow.slice(0, 20).map((c) => `• Kunde ${c.full_name}${who(c)}`),
         ""
       );
+    }
+  }
+
+  // 4. Werktags: Mandate, die bald ablaufen, und neue Objekte für Social Media
+  if (isWorkday) {
+    const { data: listingRows } = await admin
+      .from("listings")
+      .select("id, title, city, status, berater, created_at, activated_at, sale_deadline_months, listing_photos(count)")
+      .in("status", ["active", "reserved"]);
+    const rows = (listingRows ?? []) as Row[];
+    const name = (l: Row) => `${(l.title as string | null) || "Objekt"}, ${l.city}${l.berater ? ` [${l.berater}]` : ""}`;
+    const ablauf = rows
+      .filter((l) => l.status === "active" && l.activated_at)
+      .map((l) => ({ l, tage: saleDeadlineProgress(l.activated_at as string, (l.sale_deadline_months as number) ?? 4).remainingDays }))
+      .filter((x) => x.tage <= 14)
+      .sort((a, b) => a.tage - b.tage);
+    if (ablauf.length) {
+      sections.push(
+        `MANDATE LAUFEN BALD AB (${ablauf.length})`,
+        ...ablauf.map((x) => `• ${name(x.l)}: ${x.tage < 0 ? `seit ${-x.tage} Tagen abgelaufen` : `noch ${x.tage} Tage`}`),
+        "Mit dem Eigentümer verlängern oder Preis besprechen.",
+        `${SITE}/admin/fristen`,
+        ""
+      );
+    }
+    const neu = rows.filter((l) => {
+      const since = new Date((l.activated_at as string | null) ?? (l.created_at as string)).getTime();
+      const photos = (l.listing_photos as { count: number }[] | null)?.[0]?.count ?? 0;
+      return l.status === "active" && photos > 0 && now.getTime() - since <= 2 * DAY;
+    });
+    if (neu.length) {
+      sections.push("SOCIAL MEDIA: BEITRAG BEREIT", ...neu.map((l) => `• ${name(l)}: Bild und Text fertig zum Posten`), `${SITE}/admin/social`, "");
     }
   }
 

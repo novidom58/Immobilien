@@ -1006,27 +1006,44 @@ async function findUserIdByEmail(adminClient: NonNullable<ReturnType<typeof getS
 
 type ImportRow = { name: string; email: string; phone: string; message: string };
 
-export async function bulkImportCustomers(rows: ImportRow[]) {
+export async function bulkImportCustomers(rows: ImportRow[], herkunft: "novidom" | "hypocasa" = "novidom") {
   const { supabase, error: authError } = await requireAdmin();
-  if (!supabase) return { error: authError, count: 0 };
+  if (!supabase) return { error: authError, count: 0, skipped: 0 };
+
+  // Wer schon im CRM ist (gleiche E-Mail), wird nicht doppelt angelegt.
+  const { data: existing } = await supabase.from("customers").select("email").not("email", "is", null);
+  const known = new Set((existing ?? []).map((c) => String(c.email).trim().toLowerCase()));
+  let skipped = 0;
 
   const payload = rows
     .filter((r) => r.name.trim())
+    .filter((r) => {
+      const email = r.email.trim().toLowerCase();
+      if (!email) return true;
+      if (known.has(email)) {
+        skipped++;
+        return false;
+      }
+      known.add(email);
+      return true;
+    })
     .map((r) => ({
       full_name: r.name.trim(),
       email: r.email.trim() || null,
       phone: r.phone.trim() || null,
       notes: r.message.trim() || null,
       typ: "bestand" as const,
+      ...(herkunft === "hypocasa" ? { quelle: "HypoCasa · Import", rollen: ["finanzierung"] } : { quelle: "Import" }),
     }));
 
-  if (payload.length === 0) return { error: "Keine gültigen Zeilen (Name ist Pflicht).", count: 0 };
+  if (payload.length === 0)
+    return skipped ? { error: null, count: 0, skipped } : { error: "Keine gültigen Zeilen (Name ist Pflicht).", count: 0, skipped: 0 };
 
   const { error } = await supabase.from("customers").insert(payload);
-  if (error) return { error: error.message, count: 0 };
+  if (error) return { error: error.message, count: 0, skipped: 0 };
 
   revalidatePath("/admin", "layout");
-  return { error: null, count: payload.length };
+  return { error: null, count: payload.length, skipped };
 }
 
 /**
@@ -1643,5 +1660,72 @@ export async function addCustomerPolicy(customerId: string, formData: FormData) 
   });
   if (error) return { error: error.message };
   await supabase.from("customer_activity").insert({ customer_id: customerId, type: "notiz", text: `Police erfasst (${sparte}${text("versicherer") ? `, ${text("versicherer")}` : ""})` });
+  return { error: null };
+}
+
+/**
+ * Zwei Kunden zu einem zusammenführen (nur Partner). «keep» bleibt bestehen
+ * und übernimmt alle Felder, die bei ihm leer sind, die Rollen beider, die
+ * Notizen und den Verlauf, die Termine und die Käufer-Alarme. «remove» wird
+ * danach gelöscht.
+ */
+export async function mergeCustomers(keepId: string, removeId: string): Promise<{ error: string | null }> {
+  const { supabase, error: authError } = await requireAdmin();
+  if (!supabase) return { error: authError };
+  if (!keepId || !removeId || keepId === removeId) return { error: "Bitte zwei verschiedene Kunden wählen." };
+
+  const { data: rows, error: loadError } = await supabase.from("customers").select("*").in("id", [keepId, removeId]);
+  if (loadError) return { error: loadError.message };
+  const keep = rows?.find((r) => r.id === keepId) as Record<string, unknown> | undefined;
+  const remove = rows?.find((r) => r.id === removeId) as Record<string, unknown> | undefined;
+  if (!keep || !remove) return { error: "Kunde nicht gefunden." };
+
+  const empty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
+  const patch: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(remove)) {
+    if (["id", "created_at", "notes", "rollen"].includes(key)) continue;
+    if (empty(keep[key]) && !empty(value)) patch[key] = value;
+  }
+  const rollen = Array.from(new Set([...((keep.rollen as string[] | null) ?? []), ...((remove.rollen as string[] | null) ?? [])]));
+  if (rollen.length) patch.rollen = rollen;
+  const notes = [keep.notes, remove.notes].filter((n) => typeof n === "string" && n.trim()) as string[];
+  if (notes.length > 1 && notes[0] !== notes[1]) patch.notes = notes.join("\n\n");
+  else if (notes.length === 1 && empty(keep.notes)) patch.notes = notes[0];
+  // Der ältere Eintrag zählt als «Kunde seit»
+  if (String(remove.created_at) < String(keep.created_at)) patch.created_at = remove.created_at;
+
+  // Verknüpfte Daten umhängen (Verlauf, Termine, Käufer-Alarme)
+  const steps = await Promise.all([
+    supabase.from("customer_activity").update({ customer_id: keepId }).eq("customer_id", removeId),
+    supabase.from("termine").update({ customer_id: keepId }).eq("customer_id", removeId),
+  ]);
+  const stepError = steps.find((s) => s.error)?.error;
+  if (stepError) return { error: stepError.message };
+
+  const { data: alerts } = await supabase.from("listing_alerts").select("*").eq("customer_id", removeId);
+  if (alerts?.length) {
+    await supabase
+      .from("listing_alerts")
+      .upsert(
+        alerts.map((a) => ({ ...a, customer_id: keepId })),
+        { onConflict: "listing_id,customer_id", ignoreDuplicates: true }
+      );
+  }
+
+  // Erst löschen, dann aktualisieren: sonst kollidieren eindeutige Felder (z.B. Portal-Konto)
+  const { error: deleteError } = await supabase.from("customers").delete().eq("id", removeId);
+  if (deleteError) return { error: deleteError.message };
+  if (Object.keys(patch).length) {
+    const { error: updateError } = await supabase.from("customers").update(patch).eq("id", keepId);
+    if (updateError) return { error: updateError.message };
+  }
+  await supabase.from("customer_activity").insert({
+    customer_id: keepId,
+    type: "notiz",
+    text: `Zusammengeführt mit «${remove.full_name as string}»${remove.email ? ` (${remove.email as string})` : ""}`,
+  });
+
+  revalidatePath("/admin/kunden");
+  revalidatePath("/admin/kunden/doppelte");
   return { error: null };
 }

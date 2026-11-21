@@ -15,10 +15,11 @@ import { RatgeberHome } from "@/components/sections/RatgeberHome";
 import { BookingSection } from "@/components/sections/BookingSection";
 import { FinalCta } from "@/components/sections/FinalCta";
 import { getShowcase } from "@/lib/showcase";
+import { buyerCount, RADAR_MIN_KAEUFER } from "@/lib/buyerCount";
 import { Giraffe360Showcase } from "@/components/leistungen/Giraffe360Showcase";
 
 export default async function Home() {
-  const showcase = await getShowcase();
+  const [showcase, kaeufer] = await Promise.all([getShowcase(), buyerCount()]);
 
   return (
     <>
@@ -28,7 +29,7 @@ export default async function Home() {
         <UspMarquee />
         <TrustBar />
         <SolutionsHub />
-        <BuyerRadar />
+        {kaeufer >= RADAR_MIN_KAEUFER && <BuyerRadar />}
         <FeaturedListings />
         <Giraffe360Showcase />
         <WhyNoviDom />

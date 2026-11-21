@@ -121,9 +121,9 @@ export function VersicherungContent() {
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="flex flex-col rounded-2xl border border-line bg-white p-8 lg:p-10">
             <FileUp className="h-6 w-6 text-amber" strokeWidth={1.5} />
-            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Policen-Check, Lücken aufzeigen</h3>
+            <h3 className="mt-4 font-display text-2xl font-semibold text-ivory">Policen prüfen lassen, Lücken-Check erhalten</h3>
             <p className="mt-3 leading-relaxed text-ivory-dim">
-              Schicken Sie uns Ihre Policen. Zusammen mit unserem Partner HypoCasa legen wir alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
+              Schicken Sie uns Ihre Policen als Foto oder PDF. Zusammen mit unserem Partner HypoCasa legen wir alle drei Ringe nebeneinander und zeigen Ihnen, wo Lücken sind, wo Sie doppelt zahlen und wo Sie sparen können.
             </p>
             <ul className="mt-5 grid gap-2 text-sm text-ivory">
               {["Kostenlos und unverbindlich", "Antwort innert 5 Arbeitstagen", "Gebäude, Hausrat, Haftpflicht, Leben und 3a in einem Blick"].map((t) => (
@@ -170,8 +170,8 @@ export function VersicherungContent() {
           </div>
           <h3 className="mt-3 font-display text-2xl font-semibold text-ivory">Privat und Geschäft an einem Ort.</h3>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ivory-dim">
-            Sie haben eine eigene Firma? HypoCasa prüft Ihre Geschäftspolicen zusammen mit den privaten, damit nichts doppelt
-            oder gar nicht versichert ist.
+            Sie haben eine eigene Firma? Wir prüfen Ihre Geschäftspolicen zusammen mit den privaten, damit nichts doppelt oder gar nicht versichert ist. Der Abschluss
+            läuft über unseren Partner HypoCasa.
           </p>
           <ul className="mt-5 grid gap-2.5 text-sm text-ivory sm:grid-cols-2 lg:grid-cols-3">
             {SPARTEN_KMU.map((s) => (
@@ -188,7 +188,7 @@ export function VersicherungContent() {
             href="#kontakt"
             className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-night px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-amber"
           >
-            Geschäftspolicen prüfen lassen
+            KMU-Beratung anfragen
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
           </a>
         </div>

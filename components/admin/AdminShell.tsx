@@ -33,6 +33,8 @@ export function AdminShell({
   counts: {
     leads: number;
     fristen: number;
+    /** Offene Versicherungs-/Hypothekar-Meldungen (nur Partner) */
+    pruefen?: number;
   };
 }) {
   const pathname = usePathname();
@@ -49,10 +51,13 @@ export function AdminShell({
       title: "Übersicht",
       items: [
         { href: "/admin", label: "Heute", icon: "☀️" },
-        { href: "/admin/karriere", label: "Karriere", icon: "🏆" },
+        { href: "/admin/hilfe", label: "Wo finde ich was?", icon: "🧭" },
+        { href: "/admin/karriere", label: "Karriere", icon: "🏆", badge: counts.pruefen, badgeTone: "gold" },
+        { href: "/admin/provisionen", label: "Provisionen", icon: "💰" },
         { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
         { href: "/admin/mitarbeiter", label: "Mitarbeitende", icon: "📈" },
         { href: "/admin/leads", label: "Leads", icon: "⚡", badge: counts.leads, badgeTone: "red" },
+        { href: "/admin/kanaele", label: "Was bringt was", icon: "📶" },
       ],
     },
     {
@@ -63,13 +68,17 @@ export function AdminShell({
         { href: "/admin/fristen", label: "Ablaufende Fristen", icon: "⏰", badge: counts.fristen, badgeTone: "gold" },
         { href: "/admin/inserate", label: "Alle Inserate", icon: "🏠" },
         { href: "/admin/hypotheken", label: "Hypothekenwächter", icon: "🏦" },
+        { href: "/admin/unterlagen", label: "Unterlagen", icon: "📁" },
         { href: "/admin/feedback", label: "Besichtigungsfeedback", icon: "💬" },
+        { href: "/admin/social", label: "Social Media", icon: "📣" },
       ],
     },
     {
       title: "Erfassen",
       items: [
         { href: "/admin/kunde-erfassen", label: "Kunde erfassen", icon: "➕" },
+        { href: "/admin/erfassen", label: "Lead erfassen (Telefon)", icon: "☎️" },
+        { href: "/admin/akquise", label: "Akquise-E-Mail", icon: "✍️" },
         { href: "/admin/import", label: "Excel-Import", icon: "📥" },
       ],
     },
@@ -79,6 +88,7 @@ export function AdminShell({
         { href: "/admin/kalender", label: "Kalender", icon: "🗓️" },
         { href: "/admin/berater", label: "Berater", icon: "🧑‍💼" },
         { href: "/admin/mailvorlagen", label: "Mailvorlagen", icon: "✉️" },
+        { href: "/admin/newsletter", label: "Newsletter", icon: "📰" },
       ],
     },
     {

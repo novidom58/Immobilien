@@ -28,6 +28,9 @@ const STATUS_LABEL: Record<string, string> = {
   draft: "Entwurf",
 };
 
+/** Kunden, die über HypoCasa gekommen sind (Formular oder Import). */
+const isHypoCasa = (c: CrmCustomer) => (c.quelle ?? "").toLowerCase().startsWith("hypocasa");
+
 function AblaufPill({ listing }: { listing: CrmCustomer["listing"] }) {
   if (!listing || !listing.activated_at || (listing.status !== "active" && listing.status !== "reserved")) {
     return <span className="td-light">—</span>;
@@ -52,6 +55,7 @@ export function CustomerList({
   const [typFilter, setTypFilter] = useState("aktiv");
   const [beraterFilter, setBeraterFilter] = useState("");
   const [rolleFilter, setRolleFilter] = useState("");
+  const [firmaFilter, setFirmaFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const exCount = customers.filter((c) => c.typ === "ex").length;
@@ -65,13 +69,15 @@ export function CustomerList({
       if (typFilter === "ex" && c.typ !== "ex") return false;
       if (beraterFilter && c.berater !== beraterFilter) return false;
       if (rolleFilter && !c.rollen.includes(rolleFilter)) return false;
+      if (firmaFilter === "hypocasa" && !isHypoCasa(c)) return false;
+      if (firmaFilter === "novidom" && isHypoCasa(c)) return false;
       if (q) {
         const haystack = `${c.full_name} ${c.email ?? ""} ${c.phone ?? ""} ${c.address ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [customers, query, typFilter, beraterFilter, rolleFilter]);
+  }, [customers, query, typFilter, beraterFilter, rolleFilter, firmaFilter]);
 
   const openCustomer = customers.find((c) => c.id === openId) ?? null;
 
@@ -149,6 +155,11 @@ export function CustomerList({
               </option>
             ))}
           </select>
+          <select className="filter-select" value={firmaFilter} onChange={(e) => setFirmaFilter(e.target.value)} aria-label="Firma">
+            <option value="">NoviDom + HypoCasa</option>
+            <option value="novidom">Nur NoviDom</option>
+            <option value="hypocasa">Nur HypoCasa ({customers.filter(isHypoCasa).length})</option>
+          </select>
           <span className="td-light" style={{ fontSize: 12 }}>
             {filtered.length} Kunden · {exCount} im Archiv
           </span>
@@ -182,11 +193,16 @@ export function CustomerList({
                         {c.email}
                         {c.phone ? ` · ${formatSwissPhone(c.phone)}` : ""}
                       </div>
-                      {(c.rollen.length > 0 || c.finanz_status) && (
+                      {(c.rollen.length > 0 || c.finanz_status || isHypoCasa(c)) && (
                         <div className="flex flex-wrap gap-1" style={{ marginTop: 4 }}>
                           {c.finanz_status && (
                             <span className={`badge ${c.finanz_status === "bestaetigt" ? "badge-green" : "badge-blue"}`}>
                               {c.finanz_status === "bestaetigt" ? "Fin. bestätigt" : "Fin. vorgeprüft"}
+                            </span>
+                          )}
+                          {isHypoCasa(c) && (
+                            <span className="badge" style={{ background: "#fdecea", color: "#c0392b" }}>
+                              HypoCasa
                             </span>
                           )}
                           {c.rollen.map((r) => (

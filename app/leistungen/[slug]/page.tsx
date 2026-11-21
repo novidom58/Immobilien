@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Home as HomeIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -28,6 +29,19 @@ import { VersicherungContent } from "@/components/leistungen/VersicherungContent
 import { SellVsPrivate } from "@/components/sections/SellVsPrivate";
 import { BuyerSection, OwnerSection } from "@/components/sections/BuyerAndOwnerSections";
 
+const HYPOCASA_THEME = {
+  "--color-amber": "#c0392b",
+  "--color-amber-soft": "#c0392b",
+  "--color-ink": "#ffffff",
+  "--color-ink-2": "#fdf3f2",
+  "--color-ink-3": "#f8e3e0",
+  "--color-ivory": "#0f172a",
+  "--color-ivory-dim": "#475569",
+  "--color-line": "#e2e8f0",
+  "--color-night": "#0f172a",
+  "--color-blueprint": "#c0392b",
+};
+
 export function generateStaticParams() {
   return AREAS.map((a) => ({ slug: a.slug }));
 }
@@ -53,10 +67,11 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
   const content = AREA_CONTENT[area.id];
   const contact = AREA_CONTACTS[area.id];
-  // Finanzieren und Versichern laufen mit HypoCasa und übernehmen deren Rot als Akzentfarbe.
-  const themeStyle = content.accentColor
-    ? ({ "--color-amber": content.accentColor, "--color-amber-soft": content.accentColor } as React.CSSProperties)
-    : undefined;
+  // Finanzieren und Versichern laufen über HypoCasa und erscheinen in deren
+  // Look: weiss, HypoCasa-Rot, dunkle Schiefer-Schrift. Die Farben sind
+  // Theme-Variablen, darum färbt sich alles darunter automatisch um.
+  const hypo = content.theme === "hypocasa";
+  const themeStyle = hypo ? (HYPOCASA_THEME as React.CSSProperties) : undefined;
 
   return (
     <>
@@ -67,6 +82,19 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
           <Link href="/#leistungen" className="block font-mono text-[11px] uppercase tracking-[0.2em] text-ivory-dim hover:text-ivory">
             ← NoviDom 360°
           </Link>
+          {hypo && (
+            <div className="mx-auto mt-6 inline-flex items-center gap-2.5 rounded-full border border-line bg-white px-4 py-2 text-sm text-ivory-dim shadow-sm">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber text-white">
+                <HomeIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </span>
+              <span>
+                In Partnerschaft mit{" "}
+                <span className="font-extrabold tracking-tight text-ivory">
+                  Hypo<span className="text-amber">Casa</span>
+                </span>
+              </span>
+            </div>
+          )}
           <h1 className="mt-8 text-balance font-display text-[clamp(2.4rem,5.5vw,4.8rem)] font-normal leading-[1.05] tracking-[-0.03em] text-ivory">
             {content.headline}
             <br />

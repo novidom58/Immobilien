@@ -959,3 +959,18 @@ create policy "staff_ertraege_staff_insert" on staff_ertraege for insert
 drop policy if exists "staff_ertraege_staff_delete" on staff_ertraege;
 create policy "staff_ertraege_staff_delete" on staff_ertraege for delete
   using (public.my_berater() is not null and berater = public.my_berater() and bestaetigt_am is null);
+
+-- ---------------------------------------------------------------------
+-- Bringer: wer ein Objekt gebracht hat, erhält 20 % der Provision.
+-- Mitarbeitende sehen auch Abschlüsse, bei denen sie Bringer sind.
+-- ---------------------------------------------------------------------
+alter table listing_deals add column if not exists bringer text;
+update listing_deals d set bringer = l.berater
+  from listings l
+  where l.id = d.listing_id and d.self_acquired and d.bringer is null;
+drop policy if exists "listing_deals_staff_own" on listing_deals;
+create policy "listing_deals_staff_own" on listing_deals for select
+  using (
+    bringer = public.my_berater()
+    or exists (select 1 from listings l where l.id = listing_id and l.berater = public.my_berater())
+  );

@@ -30,8 +30,8 @@ export type AreaContent = {
   cta: string;
   /** Kurze Vertrauenspunkte unter den Buttons */
   badges?: string[];
-  /** Eigene Akzentfarbe für die Bereichsseite (z.B. HypoCasa-Rot) */
-  accentColor?: string;
+  /** Bereichsseite im Look unseres Partners (Finanzieren und Versichern laufen über HypoCasa) */
+  theme?: "hypocasa";
   /** Abschluss-Formular am Seitenende */
   closing: { title: string; text: string };
 };
@@ -62,7 +62,7 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     accent: "Persönlich.",
     intro:
       "Mit unserem Partner HypoCasa vergleichen wir über 50 Banken, Versicherungen und Pensionskassen und finden die beste Lösung für Sie. Von der ersten Anfrage bis zum Notartermin. Persönlich, neutral und kostenlos.",
-    accentColor: "#c0392b",
+    theme: "hypocasa",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Viele Anbieter, ein Vergleich", text: "Statt bei jeder Bank einzeln anzufragen, holen wir die Offerten für Sie ein und vergleichen sie verständlich." },
@@ -109,25 +109,24 @@ export const AREA_CONTENT: Record<AreaId, AreaContent> = {
     headline: "Rundum abgesichert.",
     accent: "Passend zu Ihrem Zuhause.",
     intro:
-      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Mit unserem Partner HypoCasa prüfen wir, was Ihr Zuhause wirklich braucht, und vergleichen die Angebote mehrerer Versicherer. Ohne Standardpaket. Persönlich, neutral und kostenlos.",
-    accentColor: "#c0392b",
+      "Beim Kauf, beim Umbau und im Besitz entstehen neue Risiken. Wir prüfen, was Ihr Zuhause wirklich braucht. Abgeschlossen wird über unseren Partner HypoCasa, mit Vergleich über viele Versicherer. Ohne Standardpaket.",
+    theme: "hypocasa",
     image: "/images/novidom-holzhaus.webp",
     benefits: [
       { title: "Gebäude & Naturgefahren", text: "Je nach Kanton über die Gebäudeversicherung geregelt. Wir zeigen, wo Lücken bestehen." },
       { title: "Hausrat & Haftpflicht", text: "Neu bewertet beim Umzug, damit die Versicherungssumme zum neuen Zuhause passt." },
       { title: "Bauzeit absichern", text: "Bauherrenhaftpflicht und Bauwesenversicherung beim Umbau, damit nichts an Ihnen hängen bleibt." },
-      { title: "Rechtsschutz", text: "Für Streitigkeiten mit Handwerkern, Nachbarn oder beim Kaufvertrag." },
+      { title: "Rechtsschutz", text: "Für Streitigkeiten mit Nachbarn, dem Vermieter oder rund um den Kaufvertrag." },
     ],
     faq: [
       { q: "Wann sollte ich meine Versicherungen prüfen?", a: "Beim Kauf, vor einem Umbau und bei jedem grösseren Lebensereignis. Spätestens alle paar Jahre lohnt sich ein Check." },
-      { q: "Kostet die Beratung etwas?", a: "Die Beratung ist für Sie kostenlos. HypoCasa wird von den Versicherungen entschädigt, wenn eine Police abgeschlossen wird. Kein Abschluss, keine Kosten." },
-      { q: "Wer schliesst die Versicherung ab?", a: "Die Versicherungen schliessen Sie über unseren Partner HypoCasa ab. Ein Ansprechpartner für Hypothek und Versicherung, abgestimmt auf Ihre Finanzierung." },
+      { q: "Kostet die Beratung etwas?", a: "Die Erstberatung ist für Sie kostenlos und unverbindlich." },
       { q: "Muss ich meine bestehenden Policen kündigen?", a: "Nein. Wir prüfen zuerst, was Sie haben, und empfehlen nur Änderungen, die sich lohnen." },
       { q: "Was passiert mit der Gebäudeversicherung beim Kauf?", a: "Sie geht mit dem Eigentum auf Sie über. Zusatzdeckungen wie Gebäudewasser oder Glas laufen beim Verkäufer und müssen neu abgeschlossen werden." },
       { q: "Was ist Unterversicherung?", a: "Ist die Versicherungssumme zu tief, zahlt die Versicherung im Schadenfall nur anteilig. Nach Umzug oder Umbau sollten Sie die Summen deshalb anpassen." },
       { q: "Braucht es eine Lebensversicherung für die Hypothek?", a: "Nicht zwingend, aber sie schützt Ihre Familie, wenn ein Einkommen wegfällt und die Hypothek sonst nicht mehr tragbar wäre." },
     ],
     cta: "Versicherung besprechen",
-    closing: { title: "Sichern wir Ihr Zuhause ab.", text: "Gemeinsam mit HypoCasa prüfen wir Ihre bestehenden Policen und zeigen, wo Lücken sind — unverbindlich und kostenlos." },
+    closing: { title: "Sichern wir Ihr Zuhause ab.", text: "Wir prüfen Ihre bestehenden Policen und zeigen, wo Lücken sind — unverbindlich und kostenlos." },
   },
 };

@@ -69,7 +69,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-5 pt-20 text-white lg:px-8">
+        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent px-6 pb-6 pt-24 text-white lg:px-8 lg:pb-8">
           {current ? (
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/80">
@@ -96,10 +96,10 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
               </div>
             )}
             <Link
-              href={current ? `/immobilien/${current.id}` : "#kaeufer-radar"}
-              className="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-white/25"
+              href={current ? `/immobilien/${current.id}` : "#bewertung"}
+              className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-ivory shadow-lg transition-colors hover:bg-amber hover:text-white lg:px-8 lg:py-4 lg:text-base"
             >
-              {current ? "Objekt ansehen →" : "Wer sucht Ihre Immobilie? →"}
+              {current ? "Objekt ansehen →" : "Was ist Ihre Immobilie wert? →"}
             </Link>
           </div>
         </div>
@@ -107,7 +107,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
 
       {/* Provisions-Siegel: bewusst gross und verspielt, das Hauptargument */}
       <motion.div
-        className="absolute -top-10 right-3 z-10 sm:-top-16 sm:right-8"
+        className="absolute -top-8 right-2 z-10 sm:-top-16 sm:right-8"
         initial={{ scale: 0, rotate: -40 }}
         animate={{ scale: 1, rotate: -8 }}
         transition={{ type: "spring", stiffness: 260, damping: 10, delay: 1.6 }}
@@ -115,7 +115,7 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
         <Link
           href="/leistungen/kaufen-verkaufen#kommission"
           aria-label="Ab nur 0.95% Provision statt 3%"
-          className="group relative flex h-32 w-32 items-center justify-center transition-transform hover:scale-110 motion-safe:animate-[nd-wiggle_7s_ease-in-out_3.5s_infinite] sm:h-48 sm:w-48"
+          className="group relative flex h-24 w-24 items-center justify-center transition-transform hover:scale-110 motion-safe:animate-[nd-wiggle_7s_ease-in-out_3.5s_infinite] sm:h-48 sm:w-48"
         >
           {/* Pulsierende Wellen hinter dem Siegel */}
           <span aria-hidden className="absolute inset-3 rounded-full bg-amber motion-safe:animate-[nd-pulse_2.6s_ease-out_infinite]" />
@@ -134,10 +134,10 @@ export function HeroShowcase({ items }: { items: ShowcaseItem[] }) {
             <span className="absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent motion-safe:animate-[nd-shine_4.5s_ease-in-out_2.5s_infinite]" />
           </span>
           <span className="relative flex flex-col items-center text-center text-white">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/90 sm:text-xs">ab nur</span>
-            <span className="font-display text-[2.1rem] font-semibold leading-none tracking-tight sm:text-[2.9rem]">0.95%</span>
-            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] sm:text-xs">Provision</span>
-            <span className="mt-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-amber sm:text-xs">
+            <span className="text-[8px] font-semibold uppercase tracking-[0.25em] text-white/90 sm:text-xs">ab nur</span>
+            <span className="font-display text-[1.55rem] font-semibold leading-none tracking-tight sm:text-[2.9rem]">0.95%</span>
+            <span className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] sm:text-xs">Provision</span>
+            <span className="mt-1 rounded-full bg-white px-1.5 py-0.5 text-[8px] font-semibold text-amber sm:px-2 sm:text-xs">
               statt <span className="line-through decoration-2">3%</span>
             </span>
           </span>

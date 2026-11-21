@@ -33,7 +33,8 @@ export function ErtragForm({ berater, isPartner }: { berater: string; isPartner:
       <input type="hidden" name="berater" value={berater} />
       <select name="art" className="field-select" value={art} onChange={(e) => setArt(e.target.value as typeof art)} aria-label="Art">
         <option value="hypothek">Hypothek</option>
-        <option value="versicherung">Versicherung</option>
+        {/* Versicherungen rechnet HypoCasa ab, erfasst werden sie nur von Partnern */}
+        {isPartner && <option value="versicherung">Versicherung</option>}
       </select>
       <input name="kunde" className="field-input" placeholder="Kunde" aria-label="Kunde" />
       <input
@@ -66,11 +67,31 @@ export function ErtragForm({ berater, isPartner }: { berater: string; isPartner:
 }
 
 /** Partner: offenen Eintrag mit definitivem Ertrag bestätigen. */
-export function ConfirmErtrag({ id, vorschlag }: { id: string; vorschlag: number | null }) {
+export function ConfirmErtrag({
+  id,
+  vorschlag,
+  berater,
+  beraterOptions,
+}: {
+  id: string;
+  vorschlag: number | null;
+  /** Aktuell eingetragene Person (Bringer), korrigierbar */
+  berater?: string;
+  beraterOptions?: string[];
+}) {
   const { pending, error, run } = useAction(confirmErtrag);
   return (
     <form action={run} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
       <input type="hidden" name="id" value={id} />
+      {beraterOptions && beraterOptions.length > 0 && (
+        <select name="berater" className="field-select" defaultValue={berater} aria-label="Bringer" style={{ width: 140 }}>
+          {beraterOptions.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      )}
       <input name="ertrag" className="field-input" style={{ width: 120 }} inputMode="numeric" defaultValue={vorschlag ?? ""} placeholder="Ertrag CHF" aria-label="Ertrag CHF" />
       <button className="btn btn-green btn-sm" disabled={pending}>
         Bestätigen

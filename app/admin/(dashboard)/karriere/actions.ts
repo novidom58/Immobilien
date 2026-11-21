@@ -20,9 +20,10 @@ const num = (v: FormDataEntryValue | null) => {
 };
 
 /**
- * Versicherungs- oder Hypothekar-Abschluss erfassen. Mitarbeitende erfassen
- * für sich selbst (zählt nach Bestätigung durch einen Partner), Partner für
- * eine beliebige Person (gilt sofort als bestätigt).
+ * Versicherungs- oder Hypothekar-Abschluss erfassen. Mitarbeitende melden
+ * Hypotheken für sich selbst (zählt nach Bestätigung durch einen Partner).
+ * Versicherungen rechnet HypoCasa ab, sie erfassen nur Partner, für eine
+ * beliebige Person (gilt sofort als bestätigt).
  */
 export async function addErtrag(formData: FormData): Promise<Result> {
   const { supabase, staff } = await staffClient();
@@ -32,6 +33,8 @@ export async function addErtrag(formData: FormData): Promise<Result> {
   if (!berater) return { error: "Kein Berater zugeordnet." };
 
   const art = formData.get("art") === "hypothek" ? "hypothek" : "versicherung";
+  // Versicherungen werden über HypoCasa abgerechnet und nur von Partnern erfasst
+  if (art === "versicherung" && staff.role !== "admin") return { error: "Versicherungen erfassen die Partner." };
   const volumen = num(formData.get("volumen"));
   let ertrag = num(formData.get("ertrag"));
   if (!ertrag && art === "hypothek" && volumen) ertrag = Math.round((volumen * HYPO_ERTRAG_PCT) / 100);
@@ -56,16 +59,18 @@ export async function addErtrag(formData: FormData): Promise<Result> {
   return { error: null };
 }
 
-/** Partner bestätigen einen Eintrag und legen den definitiven Ertrag fest. */
+/** Partner bestätigen einen Eintrag, legen den definitiven Ertrag fest und korrigieren bei Bedarf den Bringer. */
 export async function confirmErtrag(formData: FormData): Promise<Result> {
   const { supabase, staff } = await staffClient();
   if (!supabase || staff?.role !== "admin") return { error: "Nur Partner können bestätigen." };
   const id = String(formData.get("id") ?? "");
   const ertrag = num(formData.get("ertrag"));
+  // Bringer korrigieren: wer den Kunden gebracht hat, erhält die 80 %
+  const berater = String(formData.get("berater") ?? "").trim();
   if (!id || !ertrag) return { error: "Bitte den Ertrag in CHF angeben." };
   const { error } = await supabase
     .from("staff_ertraege")
-    .update({ ertrag_chf: ertrag, bestaetigt_am: new Date().toISOString() })
+    .update({ ertrag_chf: ertrag, bestaetigt_am: new Date().toISOString(), ...(berater ? { berater } : {}) })
     .eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/admin/karriere");

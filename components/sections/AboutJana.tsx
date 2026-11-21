@@ -33,34 +33,22 @@ const PEOPLE = [
   },
 ];
 
-const stats = [
-  { value: "500+", label: "Bewertungen" },
-  { value: "20+", label: "Jahre Praxis" },
-  { value: "ab 0.95%", label: "Provision" },
-];
-
 export function AboutJana() {
   return (
     <section id="ueber-uns" className="relative bg-ink py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionLabel>Köpfe hinter NoviDom</SectionLabel>
 
-        <div className="mt-10">
-          <Reveal delay={0.1}>
+        {/* Links Titel und Einladung, rechts der Text: nutzt die ganze Breite */}
+        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <Reveal>
             <h2 className="text-balance font-display text-3xl font-semibold leading-tight text-ivory lg:text-5xl">
               Unser Team
             </h2>
             <p className="mt-2 font-mono text-sm uppercase tracking-widest text-blueprint">
               NoviDom Immobilien AG · Basel &amp; Zug
             </p>
-            <p className="mt-8 max-w-2xl text-balance text-lg text-ivory-dim">
-              Hinter NoviDom steht ein erfahrenes Team mit Kompetenzen in
-              Immobilienverkauf, Immobilienbewertung, Finanzierung und
-              digitaler Vermarktung. Gemeinsam begleiten wir unsere Kunden
-              persönlich und professionell vom ersten Gespräch bis zum
-              erfolgreichen Abschluss.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-xs uppercase tracking-widest text-blueprint">
+            <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-xs uppercase tracking-widest text-blueprint">
               {competences.map((c, i) => (
                 <span key={c} className="flex items-center gap-3">
                   {i > 0 && <span aria-hidden className="text-ivory-dim/30">·</span>}
@@ -68,32 +56,24 @@ export function AboutJana() {
                 </span>
               ))}
             </div>
-            <p className="mt-5 max-w-2xl text-balance text-lg text-ivory-dim">
-              Was uns unterscheidet: Wir denken Immobilienverkauf und
-              Finanzierung zusammen. Käufer werden direkt auf ihre
-              Finanzierungsfähigkeit geprüft — kein Zeitverlust, mehr
-              Sicherheit für Sie. Persönlich, unkompliziert und immer
-              erreichbar, bis zum Notartermin.
-            </p>
-
-            <div className="mt-10 flex gap-10">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div className="font-display text-3xl font-semibold text-amber lg:text-4xl">
-                    {stat.value}
-                  </div>
-                  <div className="mt-1 text-sm text-ivory-dim">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
             <Link
               href="/karriere"
-              className="group mt-10 inline-flex items-center gap-2 rounded-full border border-amber/40 px-6 py-3 text-sm font-semibold text-ivory transition-colors hover:border-amber hover:bg-amber/10"
+              className="group mt-8 inline-flex items-center gap-2 rounded-full border border-amber/40 px-6 py-3 text-sm font-semibold text-ivory transition-colors hover:border-amber hover:bg-amber/10"
             >
               Teil vom Team werden
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.75} />
             </Link>
+          </Reveal>
+
+          <Reveal delay={0.1} className="grid gap-5 text-lg leading-relaxed text-ivory-dim lg:pt-2">
+            <p>
+              Hinter NoviDom steht ein erfahrenes Team mit Kompetenzen in Immobilienverkauf, Immobilienbewertung, Finanzierung und digitaler Vermarktung.
+              Gemeinsam begleiten wir unsere Kunden persönlich und professionell vom ersten Gespräch bis zum erfolgreichen Abschluss.
+            </p>
+            <p>
+              Was uns unterscheidet: Wir denken Immobilienverkauf und Finanzierung zusammen. Käufer werden direkt auf ihre Finanzierungsfähigkeit geprüft, das
+              heisst kein Zeitverlust und mehr Sicherheit für Sie. Persönlich, unkompliziert und immer erreichbar, bis zum Notartermin.
+            </p>
           </Reveal>
         </div>
 

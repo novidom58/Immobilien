@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PORTAL_WEGWEISER } from "@/lib/wegweiser";
 import { OpenSectionOnHash } from "@/components/portal/OpenSectionOnHash";
 import { Fragment } from "react";
 import { isAnliegen, type Anliegen } from "@/lib/anliegen";
@@ -88,7 +89,7 @@ async function getCrmProfile(userId: string, email: string | undefined) {
   };
 }
 
-type PortalSection = "weg" | "suchprofil" | "objekte" | "planer" | "finanzierung" | "umbau" | "eigentum" | "verkaufen";
+type PortalSection = "weg" | "suchprofil" | "objekte" | "planer" | "finanzierung" | "versicherung" | "umbau" | "eigentum" | "verkaufen";
 
 const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
   verkauf: "Mein Verkauf",
@@ -97,19 +98,20 @@ const SECTION_LABEL: Record<PortalSection | "verkauf", string> = {
   objekte: "Passende Objekte",
   planer: "Grundriss-Planer",
   finanzierung: "Finanzierung",
+  versicherung: "Versicherung",
   umbau: "Umbau",
   eigentum: "Mein Eigentum",
   verkaufen: "Verkaufen",
 };
 
 const ORDER: Record<Anliegen | "eigentum", PortalSection[]> = {
-  kaufen: ["suchprofil", "objekte", "planer", "finanzierung", "umbau", "eigentum", "verkaufen"],
-  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "planer", "finanzierung", "umbau"],
-  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "planer", "umbau", "verkaufen"],
-  umbauen: ["umbau", "finanzierung", "eigentum", "suchprofil", "objekte", "planer", "verkaufen"],
-  versichern: ["eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "planer", "verkaufen"],
-  eigentum: ["eigentum", "finanzierung", "umbau", "verkaufen", "suchprofil", "objekte", "planer"],
-  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "planer", "umbau"],
+  kaufen: ["suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau", "eigentum", "verkaufen"],
+  verkaufen: ["verkaufen", "eigentum", "suchprofil", "objekte", "planer", "finanzierung", "versicherung", "umbau"],
+  finanzieren: ["finanzierung", "eigentum", "suchprofil", "objekte", "planer", "versicherung", "umbau", "verkaufen"],
+  umbauen: ["umbau", "finanzierung", "versicherung", "eigentum", "suchprofil", "objekte", "planer", "verkaufen"],
+  versichern: ["versicherung", "eigentum", "umbau", "finanzierung", "suchprofil", "objekte", "planer", "verkaufen"],
+  eigentum: ["eigentum", "finanzierung", "umbau", "versicherung", "verkaufen", "suchprofil", "objekte", "planer"],
+  trennung: ["finanzierung", "eigentum", "verkaufen", "suchprofil", "objekte", "planer", "versicherung", "umbau"],
 };
 
 /**
@@ -139,7 +141,7 @@ const MAIN: Record<keyof typeof ORDER, PortalSection[]> = {
   verkaufen: ["verkaufen", "eigentum"],
   finanzieren: ["finanzierung"],
   umbauen: ["umbau"],
-  versichern: ["eigentum"],
+  versichern: ["versicherung"],
   eigentum: ["eigentum"],
   trennung: ["finanzierung", "eigentum", "verkaufen"],
 };
@@ -150,7 +152,7 @@ const TITLE: Record<keyof typeof ORDER, [string, string]> = {
   verkaufen: ["Mein", "Verkauf"],
   finanzieren: ["Meine", "Finanzierung"],
   umbauen: ["Mein", "Umbau"],
-  versichern: ["Mein", "Zuhause"],
+  versichern: ["Meine", "Versicherungen"],
   eigentum: ["Mein", "Eigentum"],
   trennung: ["Meine", "Situation"],
 };
@@ -161,17 +163,18 @@ const MORE_HINT: Record<PortalSection, string> = {
   objekte: "Passende Objekte und Favoriten",
   planer: "Möbel massstabsgetreu im echten Grundriss platzieren",
   finanzierung: "Kaufkraft prüfen und Unterlagen für die Bank",
+  versicherung: "Policen prüfen und vergleichen lassen, mit HypoCasa",
   umbau: "Richtpreise, Förderung und Umbau anfragen",
   eigentum: "Wertmonitor und Hypothekenwächter für Ihre Immobilie",
   verkaufen: "Was ist Ihr Zuhause wert? Verkauf starten",
 };
 
 const INTRO: Record<Anliegen | "eigentum", string> = {
-  kaufen: "Suchprofil, Finanzierung und Objekte an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
+  kaufen: "Suchprofil, Finanzierung und Versicherung an einem Ort. Passende Objekte sehen Sie hier zuerst, oft vor den Portalen.",
   verkaufen: "Was ist Ihr Zuhause wert, und wie verkaufen Sie es am besten? Hier starten Sie Ihren Verkauf und behalten alles im Blick.",
   finanzieren: "Ihre Kaufkraft, Ihr Finanzierungs-Pass und Ihre laufende Hypothek an einem Ort. HypoCasa prüft verbindlich innert 24 Stunden.",
-  umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Die Finanzierung gleich dabei.",
-  versichern: "Ihre Versicherungen prüft und vermittelt unser Partner HypoCasa persönlich. Hier behalten Sie Wert und Hypothek Ihres Zuhauses im Blick.",
+  umbauen: "Kosten abschätzen, Förderung prüfen und mit uns planen. Finanzierung und Versicherung gleich dabei.",
+  versichern: "Lassen Sie Ihre Versicherungen prüfen und vergleichen, zusammen mit unserem Partner HypoCasa. Wir zeigen Ihnen, wo Lücken sein könnten.",
   eigentum: "Der Richtwert Ihrer Immobilie und Ihre Hypothek im Blick. Wir melden uns rechtzeitig, wenn sich etwas lohnt.",
   trennung: "Prüfen Sie, ob Sie das Haus allein finanzieren können, und sehen Sie den aktuellen Richtwert. Vertraulich und nur für Sie sichtbar.",
 };
@@ -255,7 +258,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     documents = documents.filter((doc) => doc.url);
   }
 
-  // «Mein Immobilienplan»: Suchprofil, Finanzierung, Favoriten
+  // «Mein Immobilienplan»: Suchprofil, Finanzierung, Versicherung, Favoriten
   const plan = planRes.data as
     | (SearchProfile & {
         finanz: { income: number; savings: number; pension: number; price: number; max_price?: number; saved_at?: string } | null;
@@ -423,6 +426,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </section>
     ),
+    versicherung: (
+        <section id="versicherung" className={sectionClass}>
+          <h2 className={sectionHead}>Versicherungen</h2>
+          {/* Versicherungen laufen über unseren Partner HypoCasa, darum hier nur der Weg dorthin */}
+          <div id="policen" className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white p-6">
+            <div>
+              <div className="font-display text-xl text-ivory">Policen prüfen und vergleichen lassen</div>
+              <p className="mt-1 max-w-xl text-sm text-ivory-dim">
+                Gebäude, Hausrat, Haftpflicht und Vorsorge: Zusammen mit unserem Partner HypoCasa prüfen wir Ihre Policen auf Lücken und vergleichen über viele
+                Versicherer. Kostenlos und unverbindlich.
+              </p>
+            </div>
+            <Link href="/leistungen/versichern#kontakt" className="rounded-full bg-night px-5 py-3 text-sm font-semibold text-ink hover:bg-amber">
+              Beratung anfragen
+            </Link>
+          </div>
+        </section>
+    ),
     umbau: (
         <section id="umbau" className={sectionClass}>
           <h2 className={sectionHead}>Umbauen &amp; einrichten</h2>
@@ -523,6 +544,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         : plan?.finanz?.max_price
           ? `Kaufkraft bis ${formatChf(plan.finanz.max_price)}`
           : "Noch nicht geprüft",
+    versicherung: "Prüfen lassen mit HypoCasa",
     planer: `${planOptions.length} ${planOptions.length === 1 ? "Grundriss" : "Grundrisse"}${planOptions.some((o) => o.favorite) ? ` · ${planOptions.filter((o) => o.favorite).length} Favoriten` : ""}`,
     umbau: "Richtpreise und Anfrage",
     eigentum: eigentum ? `Richtwert ${formatChf(eigentum.wert.mid)}` : "Wertmonitor einrichten",
@@ -753,6 +775,32 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </div>
           </section>
         )}
+
+        {/* Wegweiser: kurze Antworten, wo was im Portal steht */}
+        <details className="group mt-12 rounded-2xl border border-line bg-white px-5 py-4 open:pb-6">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <span>
+              <span className="block font-display text-lg text-ivory">Wo finde ich was?</span>
+              <span className="block text-sm text-ivory-dim">Kurze Antworten zu Ihrem Kundenportal</span>
+            </span>
+            <span aria-hidden className="text-2xl leading-none text-amber transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+            {PORTAL_WEGWEISER.map((w) => (
+              <div key={w.frage}>
+                <dt className="text-sm font-semibold text-ivory">{w.frage}</dt>
+                <dd className="mt-1 text-sm leading-relaxed text-ivory-dim">{w.antwort}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 text-sm text-ivory-dim">
+            Noch Fragen? Schreiben Sie uns an{" "}
+            <a href="mailto:verkaufen@novidom-immo.ch" className="font-semibold text-amber hover:underline">
+              verkaufen@novidom-immo.ch
+            </a>
+            , wir melden uns persönlich.
+          </p>
+        </details>
       </div>
     </main>
   );

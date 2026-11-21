@@ -29,20 +29,23 @@ function Chips({
   options,
   value,
   onToggle,
+  row = false,
 }: {
   options: string[];
   value: string[];
   onToggle: (option: string) => void;
+  /** Alle Optionen auf einer Zeile (ab Tablet), Text darf umbrechen */
+  row?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={row ? "grid grid-cols-2 gap-2 sm:grid-cols-4" : "flex flex-wrap gap-2"}>
       {options.map((o) => (
         <button
           key={o}
           type="button"
           aria-pressed={value.includes(o)}
           onClick={() => onToggle(o)}
-          className={`rounded-xl border px-4 py-3 font-sans text-sm transition-colors ${
+          className={`rounded-xl border font-sans text-sm transition-colors ${row ? "px-2 py-3 text-center leading-tight" : "px-4 py-3"} ${
             value.includes(o) ? "border-amber bg-amber/10 text-amber-soft" : "border-line bg-ink text-ivory-dim hover:border-ivory-dim/40"
           }`}
         >
@@ -395,7 +398,7 @@ export function FinalCta({
 
                   {anliegen === "versichern" && (
                     <>
-                      <Chips options={SITUATIONEN} value={situation} onToggle={multi(situation, setSituation)} />
+                      <Chips row options={SITUATIONEN} value={situation} onToggle={multi(situation, setSituation)} />
                       <input placeholder="Ort (optional)" value={address} onChange={(e) => setAddress(e.target.value)} className={fieldClasses} />
                     </>
                   )}

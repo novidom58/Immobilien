@@ -346,6 +346,11 @@ export function ListingCard({
               Datenblatt für die Bank
             </Link>
           )}
+          {listing.status !== "draft" && (
+            <Link href={`/admin/social#objekt-${listing.id}`} style={{ color: "var(--blue)", textDecoration: "underline" }}>
+              📣 Social-Media-Beitrag
+            </Link>
+          )}
         </div>
         <div style={{ marginTop: 10 }}>
           <PhotoManager listingId={listing.id} count={listing.photoCount} />

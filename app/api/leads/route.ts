@@ -6,7 +6,7 @@ import { createResendClient } from "@/lib/resend";
 import { createClient } from "@/lib/supabase/server";
 import { syncLeadToCrm } from "@/lib/leadCrm";
 import { isAnliegen } from "@/lib/anliegen";
-import { notifyHypoCasa } from "@/lib/hypocasa";
+import { sendToHypoCasa } from "@/lib/hypocasa";
 
 const NOTIFY_TO = process.env.LEADS_EMAIL_TO || "verkaufen@novidom-immo.ch";
 const NOTIFY_FROM = process.env.LEADS_EMAIL_FROM || "NoviDom Immobilien AG <onboarding@resend.dev>";
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
   const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 50) : "";
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 4000) : "";
   const wantsFinancing = body.wantsFinancing === true;
+  // Weitergabe an HypoCasa nur mit ausdrücklicher Einwilligung (Häkchen im Formular)
+  const hypocasaConsent = body.hypocasaConsent === true;
   const newsletterOptIn = body.newsletterOptIn === true;
   const listingId = typeof body.listingId === "string" && UUID_RE.test(body.listingId) ? body.listingId : null;
   const source = typeof body.source === "string" ? body.source.trim().slice(0, 100) : "";
@@ -107,16 +109,12 @@ export async function POST(request: Request) {
     });
     results.emailed = !error;
 
-    // Finanzierung und Versicherung laufen über HypoCasa: der Lead geht
-    // direkt per Mail an HypoCasa, ohne Umweg über das Team.
+    // Finanzierung und Versicherung laufen über HypoCasa: mit Einwilligung geht der
+    // Lead direkt ins HypoCasa-CRM (Rückfall: Mail), ohne Umweg über das Team.
     const hypoCasaThema =
-      anliegen === "versichern" ? "Versicherungs" : wantsFinancing || anliegen === "finanzieren" ? "Finanzierungs" : null;
-    if (hypoCasaThema) {
-      await notifyHypoCasa({
-        replyTo: email,
-        subject: `${hypoCasaThema}-Lead von NoviDom: ${name}`,
-        text: `Name: ${name}\nE-Mail: ${email}\nTelefon: ${phone || "—"}\nQuelle: NoviDom ${source || type}\n\n${message || "—"}`,
-      }).catch(() => false);
+      anliegen === "versichern" ? "versicherung" : wantsFinancing || anliegen === "finanzieren" ? "finanzierung" : null;
+    if (hypoCasaThema && hypocasaConsent) {
+      await sendToHypoCasa({ thema: hypoCasaThema, name, email, phone, message, quelle: source || type });
     }
 
     // Best-effort auto-reply to the submitter. Failing this never fails the

@@ -111,7 +111,7 @@ export function WertmonitorForm({ portal = false, initial }: { portal?: boolean;
       const res = await fetch("/api/wertmonitor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, consent: raw.consent === "on", quelle }),
+        body: JSON.stringify({ ...data, consent: raw.consent === "on", hypocasaConsent: raw.hypocasa_consent === "on", quelle }),
       });
       const json = await res.json().catch(() => ({}));
       setState({ busy: false, error: res.ok ? null : (json.error ?? "Senden fehlgeschlagen."), wert: res.ok ? json.wert : null });
@@ -252,6 +252,12 @@ export function WertmonitorForm({ portal = false, initial }: { portal?: boolean;
                 <input name="hypo_betrag" inputMode="numeric" defaultValue={initial?.hypo_betrag ?? ""} placeholder="z.B. 650'000" className={field} />
               </label>
             </div>
+            {!portal && (
+              <label className="mt-3 flex items-start gap-2.5 text-xs leading-relaxed text-ivory-dim">
+                <input type="checkbox" name="hypocasa_consent" className="mt-0.5 h-4 w-4 shrink-0 accent-amber" />
+                <span>Unser Finanzierungspartner HypoCasa darf mich vor dem Ablauf mit Offerten kontaktieren.</span>
+              </label>
+            )}
           </div>
           {!portal && (
             <>

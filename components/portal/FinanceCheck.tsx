@@ -76,6 +76,7 @@ export function FinanceCheck({
         name: user.name,
         email: user.email,
         wantsFinancing: true,
+        hypocasaConsent: true,
         message: [
           "Finanzierungs-Check aus dem Kundenportal, bitte verbindlich prüfen (HypoCasa):",
           `Einkommen: ${chf(input.income)} / Jahr`,
@@ -177,6 +178,7 @@ export function FinanceCheck({
           >
             {state === "sending" ? "Wird gesendet …" : "Verbindlich prüfen lassen"}
           </button>
+          <p className="mt-2 text-xs text-ivory-dim">Für die Prüfung gehen Ihre Angaben an unseren Finanzierungspartner HypoCasa.</p>
           <button type="button" onClick={handleSave} disabled={state === "saving"} className="text-sm text-ivory underline underline-offset-4">
             {state === "saving" ? "Speichert …" : "Werte speichern"}
           </button>

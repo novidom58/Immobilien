@@ -7,7 +7,7 @@ const STEPS = [
   { key: "besichtigung", title: "Besichtigung", text: "Termin online buchen oder per WhatsApp anfragen.", href: "#objekte" },
   { key: "bestaetigt", title: "Finanzierung bestätigt", text: "HypoCasa bestätigt verbindlich innert 24 Stunden.", href: "#finanzierung" },
   { key: "angebot", title: "Angebot & Reservation", text: "Wir verhandeln mit Ihnen und halten das Objekt mit einer Reservation fest.", href: null },
-  { key: "notar", title: "Notar & Schlüssel", text: "Kaufvertrag beurkunden, Versicherung abschliessen, einziehen.", href: "#versicherung" },
+  { key: "notar", title: "Notar & Schlüssel", text: "Kaufvertrag beurkunden, Versicherung mit HypoCasa abschliessen, einziehen.", href: "/leistungen/versichern" },
 ] as const;
 
 export type JourneyState = Partial<Record<(typeof STEPS)[number]["key"], boolean>>;

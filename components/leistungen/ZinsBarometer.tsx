@@ -48,6 +48,7 @@ export function ZinsBarometer() {
         source: "saron-alarm",
         anliegen: "finanzieren",
         wantsFinancing: true,
+        hypocasaConsent: true,
         message: "Bereich: Finanzieren\nMöchte den SARON-Alarm erhalten (Meldung bei deutlicher Zinsänderung).",
       }),
     }).catch(() => null);
@@ -111,6 +112,7 @@ export function ZinsBarometer() {
                 </button>
               </div>
             )}
+            {state !== "done" && <p className="mt-3 text-xs text-ink/60">Den SARON-Alarm betreut unser Partner HypoCasa. Mit der Anmeldung geht Ihre E-Mail an HypoCasa.</p>}
             {state === "error" && <p className="mt-2 text-xs text-red-300">Hat nicht geklappt. Bitte später nochmals versuchen.</p>}
           </form>
           <a

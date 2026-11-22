@@ -106,6 +106,7 @@ export function FinalCta({
   const [source, setSource] = useState("");
   const [wantsFinancing, setWantsFinancing] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const [hypocasaConsent, setHypocasaConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -223,6 +224,7 @@ export function FinalCta({
             .join("\n"),
           wantsFinancing: anliegen === "finanzieren" || wantsFinancing,
           newsletterOptIn,
+          hypocasaConsent: hypocasaConsent && (anliegen === "finanzieren" || anliegen === "versichern" || wantsFinancing),
           source: source || undefined,
         }),
       });
@@ -461,6 +463,17 @@ export function FinalCta({
                         className="mt-0.5 h-4 w-4 rounded border-line bg-ink accent-amber"
                       />
                       Ich interessiere mich zusätzlich für eine Finanzierungsberatung.
+                    </label>
+                  )}
+                  {(anliegen === "finanzieren" || anliegen === "versichern" || wantsFinancing) && (
+                    <label className="flex items-start gap-2.5 text-sm text-ivory-dim">
+                      <input
+                        type="checkbox"
+                        checked={hypocasaConsent}
+                        onChange={(e) => setHypocasaConsent(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-line bg-ink accent-amber"
+                      />
+                      Ich bin einverstanden, dass meine Angaben für die {anliegen === "versichern" ? "Versicherungs" : "Finanzierungs"}beratung an unseren Partner HypoCasa weitergegeben werden.
                     </label>
                   )}
                   <label className="flex items-start gap-2.5 text-sm text-ivory-dim">

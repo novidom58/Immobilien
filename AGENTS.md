@@ -6,9 +6,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Zusammenarbeit NoviDom ↔ HypoCasa (bei allen Änderungen einhalten)
 
-- HypoCasa ist eine eigene Firma mit eigenem CRM (hypocasa.ch/crm, PHP/SQLite bei Metanet). NoviDom (Next.js/Supabase/Vercel) speichert keine HypoCasa-Daten: keine HypoCasa-Leads, -Kunden oder -Importe in Supabase, keine Schnittstelle, die HypoCasa-Daten bei NoviDom ablegt.
+- HypoCasa ist eine eigene Firma mit eigenem CRM (hypocasa.ch/crm, PHP/SQLite bei Metanet). Die beiden CRMs gleichen sich ab, aber nur pro Kunde mit dessen Einwilligung, in beide Richtungen.
+- HypoCasa → NoviDom: nur Anfragen, bei denen der Kunde auf hypocasa.ch der Weitergabe an NoviDom zugestimmt hat. Schnittstelle `POST /api/partner/hypocasa` mit `einwilligung: true` und Header `X-ND-Key = NOVIDOM_PARTNER_KEY`; ohne Einwilligung lehnt sie ab. Keine Sammel-Importe von HypoCasa-Kunden ohne Einwilligung.
 - Finanzierungs-, Verlängerungs- und Versicherungsanfragen gehen NUR mit Einwilligung des Kunden (Häkchen `hypocasaConsent`) an HypoCasa, über `sendToHypoCasa()` in `lib/hypocasa.ts`. Rückfall: Mail an `HYPOCASA_LEADS_EMAIL_TO`.
 - Schnittstelle: `POST HYPOCASA_API_URL` mit Header `X-HC-Key = HYPOCASA_API_KEY`. HypoCasa erkennt bekannte E-Mails und legt dann keinen zweiten Lead an.
 - Keine Sammellisten oder Exporte von NoviDom-Kunden an HypoCasa ohne Einwilligung.
 - Neue Formulare mit Finanzierungs- oder Versicherungsbezug brauchen dasselbe Häkchen und müssen `sendToHypoCasa()` verwenden.
-- Gemeinsamer Überblick: monatlich Kennzahlen (Anzahl Leads, Abschlüsse) per CSV aus beiden CRMs in eine gemeinsame Excel-Liste (NoviDom: `/api/admin/kennzahlen`). Keine Personendaten zusammenführen.
+- Gemeinsamer Überblick: monatlich Kennzahlen (Anzahl Leads, Abschlüsse) per CSV aus beiden CRMs in eine gemeinsame Excel-Liste (NoviDom: `/api/admin/kennzahlen`). Personendaten nur über die beiden Schnittstellen und nur mit Einwilligung, nie per Export oder Liste.

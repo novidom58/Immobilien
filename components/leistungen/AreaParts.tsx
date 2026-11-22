@@ -36,7 +36,7 @@ export function AreaContactCard({ contact }: { contact: AreaContact }) {
           <Image src={contact.photo} alt={name} fill sizes="180px" className="object-cover" />
         ) : (
           <span className="absolute inset-0 flex items-center justify-center font-display text-5xl text-ivory/25">
-            {contact.name ? initials(contact.name) : "ND"}
+            {contact.monogram ?? (contact.name ? initials(contact.name) : "ND")}
           </span>
         )}
       </div>

@@ -125,6 +125,8 @@ export async function GET(request: Request) {
       subject: `Hypothekenwächter: ${lines.length} Hypothek(en) laufen in den nächsten 12 Monaten ab`,
       text: [...lines, "", `Übersicht im Admin: ${SITE}/admin/hypotheken`].join("\n"),
     });
+    // Keine Sammelliste an HypoCasa: Kunden mit Einwilligung sind bei der
+    // Anmeldung bereits einzeln ins HypoCasa-CRM übertragen worden.
   }
 
   return NextResponse.json({ ok: true, wertmonitor: wertSent, hypothekenwaechter: hypoSent });

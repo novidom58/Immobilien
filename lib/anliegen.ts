@@ -44,7 +44,7 @@ export const ANLIEGEN_CONFIG: Record<
     title: "Sichern wir Ihr Zuhause ab.",
     text: "Wir prüfen Ihre Policen und zeigen, wo Lücken sind. Unverbindlich und kostenlos.",
     submit: "Versicherungs-Check anfragen",
-    portalLabel: "Versicherungs-Check im Kundenportal",
+    portalLabel: "Kundenkonto eröffnen",
   },
   trennung: {
     label: "Trennung",

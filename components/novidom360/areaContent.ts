@@ -9,6 +9,8 @@ export type AreaContact = {
   name: string;
   role: string;
   photo?: string;
+  /** Kürzel im Bildfeld, solange kein Foto da ist (sonst die Initialen) */
+  monogram?: string;
   phone?: string;
   email?: string;
 };
@@ -17,7 +19,8 @@ export const AREA_CONTACTS: Record<AreaId, AreaContact> = {
   kv: { name: "", role: "Kauf & Verkauf", email: "verkaufen@novidom-immo.ch" },
   fin: { name: "", role: "Finanzierung", email: "verkaufen@novidom-immo.ch" },
   umbau: { name: "", role: "Umbau & Renovation", email: "verkaufen@novidom-immo.ch" },
-  vers: { name: "", role: "Versicherung", email: "verkaufen@novidom-immo.ch" },
+  // Versicherungen schliessen Kunden über den Partner HypoCasa ab
+  vers: { name: "HypoCasa", role: "Versicherung · Partner", monogram: "HC", phone: "+41 61 543 29 53", email: "anfrage@hypocasa.ch" },
 };
 
 export type AreaContent = {

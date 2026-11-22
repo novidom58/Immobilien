@@ -1006,7 +1006,7 @@ async function findUserIdByEmail(adminClient: NonNullable<ReturnType<typeof getS
 
 type ImportRow = { name: string; email: string; phone: string; message: string };
 
-export async function bulkImportCustomers(rows: ImportRow[], herkunft: "novidom" | "hypocasa" = "novidom") {
+export async function bulkImportCustomers(rows: ImportRow[]) {
   const { supabase, error: authError } = await requireAdmin();
   if (!supabase) return { error: authError, count: 0, skipped: 0 };
 
@@ -1033,7 +1033,7 @@ export async function bulkImportCustomers(rows: ImportRow[], herkunft: "novidom"
       phone: r.phone.trim() || null,
       notes: r.message.trim() || null,
       typ: "bestand" as const,
-      ...(herkunft === "hypocasa" ? { quelle: "HypoCasa · Import", rollen: ["finanzierung"] } : { quelle: "Import" }),
+      quelle: "Import",
     }));
 
   if (payload.length === 0)
